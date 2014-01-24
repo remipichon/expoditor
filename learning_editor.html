@@ -3,6 +3,7 @@
 </head>
 
 <body>
+    {{loginButtons}}
     {{> hello}}
     {{> slideArea}}
 
@@ -10,29 +11,38 @@
 </body>
 
 <template name="hello">
-    <h1>Hello World!</h1>
-    {{greeeting}}
-    <input type="button" value="Click" />
+    <p>{{greeeting}}</p>
+    {{> createJmpressSlide}}
+    {{> createPlaneSlide}}
+    {{> loadJmpressSlide}}
+    {{> loadPlaneSlide}}
+    {{> loadAllSlide}}
 </template>
+<template name="createJmpressSlide"><input class="createSlide Button" type="button" value="createJmpressSlide"/></template>
+<template name="createPlaneSlide"><input class="createSlide Button" type="button" value="createPlaneSlide" /></template>
+<template name="loadJmpressSlide"><input class="loadSlide Button" type="button" value="loadJmpressSlide"/></template>
+<template name="loadPlaneSlide"><input class="loadSlide Button" type="button" value="loadPlaneSlide" /></template>
+<template name="loadAllSlide"><input class="loadSlide Button" type="button" value="loadAllSlide" /></template>
 
-    
+
+
 <template name="slideArea">
 
     {{#each slides}}
     {{> slide}}
     {{/each}}
-    
+
     <div id="forbidenZone"></div>
 
 </template>
 
 <template name="slide">
-     {{#constant}} {{!pour le draggable, render à la mano}}
-    <div id="{{_id}}" class="slide" style="top:{{top}}; left:{{left}}">
-        
+    {{#constant}} {{!pour le draggable, render à la mano}}
+    <div id="{{_id}}" class="slide" style="top:{{top}}px; left:{{left}}px">
+
         <p class='title'> {{title}}</p>
         {{> deleteSlide }}
     </div>
-     {{/constant}} 
+    {{/constant}} 
 </template>    
 <template name="deleteSlide"><span class="delete"> X </span></template>
