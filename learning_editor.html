@@ -5,8 +5,9 @@
 <body>
     {{loginButtons}}
     {{> hello}}
-    {{> slideArea}}
-
+    <div id="slideArea">
+        {{> slideArea}}
+    </div>
 
 </body>
 
@@ -32,17 +33,21 @@
     {{> slide}}
     {{/each}}
 
-    <div id="forbidenZone"></div>
+    {{! <div id="forbidenZone"></div> }}
 
 </template>
 
 <template name="slide">
-    {{#constant}} {{!pour le draggable, render à la mano}}
-    <div id="{{_id}}" class="slide" style="top:{{top}}px; left:{{left}}px">
 
-        <p class='title'> {{title}}</p>
+    {{!style en constant pour le draggable, render à la mano}}
+    {{#constant}}
+    <div id="{{_id}}" class="step slide" style="top:{{top}}px; left:{{left}}px" 
+         {{getJmpressData "x"}} {{getJmpressData "y"}} {{getJmpressData "z"}}>
+
+        <p class='title'> {{title}} </p>
         {{> deleteSlide }}
     </div>
-    {{/constant}} 
+    {{/constant}}
+
 </template>    
 <template name="deleteSlide"><span class="delete"> X </span></template>

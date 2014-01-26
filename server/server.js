@@ -81,6 +81,7 @@ if (Meteor.isServer) {
     //le server ontrole certaines actions sur les slides
     Slides.allow({
         insert: function() {
+            console.log("info : slides.allaow.insert : true");
             return true;
         },
         update: function(userId, slide, fields, modifier) {
@@ -103,6 +104,8 @@ if (Meteor.isServer) {
 
             //position
             if (_.contains(fields, 'top') || _.contains(fields, 'left')) {
+                return true;
+                
                 var topSlide = parseInt(modifier.$set.top);
                 var leftSlide = parseInt(modifier.$set.left);
                 var widthSlide = 150;
