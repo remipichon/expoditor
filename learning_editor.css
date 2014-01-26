@@ -1,19 +1,19 @@
 /* CSS declarations go here */
 
 
-.slide{
-    width: 150px;
-    height: 30px;
+#slideArea >.slide{
+    width: 90px;
+    height: 70px;
     color: blue;
     border : dashed black 2px;
     position: absolute;
 }
 
-.slide p{
+#slideArea >.slide p{
     margin: 0;
 }
 
-.slide span{
+#slideArea >.slide span{
     position: absolute;
     left: 80%;
     color: red;
@@ -35,4 +35,9 @@
     width: 200px;
     height: 200px;
     
+}
+
+
+#slideArea >.active {
+    border : dashed red 2px;
 }

@@ -2,12 +2,90 @@ if (Meteor.isClient) {
     var subscriptionSlide = Meteor.subscribe("slides");
     Session.set("slideSubscription", "slides");
     Meteor.subscribe("slidesLock");
+    Meteor.subscribe("remoteSlides");
 
     Slides = new Meteor.Collection("slides");
     SlidesLock = new Meteor.Collection("slidesLock");
+    RemoteSlides = new Meteor.Collection("remoteSlides");
 
     Meteor.startup(function() {
+        //listener jquery
+        //keypress ne fire pas les arrow sont webkit et IE
+        $(document).on("keypress", function(event) {
+//            return;
+//            console.log("document.keypress ",event.keyCode);
+            if (Session.get("slideSubscription") === "jmpressSlides") {
+                var activeSlide = $("#slideArea .active").attr("id");
+                switch (event.keyCode) {
+                    case 37: // left
+                        setActive(activeSlide);
+                        break;
+
+                    case 38: // up
+                        setActive(activeSlide);
+                        break;
+
+                    case 39: // right
+//                        console.log("right arrow");
+                        setActive(activeSlide);
+                        break;
+                    case 8: // space
+//                        console.log("space");
+                        setActive(activeSlide);
+                        break;
+                    case 32 : // space
+//                        console.log("space");
+                        setActive(activeSlide);
+                        break;
+
+                    case 40: // down
+                        setActive(activeSlide);
+                        break;
+
+//                    default:
+//                        return; // exit this handler for other keys
+                }
+            }
+        });
     });
+
+
+    //pour ecoute les changements dans la souscription remoteSlide
+    //suppression de la derniere slide
+    Deps.autorun(function() {
+        var remote = RemoteSlides.find({state: "active"}).fetch();
+        if (typeof remote[0] !== "undefined") { //pour eviter une erreur la premeire fois
+
+            var type = Session.get("slideSubscription");
+            if (type === "jmpressSlides") {
+                    console.log("follow slide !");
+                    $("#slideArea").jmpress("goTo","#"+remote[0].slideId)
+            } else {
+                console.log("remote slide active state changed to ", remote[0].slideId);
+                var $slide = $("#" + remote[0].slideId);
+
+                $(".slide.active").removeClass("active");
+                $slide.addClass("active");
+            }
+        }
+
+
+    });
+    //fonctionne pas parce que la slide est en constant
+    //provoque un render de chaque slide jmpress
+    //il me semble que c'est parce qu'à cause de ca les dependances de isActive chnge à chaque fois
+    //que remote est update
+    Template.slide.isActive = function() {
+        if(Session.get("slideSubscription") === "jmpressSlide") return "";
+        var remote = RemoteSlides.find({state: "active"}).fetch();
+        if (typeof remote[0] !== "undefined") { //pour eviter une erreur la premeire fois
+            if (this._id === remote[0].slideId) {
+                return "active";
+            } else {
+                return "";
+            }
+        }
+    };
 
     Template.hello.greeeting = function() {
         return "Click to create some slides";
@@ -34,12 +112,12 @@ if (Meteor.isClient) {
     Template.loadAllSlide.events({
         'click input': function() {
             $("#slideArea").jmpress("deinit");
-            subscriptionSlide.stop();            
+            subscriptionSlide.stop();
 //            $("#slideArea").empty();
 //function(){$("#slideArea").empty();}
 
             subscriptionSlide = Meteor.subscribe("slides");
-            
+
             Session.set("slideSubscription", "slides");
         }
     });
@@ -47,9 +125,9 @@ if (Meteor.isClient) {
         'click input': function() {
             $("#slideArea").jmpress("deinit");
             subscriptionSlide.stop();
-            
+
             subscriptionSlide = Meteor.subscribe("planeSlides");
-            
+
             Session.set("slideSubscription", "planeSlides");
         }
     });
@@ -59,7 +137,7 @@ if (Meteor.isClient) {
 //            initJmpress();
 
             subscriptionSlide = Meteor.subscribe("jmpressSlides");
-            
+
             Session.set("slideSubscription", "jmpressSlides");
             //magouille parce que le callback de subscribe n'est pas un callback de Template.render (lui meme étant un callback)
             setTimeout(initJmpress, 200);
@@ -131,15 +209,15 @@ if (Meteor.isClient) {
     Template.slide.created = function() {
         this.data.toFadeIn = true;
     };
-    
-    Template.slide.destroyed = function(){
+
+    Template.slide.destroyed = function() {
         console.log("slide destroyed", this.data._id);
         //si un detruit une slide de jmpress, il faut l'enlever du DOM
-        if( Session.get("slideSubscription","jmpressSlides") ){ //je comprend pas pourquoi c'est fire à chaque fois, mais ca pose pas de probleme alors je verra plus tard
+        if (Session.get("slideSubscription", "jmpressSlides")) { //je comprend pas pourquoi c'est fire à chaque fois, mais ca pose pas de probleme alors je verra plus tard
             console.log("       slide jmpress removed");
-            $("#"+this.data._id).remove();
+            $("#" + this.data._id).remove();
         }
-    }; 
+    };
 
     //update title
     Template.slide.events({
@@ -243,6 +321,7 @@ initJmpress = function() {
 
 
 createSlide = function(options) {
+    console.log("create ", options.type);
     var top = 50;
     var left = 50;
     return  Slides.insert({title: options.title, top: top, left: left, type: options.type});
@@ -309,5 +388,22 @@ updateSlidePosMove = function(slide, event) {
 
 
 
+setActive = function(activeSlide) {
+    //suppression de l'ancienne active
+    if (typeof RemoteSlides.findOne({state: "active"}) != "undefined") {
+        RemoteSlides.update(
+                RemoteSlides.findOne({state: "active"})._id,
+                {$set:
+                            {state: null}
+                });
+    }
 
+    //ajout de la nouvelle active
+    RemoteSlides.update(
+            RemoteSlides.findOne({slideId: activeSlide})._id,
+            {$set:
+                        {state: "active"}
+            });
+
+}
 

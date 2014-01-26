@@ -14,16 +14,23 @@ publishSlidesLock = function() {
     return SlidesLock.find({}); //plus tard, ne pas envoyer l'id mais l'email, ou null si null
 };
 
+publishRemoteSlides = function() {
+    return RemoteSlides.find({});
+};
+
+
 if (Meteor.isServer) {
 
     Slides = new Meteor.Collection("slides");
     SlidesLock = new Meteor.Collection("slidesLock");
+    RemoteSlides = new Meteor.Collection("remoteSlides");
 
     //publication des données
     Meteor.publish('slides', publishSlides);
     Meteor.publish('planeSlides', publishPlaneSlides);
     Meteor.publish('jmpressSlides', publishJmpressSlides);
     Meteor.publish('slidesLock', publishSlidesLock);
+    Meteor.publish('remoteSlides', publishRemoteSlides);
 
 
     Meteor.startup(function() {
@@ -33,8 +40,26 @@ if (Meteor.isServer) {
         }
     });
 
+    RemoteSlides.allow({
+        insert: function() {
+            return false;
+        },
+        update: function(userId, newActiveSlide, fields, modifier) {
+            //si le client veut ajouter une slide active, le server refuse s'il y deja une slide active
+            if( modifier.$set.state === "active" && typeof RemoteSlides.findOne({state: "active"}) != "undefined" ){
+                console.log("RemoteSides.allow.update : try to add an active with one alreay set");
+                return false;
+            }
+            return true;
+        },
+        remove: function() {
+            return false;
+        }
+    });
+
     SlidesLock.allow({
         insert: function(userId, lock, fields, modifier) {
+            
             return true;
         },
         update: function(userId, newLock, fields, modifier) {
@@ -80,8 +105,15 @@ if (Meteor.isServer) {
 
     //le server ontrole certaines actions sur les slides
     Slides.allow({
-        insert: function() {
-            console.log("info : slides.allaow.insert : true");
+        insert: function(userId, slide, fields, modifier) {
+            console.log("info : slides.allaow.insert : true ", slide );
+            //je ne sais pas si c'est la bonne méthode de faire cela ici => ca va dans le subscribe, this.changed !!!
+            RemoteSlides.insert({
+               state: null,
+               slideId: slide._id
+            });
+            
+            
             return true;
         },
         update: function(userId, slide, fields, modifier) {
@@ -105,7 +137,7 @@ if (Meteor.isServer) {
             //position
             if (_.contains(fields, 'top') || _.contains(fields, 'left')) {
                 return true;
-                
+
                 var topSlide = parseInt(modifier.$set.top);
                 var leftSlide = parseInt(modifier.$set.left);
                 var widthSlide = 150;
