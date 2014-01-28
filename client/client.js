@@ -1,5 +1,5 @@
 if (Meteor.isClient) {
-    var subscriptionSlide = Meteor.subscribe("slides");
+    subscriptionSlide = Meteor.subscribe("slides");
     Session.set("slideSubscription", "slides");
     Meteor.subscribe("slidesLock");
     Meteor.subscribe("remoteSlides");
@@ -8,23 +8,23 @@ if (Meteor.isClient) {
     SlidesLock = new Meteor.Collection("slidesLock");
     RemoteSlides = new Meteor.Collection("remoteSlides");
 
+    Slideshow = null; //set with getSlideshow
+    subscriptionSlideshow = null; //idem
+
+
     Meteor.startup(function() {
         //listener jquery
         //keypress ne fire pas les arrow sont webkit et IE
         $(document).on("keypress", function(event) {
-//            return;
-//            console.log("document.keypress ",event.keyCode);
             if (Session.get("slideSubscription") === "jmpressSlides") {
                 var activeSlide = $("#slideArea .active").attr("id");
                 switch (event.keyCode) {
                     case 37: // left
                         setActive(activeSlide);
                         break;
-
                     case 38: // up
                         setActive(activeSlide);
                         break;
-
                     case 39: // right
 //                        console.log("right arrow");
                         setActive(activeSlide);
@@ -37,13 +37,11 @@ if (Meteor.isClient) {
 //                        console.log("space");
                         setActive(activeSlide);
                         break;
-
                     case 40: // down
                         setActive(activeSlide);
                         break;
-
-//                    default:
-//                        return; // exit this handler for other keys
+                    default:
+                        return; // exit this handler for other keys
                 }
             }
         });
@@ -51,15 +49,15 @@ if (Meteor.isClient) {
 
 
     //pour ecoute les changements dans la souscription remoteSlide
-    //suppression de la derniere slide
+    //suppression du active de la derniere slide
     Deps.autorun(function() {
         var remote = RemoteSlides.find({state: "active"}).fetch();
         if (typeof remote[0] !== "undefined") { //pour eviter une erreur la premeire fois
 
             var type = Session.get("slideSubscription");
             if (type === "jmpressSlides") {
-                    console.log("follow slide !");
-                    $("#slideArea").jmpress("goTo","#"+remote[0].slideId)
+                console.log("follow slide !");
+                $("#slideArea").jmpress("goTo", "#" + remote[0].slideId)
             } else {
                 console.log("remote slide active state changed to ", remote[0].slideId);
                 var $slide = $("#" + remote[0].slideId);
@@ -76,7 +74,8 @@ if (Meteor.isClient) {
     //il me semble que c'est parce qu'à cause de ca les dependances de isActive chnge à chaque fois
     //que remote est update
     Template.slide.isActive = function() {
-        if(Session.get("slideSubscription") === "jmpressSlide") return "";
+        if (Session.get("slideSubscription") === "jmpressSlide")
+            return "";
         var remote = RemoteSlides.find({state: "active"}).fetch();
         if (typeof remote[0] !== "undefined") { //pour eviter une erreur la premeire fois
             if (this._id === remote[0].slideId) {
@@ -113,31 +112,15 @@ if (Meteor.isClient) {
         'click input': function() {
             $("#slideArea").jmpress("deinit");
             subscriptionSlide.stop();
-//            $("#slideArea").empty();
-//function(){$("#slideArea").empty();}
-
             subscriptionSlide = Meteor.subscribe("slides");
-
             Session.set("slideSubscription", "slides");
         }
     });
-    Template.loadPlaneSlide.events({
-        'click input': function() {
-            $("#slideArea").jmpress("deinit");
-            subscriptionSlide.stop();
 
-            subscriptionSlide = Meteor.subscribe("planeSlides");
-
-            Session.set("slideSubscription", "planeSlides");
-        }
-    });
     Template.loadJmpressSlide.events({
         'click input': function() {
             subscriptionSlide.stop();
-//            initJmpress();
-
             subscriptionSlide = Meteor.subscribe("jmpressSlides");
-
             Session.set("slideSubscription", "jmpressSlides");
             //magouille parce que le callback de subscribe n'est pas un callback de Template.render (lui meme étant un callback)
             setTimeout(initJmpress, 200);
@@ -352,6 +335,18 @@ updateSlidePos = function(slide, event) {
     var top = $slide.css('top');
     var left = $slide.css('left');
 
+    //pass bien du tout, ce devrai etre au server de faire cela !
+    //
+    //petite verif qu'on se superpose pas avec une slide
+    var closer = getCloserSlide(slide._id, {x: newLeft + "px", y: newTop});
+//    console.log(closer.length);
+//    console.log(slide._id,  newTop, newLeft, closer);
+//    console.log(getCloserSlide(slide._id, {x: newTop, y: newLeft}));
+    if (closer.length != 0) {
+        console.log("updateSlidePosMove : trop proche d'une slide")
+        return;
+    }
+
     return Slides.update(slide._id, {$set:
                 {top: top, left: left}
     });
@@ -362,6 +357,18 @@ updateSlidePosMove = function(slide, event) {
     var $slide = $("#" + slide._id);
     var newTop = parseInt($slide.css('top'));
     var newLeft = parseInt($slide.css('left'));
+
+    //petite verif qu'on se superpose pas avec une slide
+    var closer = getCloserSlide(slide._id, {x: newLeft + "px", y: newTop});
+//    console.log(closer.length);
+//    console.log(slide._id,  newTop, newLeft, closer);
+//    console.log(getCloserSlide(slide._id, {x: newTop, y: newLeft}));
+    if (closer.length != 0) {
+        console.log("updateSlidePosMove : trop proche d'une slide");
+        //  return;
+    }
+
+
 
     //histoire de pas trop surcharger le server, on update pas tout le temps
     var slideDb = Slides.findOne({_id: slide._id});
@@ -405,5 +412,92 @@ setActive = function(activeSlide) {
                         {state: "active"}
             });
 
-}
+};
 
+
+//getCloserSlide = function(slideID, pos) {
+//    //connecter cela au ratio et au css
+//    var H = 70; //height
+//    var W = 90; //width
+//
+//    //pour retourner uniquement les slides proche de la slide dont la pos est passée en parametre
+//    return Slides.find({
+//        $where: function() {
+//            return this._id !== slideID && (Math.pow(W, 2) + Math.pow(H, 2) > Math.pow(parseInt(pos.x) - parseInt(this.left), 2) + Math.pow(parseInt(pos.y) - parseInt(this.top), 2));
+//        }
+//    }).fetch();
+//};
+
+
+//pour test
+/*
+ $slide = $("#msZP8jhhaE97f7cKR");
+ var pos = {x: $slide.css("left"), y: $slide.css("top")};
+ getCloserSlide(pos);
+ */
+
+testCallClient = function(str) {
+    console.log("call server");
+    Meteor.call('testCallServer', str, function(error, result) {
+        console.log("server answered with ", result);
+    });
+};
+
+
+createSlideshow = function(options) {
+    console.log("createSlideshow ", options);
+    Meteor.call('createSlideshow', options, function(error, result) {
+        if (typeof error !== "undefined") {
+            console.log("createSlideshow : create error ", error);
+        } else {
+            console.log("createSlideshow ", result);
+            getSlideshow({title: options.title, presentationMode: "default"});
+        }
+    });
+};
+
+/*
+ * update things that ar note slide
+ // */
+//updateSlideshow = function(options){
+//    if( typeof options.slide !== "undefined"){
+//        console.log("updateSlideshow : you cannot update slide with this function");
+//        return;
+//    }
+//    if( typeof options.presentationMode === "undefined"){
+//        console.log("updateSlideshow : presentationMode undefined");
+//        return;
+//    }
+//    
+//    //il n'y a qu'une presentation sur le client
+//    Slideshow.update(Slideshow.findOne({})._id, {
+//       'presentationMode': options.presentationMode
+//    });
+//    
+//};
+
+
+getSlideshow = function(options) {
+    console.log("getSlideshow ", options);
+    Meteor.call("getSlideshow", options, Meteor.userId(), function(error, result) {
+        if (typeof error !== "undefined") {
+            console.log("getSlideshow : get error ", error);
+        } else {
+            //arret de la precedente si existante
+            if (subscriptionSlideshow !== null)
+                subscriptionSlideshow.stop();
+
+            //nouvelle sub
+            subscriptionSlideshow = Meteor.subscribe(options.title);
+
+            if (Slideshow === null)
+                Slideshow = new Meteor.Collection("slideshow");
+
+
+            //sub de lock
+            //sub de remote
+
+            console.log("getSlideshow ", result, ": done with subscribes");
+        }
+    });
+};
