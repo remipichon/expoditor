@@ -459,22 +459,44 @@ createSlideshow = function(options) {
 /*
  * update things that ar note slide
  // */
-//updateSlideshow = function(options){
-//    if( typeof options.slide !== "undefined"){
-//        console.log("updateSlideshow : you cannot update slide with this function");
-//        return;
+updateSlideshow = function(options) {
+    if (typeof options.slide !== "undefined") {
+        console.log("updateSlideshow : you cannot update slide with this function");
+        return;
+    }
+    if (typeof options.presentationMode === "undefined") {
+        console.log("updateSlideshow : presentationMode undefined");
+        return;
+    }
+
+    //il n'y a qu'une presentation sur le client
+    Slideshow.update(Slideshow.findOne({})._id,
+            {$set: {
+                    'presentationMode': options.presentationMode
+                }
+            });
+
+};
+
+removeSlidehow = function(){
+    //il n'y a qu'une presentation sur le client
+    Meteor.call('removeSlideshow', Slideshow.findOne({})._id, Meteor.userId(),function(error, result) {
+        if (typeof error !== "undefined") {
+            console.log("removeSlideshow : remove error ", error);
+        } else {
+            console.log("removeSlideshow : stop all corresponding subscriptions");
+             //arret de la precedente si existante
+            if (subscriptionSlideshow !== null)
+                subscriptionSlideshow.stop();
+            
+        }
+    });
+//    try{
+    
+//    } catch(err){
+//        console.log("deleteSlideshow : error catched ",err);
 //    }
-//    if( typeof options.presentationMode === "undefined"){
-//        console.log("updateSlideshow : presentationMode undefined");
-//        return;
-//    }
-//    
-//    //il n'y a qu'une presentation sur le client
-//    Slideshow.update(Slideshow.findOne({})._id, {
-//       'presentationMode': options.presentationMode
-//    });
-//    
-//};
+};
 
 
 getSlideshow = function(options) {

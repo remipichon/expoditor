@@ -84,19 +84,49 @@ Meteor.methods({
         //add user to the list of current editors
         if (slideshowPublished[options.title].indexOf(userId) === -1)
             slideshowPublished[options.title].push(userId);
-        
+
         console.log("slideshowPublised ", slideshowPublished);
 
         return "what to return ?";
 
 
         //options.presentationMode
+    },
+    removeSlideshow: function(slideshowId, userId) {
+        if( !hasAccessSlideshow(slideshowId, userId) ){
+            throw new Meteor.Error("24300", "removeSlideshow, you are not allowed to perform this action");
+        }
+        Slideshow.remove({_id: slideshowId});
     }
+
+
 
 
 });
 
+/**
+ * verifier dans slideshowPublished si userId est dans l'array des user allowed de slideshowId
+ * @param {type} slideshowId
+ * @param {type} userId
+ * @returns {Array}
+ */
+hasAccessSlideshow = function(slideshowId, userId) {
 
+    //plus tard il y aura l'id dans slideshowPublished (lorsque le title ne sera pas unique)
+    var slideshowTitle = Slideshow.findOne({_id: slideshowId}).informations.title;
+    console.log("hascaxess title ",slideshowTitle);
+
+    if (typeof slideshowPublished[slideshowTitle] === "undefined") {
+     console.log("hasAccessSlideshow undefined");
+        return false;
+    }
+    console.log("has access userRight ", slideshowPublished[slideshowTitle]);
+    if (slideshowPublished[slideshowTitle].indexOf(userId) === -1) {
+        console.log("hasAccessSlideshow not contains");
+        return false;
+    }
+    return true;
+};
 
 
 if (Meteor.isServer) {
@@ -106,6 +136,7 @@ if (Meteor.isServer) {
      * value : [userIds...]
      */
     slideshowPublished = {};
+    presentationModeArray = ["default", "hybrid"];
 
     Slides = new Meteor.Collection("slides");
 //    Slides = new Meteor.Collection("slide");
@@ -129,10 +160,50 @@ if (Meteor.isServer) {
             //create via Meteor.method.createSlideshow
             return false;
         },
-        update: function(userId, updating, fields, modifier) {
+        update: function(userId, slideshow, fields, modifier) {
+            //check if user as legimately access to the slideshow
+            if (!hasAccessSlideshow(slideshow._id, userId)) {
+                console.log("slideshow.update : user not allowed to update slideshow slidehow : ", slideshow._id, " userid :", userId);
+                throw new Meteor.Error("Slideshow.allow.update : you are not allowed to update this slideshow");
+                return false;
+            }
+
+            //manage data that are not slides
+            if (!_.contains(fields, "slides")) {
+                if (_.contains(fields, "presentationMode")) {
+                    if (presentationModeArray.indexOf(modifier.$set.presentationMode) === -1) {
+                        console.log("Slideshow.allow.update : presentationMode not allow ", modifier.$set.presentationMode);
+                        return false;
+                    }
+
+                    console.log("slideshow.allow.update : presentationMode ok");
+                }
+
+
+
+
+            }
+            if (_.contains(fields, 'slides')) {
+                console.log("slideshow.update : update slides");
+
+            }
+
+
+            //un mode secure pour verifier qui'il n'y ait pas d'update non conforme !
+            console.log("Slideshow.allow.update : default allow, true");
+            return true;
 
         },
         remove: function(userId, deleting) {
+            //check if user as legimately access to the slideshow
+//            if (!hasAccessSlideshow(slideshow._id, userId)) {
+//                console.log("slideshow.update : user not allowed to update slideshow slidehow : ", slideshow._id, " userid :", userId);
+//                throw new Meteor.Error("Slideshow.allow.update : you are not allowed to update this slideshow");
+//                return false;
+//            }
+
+            //remove via callback
+            return false;
 
         }
 
