@@ -4,33 +4,30 @@
 
 <body>
     {{loginButtons}}
-    {{> hello}}
+    {{> buttons}}
     <div id="slideArea">
         {{> slideArea}}
     </div>
 
 </body>
 
-<template name="hello">
-    <p>{{greeeting}}</p>
-    {{> createJmpressSlide}}
-    {{> createPlaneSlide}}
-    {{> loadJmpressSlide}}
-    {{> loadPlaneSlide}}
-    {{> loadAllSlide}}
+<template name="buttons">
+    {{> createSlide}}
+    {{> loadEditor}}
+    {{> loadJmpress}}
 </template>
-<template name="createJmpressSlide"><input class="createSlide Button" type="button" value="createJmpressSlide"/></template>
-<template name="createPlaneSlide"><input class="createSlide Button" type="button" value="createPlaneSlide" /></template>
-<template name="loadJmpressSlide"><input class="loadSlide Button" type="button" value="loadJmpressSlide"/></template>
-<template name="loadPlaneSlide"><input class="loadSlide Button" type="button" value="loadPlaneSlide" /></template>
-<template name="loadAllSlide"><input class="loadSlide Button" type="button" value="loadAllSlide" /></template>
+<template name="createSlide"><input id="createSlide" class="button" type="button" value="createSlide"/></template>
+<template name="loadEditor"><input id="loadEditor" class="button" type="button" value="loadEditor" /></template>
+<template name="loadJmpress"><input id="loadJmpress" class="button" type="button" value="loadJmpress"/></template>
 
 
 
 <template name="slideArea">
-
-    {{#each slides}}
-    {{> slide}}
+    
+    {{#each slideshow}}
+        {{#each slides}}
+        {{> slide}}
+        {{/each}}
     {{/each}}
 
     {{! <div id="forbidenZone"></div> }}

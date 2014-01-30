@@ -128,6 +128,13 @@ hasAccessSlideshow = function(slideshowId, userId) {
     return true;
 };
 
+stubGetSlideShow = function(){
+//    Meteor.publish('test4',function(){
+//       return Slideshow.find({'informations.title':'test4'}); 
+//    });
+    Meteor.call('getSlideshow',{title:"test4"}, 'testID');
+};
+
 
 if (Meteor.isServer) {
 
@@ -149,6 +156,8 @@ if (Meteor.isServer) {
     Meteor.publish('jmpressSlides', publishJmpressSlides);
     Meteor.publish('slidesLock', publishSlidesLock);
     Meteor.publish('remoteSlides', publishRemoteSlides);
+    
+    stubGetSlideShow();
 
 
     Meteor.startup(function() {

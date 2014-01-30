@@ -1,22 +1,37 @@
 if (Meteor.isClient) {
-    subscriptionSlide = Meteor.subscribe("slides");
-    Session.set("slideSubscription", "slides");
+//    subscriptionSlide = Meteor.subscribe("slides");
+//    Session.set("slideSubscription", "slides");
     Meteor.subscribe("slidesLock");
     Meteor.subscribe("remoteSlides");
 
-    Slides = new Meteor.Collection("slides");
+//    Slides = new Meteor.Collection("slides");
     SlidesLock = new Meteor.Collection("slidesLock");
     RemoteSlides = new Meteor.Collection("remoteSlides");
 
     Slideshow = null; //set with getSlideshow
     subscriptionSlideshow = null; //idem
+    
+    
+    ///test
+    
+    Slideshow = new Meteor.Collection("slideshow");
+//    subscriptionSlideshow =  Meteor.subscribe("test4");
+    
+     //init slideArea with all slides presents in db
+    Template.slideArea.slideshow = function() {
+//        if(typeof  Slideshow.findOne({}) !== "undefined")
+//            return Slideshow.findOne({}).slides;
+        return Slideshow.find({});
+    };
+    
+    ///fin test
 
 
     Meteor.startup(function() {
         //listener jquery
         //keypress ne fire pas les arrow sont webkit et IE
         $(document).on("keypress", function(event) {
-            if (Session.get("slideSubscription") === "jmpressSlides") {
+            if (Session.get("clientMode") === "jmpress") {
                 var activeSlide = $("#slideArea .active").attr("id");
                 switch (event.keyCode) {
                     case 37: // left
@@ -54,8 +69,8 @@ if (Meteor.isClient) {
         var remote = RemoteSlides.find({state: "active"}).fetch();
         if (typeof remote[0] !== "undefined") { //pour eviter une erreur la premeire fois
 
-            var type = Session.get("slideSubscription");
-            if (type === "jmpressSlides") {
+            var type = Session.get("clientMode");
+            if (type === "jmpress") {
                 console.log("follow slide !");
                 $("#slideArea").jmpress("goTo", "#" + remote[0].slideId)
             } else {
@@ -74,7 +89,7 @@ if (Meteor.isClient) {
     //il me semble que c'est parce qu'à cause de ca les dependances de isActive chnge à chaque fois
     //que remote est update
     Template.slide.isActive = function() {
-        if (Session.get("slideSubscription") === "jmpressSlide")
+        if (Session.get("clietMode") === "jmpress")
             return "";
         var remote = RemoteSlides.find({state: "active"}).fetch();
         if (typeof remote[0] !== "undefined") { //pour eviter une erreur la premeire fois
@@ -86,52 +101,44 @@ if (Meteor.isClient) {
         }
     };
 
-    Template.hello.greeeting = function() {
-        return "Click to create some slides";
-    };
 
-    //create a slide
-    Template.createPlaneSlide.events({
+    Template.createSlide.events({
         'click input': function() {
             var d = new Date;
             var title = d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
-            createSlide({title: title, type: 'planeSlide'});
-        }
-    });
-
-    Template.createJmpressSlide.events({
-        'click input': function() {
-            var d = new Date;
-            var title = d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
-            createSlide({title: title, type: 'jmpressSlide'});
+            createSlide({title: title, type: 'default'});
         }
     });
 
     //subscribe to plane or jmpress or all (exclu)
-    Template.loadAllSlide.events({
+    Template.loadEditor.events({  //a revoir
         'click input': function() {
             $("#slideArea").jmpress("deinit");
-            subscriptionSlide.stop();
-            subscriptionSlide = Meteor.subscribe("slides");
-            Session.set("slideSubscription", "slides");
+           Session.set("clientMode", "editor");
+            var title = prompt("load slideshow :",Slideshow.findOne({}).informations.title);
+             subscriptionSlideshow.stop();
+            getSlideshow({title:title});
+            
         }
     });
 
-    Template.loadJmpressSlide.events({
+    Template.loadJmpress.events({ //a revoir
         'click input': function() {
-            subscriptionSlide.stop();
-            subscriptionSlide = Meteor.subscribe("jmpressSlides");
-            Session.set("slideSubscription", "jmpressSlides");
+//            subscriptionSlide.stop();
+//            subscriptionSlide = Meteor.subscribe("jmpressSlides");
+//            Session.set("slideSubscription", "jmpressSlides");
+//            Session.set("clientMode", "editor");
+            var title = prompt("load slideshow :",Slideshow.findOne({}).informations.title);
+            subscriptionSlideshow.stop();
+            getSlideshow({title:title});
+            
             //magouille parce que le callback de subscribe n'est pas un callback de Template.render (lui meme étant un callback)
             setTimeout(initJmpress, 200);
 
         }
     });
 
-    //init slideArea with all slides presents in db
-    Template.slideArea.slides = function() {
-        return Slides.find({});
-    };
+   
 
     //callback of render to add draggable and fadeInt when first render
     Template.slide.rendered = function() {
@@ -155,15 +162,15 @@ if (Meteor.isClient) {
         //pos CSS (mode draggable) et jmpress       
         $slide.attr("data-x", parseInt(left) * ratio).attr("data-y", parseInt(top) * ratio);
 
-        var type = Session.get("slideSubscription");
-        if (type === "planeSlides" || type === "slides") {
+        var type = Session.get("clientMode");
+        if (type === "editor") {
             //pour plane
-            console.log("render plane et all");
+            console.log("render for editor");
             $slide.css("left", left).css("top", top);
             $slide.draggable();
         }
 
-        if (type === "jmpressSlides") {
+        if (type === "jmpress") {
             //pour jmpress
             console.log("render jmpress");
             //pas top
@@ -196,7 +203,7 @@ if (Meteor.isClient) {
     Template.slide.destroyed = function() {
         console.log("slide destroyed", this.data._id);
         //si un detruit une slide de jmpress, il faut l'enlever du DOM
-        if (Session.get("slideSubscription", "jmpressSlides")) { //je comprend pas pourquoi c'est fire à chaque fois, mais ca pose pas de probleme alors je verra plus tard
+        if (Session.get("clientMode", "jmpress")) { //je comprend pas pourquoi c'est fire à chaque fois, mais ca pose pas de probleme alors je verra plus tard
             console.log("       slide jmpress removed");
             $("#" + this.data._id).remove();
         }
