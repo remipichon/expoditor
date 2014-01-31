@@ -60,6 +60,11 @@ if (Meteor.isClient) {
                 }
             }
         });
+
+        console.log("init pres pour test");
+        Session.set("clientMode", "editor");
+        getSlideshow({title: 'test5'});
+
     });
 
 
@@ -150,7 +155,7 @@ if (Meteor.isClient) {
         var $slide = $("#" + this.data._id);
         var left = self.data.displayOptions.jmpress.positions.x;
         var top = self.data.displayOptions.jmpress.positions.y;
-        console.log("render new pos ",left,top);
+        console.log("render new pos ", left, top);
         var ratio = 10;
 
 //        //pour toutes
@@ -214,24 +219,8 @@ if (Meteor.isClient) {
     //update title
     Template.slide.events({
         'dblclick': function() {
-            //mise en place du lock si slide dispo
-            var userId = Meteor.userId();
-            var lock = SlidesLock.findOne({slideId: this._id});
-            if (typeof lock == 'undefined' || lock.userId == null) {
-                if (typeof lock == 'undefined') {
-                    SlidesLock.insert({slideId: this._id, userId: userId, type: 'title', slideTitle: this.title});
-                } else {
-                    SlidesLock.update(
-                            SlidesLock.findOne({slideId: this._id})._id,
-                            {$set: {
-                                    userId: userId, type: 'title', slideTitle: this.title //, slideId: this._id
-                                }});
-                }
-                console.log("update title, add lock to slide", this._id);
-                updateSlideTitle(this);
-            } else {
-                alert("lock set by " + lock.userId);
-            }
+
+            updateSlideTitleControler(this);
 
 
 
@@ -240,8 +229,11 @@ if (Meteor.isClient) {
 
     //update pos on move
     Template.slide.events({
-        'mousedown, mousemove': function(event) {
-            updateSlidePosMove(this, event);
+        'mousemove': function(event) {
+            if (event.which == 1) {
+                updateSlidePosMove(this, event);
+            }
+
         }
     });
 
@@ -337,6 +329,7 @@ initJmpress = function() {
 
 
 
+
 createSlide = function(options) {
     console.log("create ", options.type);
     var top = 50;
@@ -370,32 +363,50 @@ createSlide = function(options) {
     );
 };
 
-updateSlideTitle = function(slide) {
-    console.log("update title");
+
+updateSlideTitleControler = function(slide) {
+    //mise en place du lock si slide dispo
+    var userId = Meteor.userId();
+    var lock = SlidesLock.findOne({slideId: slide._id});
+    if (typeof lock == 'undefined' || lock.userId == null) {
+        if (typeof lock == 'undefined') {
+            SlidesLock.insert({slideId: slide._id, userId: userId, type: 'title', slideTitle: slide.informations.title});
+        } else {
+            SlidesLock.update(
+                    SlidesLock.findOne({slideId: slide._id})._id,
+                    {$set: {
+                            userId: userId, type: 'title', slideTitle: slide.informations.title //, slideId: this._id
+                        }});
+        }
+        console.log("update title, add lock to slide", slide._id);
+        updateSlideTitleModel(slide);
+    } else {
+        alert("lock set by " + lock.userId);
+    }
+
+};
+
+
+updateSlideTitleModel = function(slide) {
+    console.log("update title, model");
     var title = prompt("new title", slide.informations.title);
-    console.log("update title : remove lock of slide", slide._id);
 
     if (title != null) {
-        //cancel, pas d'update
-//        Slides.update(slide._id, {$set:
-//                    {title: title}
-//        
-//        
-//        //error untrusted code
-//        Slideshow.update(
-//                {_id: Slideshow.findOne({})._id, "slides._id": slide._id},
-//        {
-//            $set: {
-//                "slides.$.informations.title": title
-//            }
-//        }
-//        );
+        //obligé de passer par l'index afin d'éviter //Not permitted. Untrusted code may only update documents by ID. [403]
+        var slideIndex = getIndexOfSlide(slide); //pas aussi simple, il faut extraire slide.id et le chercher dans les elements de .slides
 
-        Meteor.call("updateSlideTitle", Slideshow.findOne({})._id, slide._id, title, function(error, result) {
-            console.log("callbacl d'update title", error, result);
-        });
+        var query = {};                 // create an empty object
+        query['slides.' + slideIndex + '.informations.title'] = title;  // and then populate the variable key
+
+        Slideshow.update(
+                {_id: Slideshow.findOne({})._id},
+        {
+            $set: query  //attention, c'est un $set donc ca écrase tout ce qui est maché 
+        }
+        );
 
     }
+    console.log("update title : remove lock of slide", slide._id);
 
     //supression du lock
     SlidesLock.update(
@@ -415,10 +426,19 @@ updateSlidePos = function(slide, event) {
         y: top,
         z: 0
     };
+
+
+    //petite verif que la slide a effectivement bougée
+    if (slide.displayOptions.jmpress.positions.x == left && slide.displayOptions.jmpress.positions.y == top) {
+        console.log("updateSlidePosMove : slide didn't really move");
+        return;
+    }
+
+
+
     //pass bien du tout, ce devrai etre au server de faire cela !
-    //
     //petite verif qu'on se superpose pas avec une slide
-//    var closer = getCloserSlide(slide._id, {x: newLeft + "px", y: newTop});
+//    var closer = getCloserSlide(slide._id, {x: left + "px", y: top});
 //    console.log(closer.length);
 //    console.log(slide._id,  newTop, newLeft, closer);
 //    console.log(getCloserSlide(slide._id, {x: newTop, y: newLeft}));
@@ -427,78 +447,92 @@ updateSlidePos = function(slide, event) {
 //        return;
 //    }
 
-//    return Slides.update(slide._id, {$set:
-//                {top: top, left: left}
-//    });
+    //obligé de passer par l'index afin d'éviter //Not permitted. Untrusted code may only update documents by ID. [403]
+    var slideIndex = getIndexOfSlide(slide); //pas aussi simple, il faut extraire slide.id et le chercher dans les elements de .slides
 
-//Not permitted. Untrusted code may only update documents by ID. [403]
+    var query = {};                 // create an empty object
+    query['slides.' + slideIndex + '.displayOptions.jmpress.positions'] = {
+        x: left,
+        y: top,
+        z: 0
+    };  // and then populate the variable key
 
-//obligé de passer par l'index afin d'éviter le untrusted code
-machin = slide;
-trucBidule = Slideshow.findOne({}).slides;
-var index = Slideshow.findOne({}).slides.indexOf(slide); //pas aussi simple, il faut extraire slide.id et le chercher dans les elements de .slides
-console.log("update pos slide index ",index);
-var str = "slides."+0+".displayOptions.jmpress.positions";
     return Slideshow.update(
-                {_id: Slideshow.findOne({})._id},
-        {
-            $set: {  //essayer avec un callback
-                'slides.0.displayOptions.jmpress.positions': {
-//                str: {
-                    x: left,
-                    y: top,
-                    z: 0
-                }
-                }
-            }
-        
-        );
+            {_id: Slideshow.findOne({})._id},
+    {
+        $set: query
+    }
+    );
 
-    //gros gros gros soucis, ca ne pase plus par le .allow !!!
-    //il faut le server ppour mettre à jour des slides....
-//    Meteor.call("updateSlidePos", Slideshow.findOne({})._id, slide._id, pos, function(error, result) {
-//        console.log("callbacl d'update pos", error, result);
-//    });
 };
 
 
+getIndexOfSlide = function(slide) {
+    var allSlides = Slideshow.findOne({}).slides;
+    for (var i = 0; i < allSlides.length; i++) {
+        if (allSlides[i]._id === slide._id)
+            return i;
+    }
+    return -1;
+};
+
 updateSlidePosMove = function(slide, event) {
-    return;
+//    return;
     var $slide = $("#" + slide._id);
-    var newTop = parseInt($slide.css('top'));
-    var newLeft = parseInt($slide.css('left'));
+    var top = parseInt($slide.css('top'));
+    var left = parseInt($slide.css('left'));
+
+    //petite verif que la slide a effectivement bougée
+    if (slide.displayOptions.jmpress.positions.x == left && slide.displayOptions.jmpress.positions.y == top) {
+        console.log("updateSlidePosMove : slide didn't really move");
+        return;
+    }
+
 
     //petite verif qu'on se superpose pas avec une slide
-    var closer = getCloserSlide(slide._id, {x: newLeft + "px", y: newTop});
+//    var closer = getCloserSlide(slide._id, {x: newLeft + "px", y: newTop});
 //    console.log(closer.length);
 //    console.log(slide._id,  newTop, newLeft, closer);
 //    console.log(getCloserSlide(slide._id, {x: newTop, y: newLeft}));
-    if (closer.length != 0) {
-        console.log("updateSlidePosMove : trop proche d'une slide");
-        //  return;
-    }
+//    if (closer.length != 0) {
+//        console.log("updateSlidePosMove : trop proche d'une slide");
+    //  return;
+//    }
 
 
 
     //histoire de pas trop surcharger le server, on update pas tout le temps
-    var slideDb = Slides.findOne({_id: slide._id});
-    var oldTop = parseInt(slideDb.top);
-    var oldLeft = parseInt(slideDb.left);
-    //console.log("newTop",newTop,"oldTop",oldTop);
+//    var slideDb = slide;//Slides.findOne({_id: slide._id});
+//    var oldTop = parseInt(slideDb.top);
+//    var oldLeft = parseInt(slideDb.left);
+//    //console.log("newTop",newTop,"oldTop",oldTop);
+//
+//    var distance = Math.sqrt(
+//            Math.pow(newTop - oldTop, 2) + Math.pow(newLeft - oldLeft, 2)
+//            );
+//
+//    //trop courte
+//    if (distance < 5) {
+//        console.log("skip update",distance);
+//        return;
+//    }
 
-    var distance = Math.sqrt(
-            Math.pow(newTop - oldTop, 2) + Math.pow(newLeft - oldLeft, 2)
-            );
+    //obligé de passer par l'index afin d'éviter //Not permitted. Untrusted code may only update documents by ID. [403]
+    var slideIndex = getIndexOfSlide(slide); //pas aussi simple, il faut extraire slide.id et le chercher dans les elements de .slides
 
-    //trop courte
-    if (distance < 5) {
-        //console.log("skip update",distance);
-        return;
+    var query = {};                 // create an empty object
+    query['slides.' + slideIndex + '.displayOptions.jmpress.positions'] = {
+        x: left,
+        y: top,
+        z: 0
+    };  // and then populate the variable key
+
+    return Slideshow.update(
+            {_id: Slideshow.findOne({})._id},
+    {
+        $set: query
     }
-
-    Slides.update(slide._id, {$set:
-                {top: newTop, left: newLeft}
-    });
+    );
 };
 
 

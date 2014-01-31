@@ -159,6 +159,12 @@ stubGetSlideShow = function() {
 };
 
 
+userAllowed = function(userId){
+    if( userId === null )
+        return false;
+};
+
+
 if (Meteor.isServer) {
 
     /*
@@ -193,6 +199,7 @@ if (Meteor.isServer) {
             return false;
         },
         update: function(userId, slideshow, fields, modifier) {
+            console.log("info : ---- slideshiow.update ---- ");
             //check if user as legimately access to the slideshow
             if (!hasAccessSlideshow(slideshow._id, userId)) {
                 console.log("slideshow.update : user not allowed to update slideshow slidehow : ", slideshow._id, " userid :", userId);
@@ -217,6 +224,7 @@ if (Meteor.isServer) {
             }
             if (_.contains(fields, 'slides')) {
                 console.log("slideshow.update : update slides");
+                return slideshowAllowSlides(userId, slideshow, fields, modifier);
 
             }
 
@@ -266,6 +274,7 @@ if (Meteor.isServer) {
         },
         update: function(userId, newLock, fields, modifier) {
             console.log("debug : slidesLock.update ", modifier);
+//            return true;
 
             //verifie si le lock existe bel et bien
             var lock = SlidesLock.findOne({_id: newLock._id});
@@ -308,69 +317,69 @@ if (Meteor.isServer) {
     //le server ontrole certaines actions sur les slides
     Slides.allow({
         insert: function(userId, slide, fields, modifier) {
-            console.log("info : slides.allaow.insert : true ", slide);
-            //je ne sais pas si c'est la bonne méthode de faire cela ici => ca va dans le subscribe, this.changed !!!
-            RemoteSlides.insert({
-                state: null,
-                slideId: slide._id
-            });
-
-
-            return true;
+//            console.log("info : slides.allaow.insert : true ", slide);
+//            //je ne sais pas si c'est la bonne méthode de faire cela ici => ca va dans le subscribe, this.changed !!!
+//            RemoteSlides.insert({
+//                state: null,
+//                slideId: slide._id
+//            });
+//
+//
+//            return true;
         },
         update: function(userId, slide, fields, modifier) {
 
 //            console.log("slides.allow.update : server");
 
 
-            //je capte pas pourquoi le requete retourne toutes les slides en server, 
-            //alors que ca marche super en client
-            //impossible de superposer deux slides
-//            var closerSlides = getCloserSlide(slide._id, {x: slide.left, y:slide.top});
-//            console.log(closerSlides.length);
-
-//            console.log(slide._id, slide.left, slide.top);
-//            if( closerSlides.length != 0 ){
-//                console.log("Slides.allow.update : trop proche d'une slide");
-//                return false;
+//            //je capte pas pourquoi le requete retourne toutes les slides en server, 
+//            //alors que ca marche super en client
+//            //impossible de superposer deux slides
+////            var closerSlides = getCloserSlide(slide._id, {x: slide.left, y:slide.top});
+////            console.log(closerSlides.length);
+//
+////            console.log(slide._id, slide.left, slide.top);
+////            if( closerSlides.length != 0 ){
+////                console.log("Slides.allow.update : trop proche d'une slide");
+////                return false;
+////            }
+//
+//            //du coup le server recupere toutes les slides puis boucle pour determiner s'il doit traiter au non
+//            var allSlides = Slides.find({}).fetch();
+////            allSlides.forEach(function(slideBd) {
+//            for (var i in allSlides) {
+//                var slideBd = allSlides[i];
+//                if (isCloseTo(slide, slideBd)) {
+//                    console.log(slide._id, " close to ", slideBd._id);
+//                    //on peut survoler une slide, mais pas droper dessus
+//                    //du coup on regarde si le lock sur la slide est encore là, sinon
+//                    //c'est que le client veut faire un drop
+//                    //je  ne sais pas si c'est top, si le client meure en cours de drag la slide pourrait
+//                    //etre posée sur une autre
+//
+////                    return false;
+//                }
+////                console.log("girafe");
 //            }
-
-            //du coup le server recupere toutes les slides puis boucle pour determiner s'il doit traiter au non
-            var allSlides = Slides.find({}).fetch();
-//            allSlides.forEach(function(slideBd) {
-            for (var i in allSlides) {
-                var slideBd = allSlides[i];
-                if (isCloseTo(slide, slideBd)) {
-                    console.log(slide._id, " close to ", slideBd._id);
-                    //on peut survoler une slide, mais pas droper dessus
-                    //du coup on regarde si le lock sur la slide est encore là, sinon
-                    //c'est que le client veut faire un drop
-                    //je  ne sais pas si c'est top, si le client meure en cours de drag la slide pourrait
-                    //etre posée sur une autre
-
-//                    return false;
-                }
-//                console.log("girafe");
-            }
-//            });
+////            });
 
 
 
             //update de title et position en exclusivité avec priorité au title
 
             //texte
-            if (_.contains(fields, 'title')) {
-                var lock = SlidesLock.findOne({$and: [
-                        {slideId: slide._id}, {userId: userId}
-                    ]});
-
-                if (typeof lock == 'undefined') {
-                    console.log("info : slides.allow.update : client trying to update without lock slide : ", slide._id, "client :", userId);
-                    return false;
-                }
-                console.log("info : slides.allow.update : allow title update");
-                return true;
-            }
+//            if (_.contains(fields, 'title')) {
+//                var lock = SlidesLock.findOne({$and: [
+//                        {slideId: slide._id}, {userId: userId}
+//                    ]});
+//
+//                if (typeof lock == 'undefined') {
+//                    console.log("info : slides.allow.update : client trying to update without lock slide : ", slide._id, "client :", userId);
+//                    return false;
+//                }
+//                console.log("info : slides.allow.update : allow title update");
+//                return true;
+//            }
 
 
             //positionet fordidden zone
@@ -409,6 +418,113 @@ if (Meteor.isServer) {
         }
     });
 }
+
+slideAllowInsert = function(userId, slideshow, fields, modifier) {
+    var slideId = modifier.$push.slides._id
+    console.log("info : slides.allaow.insert : true : ", slideId);
+    //je ne sais pas si c'est la bonne méthode de faire cela ici => ca va dans le subscribe, this.changed !!!
+    RemoteSlides.insert({
+        state: null,
+        slideId: slideId
+    });
+
+
+    return true;
+};
+
+slideAllowUpdateTitle = function(userId, slideshow, fields, modifier, slideId) {
+//    var slideId = ??;
+
+
+
+    var lock = SlidesLock.findOne({$and: [
+            {slideId: slideId}, {userId: userId}
+        ]});
+
+    if (typeof lock == 'undefined') {
+        console.log("info : slides.allow.update : client trying to update without lock slide : ", slide._id, "client :", userId);
+        return false;
+    }
+    console.log("info : slides.allow.update : allow title update");
+    return true;
+};
+
+slideAllowUpdatePositions = function(userId, slideshow, fields, modifier, slideId) {
+    //je capte pas pourquoi le requete retourne toutes les slides en server, 
+    //alors que ca marche super en client
+    //impossible de superposer deux slides
+//            var closerSlides = getCloserSlide(slide._id, {x: slide.left, y:slide.top});
+//            console.log(closerSlides.length);
+
+//            console.log(slide._id, slide.left, slide.top);
+//            if( closerSlides.length != 0 ){
+//                console.log("Slides.allow.update : trop proche d'une slide");
+//                return false;
+//            }
+
+    //du coup le server recupere toutes les slides puis boucle pour determiner s'il doit traiter au non
+    var allSlides = Slides.find({}).fetch();
+//            allSlides.forEach(function(slideBd) {
+    for (var i in allSlides) {
+        var slideBd = allSlides[i];
+        if (isCloseTo(slide, slideBd)) {
+            console.log(slide._id, " close to ", slideBd._id);
+            //on peut survoler une slide, mais pas droper dessus
+            //du coup on regarde si le lock sur la slide est encore là, sinon
+            //c'est que le client veut faire un drop
+            //je  ne sais pas si c'est top, si le client meure en cours de drag la slide pourrait
+            //etre posée sur une autre
+
+//                    return false;
+        }
+//                console.log("girafe");
+    }
+//            });
+};
+
+
+slideshowAllowSlides = function(userId, slideshow, fields, modifier) {
+
+
+    if (typeof modifier.$push !== "undefined") {
+        console.log("slideshowAllowSlides : insert");
+        return slideAllowInsert(userId, slideshow, fields, modifier);
+    }
+
+    if (typeof modifier.$set !== "undefined") {
+        console.log("slideshowAllowSlides : update");
+        var query = Object.keys(modifier.$set)[0];
+        console.log("query : ", query);
+
+        var slideId = "truc";
+
+
+
+
+        if (query.indexOf("title") !== -1) {
+            console.log("slideshowAllowSlides : update title");
+            slideAllowUpdateTitle(userId, slideshow, fields, modifier, slideId);
+        }
+
+        if (query.indexOf("positions") !== -1) {
+            console.log("slideshowAllowSlides : udpate positions");
+            slideAllowUpdatePositions(userId, slideshow, fields, modifier, slideId);
+        }
+
+    }
+
+
+
+
+
+
+
+};
+
+
+
+
+
 
 
 
