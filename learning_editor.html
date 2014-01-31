@@ -37,11 +37,11 @@
 <template name="slide">
 
     {{!style en constant pour le draggable, render à la mano}}
-    {{#constant}}
-    <div id="{{_id}}" class="step slide" style="top:{{top}}px; left:{{left}}px" 
-         {{getJmpressData "x"}} {{getJmpressData "y"}} {{getJmpressData "z"}}>
+{{#constant}}
+    <div id="{{_id}}" class="step slide" style="top:{{getEditorData "y"}}px; left:{{getEditorData "x"}}px" 
+         {{getPresentationData "x" "jmpress"}} {{getPresentationData "y" "jmpress"}} {{getPresentationData "z" "jmpress"}}>
 
-        <p class='title'> {{title}} </p>
+        <p class='title'> {{informations.title}} </p>
         {{> deleteSlide }}
     </div>
     {{/constant}}

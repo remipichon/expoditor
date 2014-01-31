@@ -93,10 +93,33 @@ Meteor.methods({
         //options.presentationMode
     },
     removeSlideshow: function(slideshowId, userId) {
-        if( !hasAccessSlideshow(slideshowId, userId) ){
+        if (!hasAccessSlideshow(slideshowId, userId)) {
             throw new Meteor.Error("24300", "removeSlideshow, you are not allowed to perform this action");
         }
         Slideshow.remove({_id: slideshowId});
+    },
+    updateSlideTitle: function(slideshowId, slideId, title) {
+        console.log("updateSlideTitle slideshow : ", slideshowId, " slideId : ", slideId, " title : ", title);
+        Slideshow.update(
+                {_id: slideshowId, "slides._id": slideId},
+        {
+            $set: {
+                "slides.$.informations.title": title
+            }
+        }
+        );
+    },
+    updateSlidePos: function(slideshowId, slideId, pos) {
+        console.log("updateSlideTitle slideshow : ", slideshowId, " slideId : ", slideId, " title : ", pos);
+
+        Slideshow.update(
+                {_id: slideshowId, "slides._id": slideId},
+        {
+            $set: {
+                "slides.$.displayOptions.jmpress.positions": pos
+            }
+        }
+        );
     }
 
 
@@ -114,10 +137,10 @@ hasAccessSlideshow = function(slideshowId, userId) {
 
     //plus tard il y aura l'id dans slideshowPublished (lorsque le title ne sera pas unique)
     var slideshowTitle = Slideshow.findOne({_id: slideshowId}).informations.title;
-    console.log("hascaxess title ",slideshowTitle);
+    console.log("hascaxess title ", slideshowTitle);
 
     if (typeof slideshowPublished[slideshowTitle] === "undefined") {
-     console.log("hasAccessSlideshow undefined");
+        console.log("hasAccessSlideshow undefined");
         return false;
     }
     console.log("has access userRight ", slideshowPublished[slideshowTitle]);
@@ -128,11 +151,11 @@ hasAccessSlideshow = function(slideshowId, userId) {
     return true;
 };
 
-stubGetSlideShow = function(){
+stubGetSlideShow = function() {
 //    Meteor.publish('test4',function(){
 //       return Slideshow.find({'informations.title':'test4'}); 
 //    });
-    Meteor.call('getSlideshow',{title:"test4"}, 'testID');
+    Meteor.call('getSlideshow', {title: "test4"}, 'testID');
 };
 
 
@@ -156,7 +179,7 @@ if (Meteor.isServer) {
     Meteor.publish('jmpressSlides', publishJmpressSlides);
     Meteor.publish('slidesLock', publishSlidesLock);
     Meteor.publish('remoteSlides', publishRemoteSlides);
-    
+
     stubGetSlideShow();
 
 

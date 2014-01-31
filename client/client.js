@@ -10,20 +10,20 @@ if (Meteor.isClient) {
 
     Slideshow = null; //set with getSlideshow
     subscriptionSlideshow = null; //idem
-    
-    
+
+
     ///test
-    
+
     Slideshow = new Meteor.Collection("slideshow");
 //    subscriptionSlideshow =  Meteor.subscribe("test4");
-    
-     //init slideArea with all slides presents in db
+
+    //init slideArea with all slides presents in db
     Template.slideArea.slideshow = function() {
 //        if(typeof  Slideshow.findOne({}) !== "undefined")
 //            return Slideshow.findOne({}).slides;
         return Slideshow.find({});
     };
-    
+
     ///fin test
 
 
@@ -111,53 +111,55 @@ if (Meteor.isClient) {
     });
 
     //subscribe to plane or jmpress or all (exclu)
-    Template.loadEditor.events({  //a revoir
+    Template.loadEditor.events({//a revoir
         'click input': function() {
             $("#slideArea").jmpress("deinit");
-           Session.set("clientMode", "editor");
-            var title = prompt("load slideshow :",Slideshow.findOne({}).informations.title);
-             subscriptionSlideshow.stop();
-            getSlideshow({title:title});
-            
+            Session.set("clientMode", "editor");
+            var title = prompt("load slideshow :", Slideshow.findOne({}).informations.title);
+            subscriptionSlideshow.stop();
+            getSlideshow({title: title});
+
         }
     });
 
-    Template.loadJmpress.events({ //a revoir
+    Template.loadJmpress.events({//a revoir
         'click input': function() {
 //            subscriptionSlide.stop();
 //            subscriptionSlide = Meteor.subscribe("jmpressSlides");
 //            Session.set("slideSubscription", "jmpressSlides");
-//            Session.set("clientMode", "editor");
-            var title = prompt("load slideshow :",Slideshow.findOne({}).informations.title);
+            Session.set("clientMode", "jmpress");
+            var title = prompt("load slideshow :", Slideshow.findOne({}).informations.title);
             subscriptionSlideshow.stop();
-            getSlideshow({title:title});
-            
+            getSlideshow({title: title});
+
             //magouille parce que le callback de subscribe n'est pas un callback de Template.render (lui meme étant un callback)
             setTimeout(initJmpress, 200);
 
         }
     });
 
-   
+
 
     //callback of render to add draggable and fadeInt when first render
     Template.slide.rendered = function() {
+
         //une bonne partie de cela devrait disparaitre lorsque le draggable de jquery sera enlevé        
         //BAD BAD BAD BAD BAD il faut trouver un moyen pour que ce soit meteor qui s'en charge !
         self = this;
         var $slide = $(self.find(".slide"));
         var $slide = $("#" + this.data._id);
-        var left = self.data.left;
-        var top = self.data.top;
+        var left = self.data.displayOptions.jmpress.positions.x;
+        var top = self.data.displayOptions.jmpress.positions.y;
+        console.log("render new pos ",left,top);
         var ratio = 10;
 
-        //pour toutes
-        if (self.data.toFadeIn) { //pour ne fadeIn qu'une fois
-            $("#" + self.data._id).fadeOut(0).fadeIn(1000);  //petite magouille
-            self.data.toFadeIn = false;
-        }
+//        //pour toutes
+//        if (self.data.toFadeIn) { //pour ne fadeIn qu'une fois
+//            $("#" + self.data._id).fadeOut(0).fadeIn(1000);  //petite magouille
+//            self.data.toFadeIn = false;
+//        }
         //title
-        $slide.children('.title').html(self.data.title);
+        $slide.children('.title').html(self.data.informations.title);
 
         //pos CSS (mode draggable) et jmpress       
         $slide.attr("data-x", parseInt(left) * ratio).attr("data-y", parseInt(top) * ratio);
@@ -264,14 +266,38 @@ if (Meteor.isClient) {
 
 
     //template method
-    Template.slide.getJmpressData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
-        var ratio = 10;
+    Template.slide.getPresentationData = function(axis, technoSlideshow) { //pas encore utilisé à cause du draggable de jqueryreu
+        if (technoSlideshow === "jmpress") {
+            var ratio = 10;
+            switch (axis) {
+                case "x":
+                    var coord = parseInt(this.displayOptions.jmpress.positions.x) * ratio;
+                    break;
+                case "y":
+                    var coord = parseInt(this.displayOptions.jmpress.positions.y) * ratio;
+                    break;
+                case "z":
+                    var coord = 0;
+                    break;
+                default:
+                    return "";
+
+            }
+//            console.log(coord, parseInt(this.displayOptions.jmpress.positions.y));
+            return 'data-' + axis + '=' + coord + '';
+        }
+    };
+
+    //template method
+    Template.slide.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
+        truc = this;
+        var ratio = 1;
         switch (axis) {
             case "x":
-                var coord = parseInt(this.left) * ratio;
+                var coord = parseInt(this.displayOptions.jmpress.positions.x) * ratio;
                 break;
             case "y":
-                var coord = parseInt(this.top) * ratio;
+                var coord = parseInt(this.displayOptions.jmpress.positions.y) * ratio;
                 break;
             case "z":
                 var coord = 0;
@@ -280,8 +306,9 @@ if (Meteor.isClient) {
                 return "";
 
         }
-        return 'data-' + axis + '="' + coord + '"';
+        return coord;
     };
+
 }
 
 
@@ -314,19 +341,60 @@ createSlide = function(options) {
     console.log("create ", options.type);
     var top = 50;
     var left = 50;
-    return  Slides.insert({title: options.title, top: top, left: left, type: options.type});
+//    return  Slides.insert({title: options.title, top: top, left: left, type: options.type});
+    return Slideshow.update(
+            {_id: Slideshow.findOne({})._id},
+    {$push: {
+            slides: {
+                _id: Random.id(),
+                informations: {
+                    title: options.title
+                },
+                displayOptions: {
+                    jmpress: {
+                        positions: {
+                            x: left,
+                            y: top,
+                            z: 0
+                        },
+                        rotates: {
+                            x: 0,
+                            y: 0,
+                            z: 0
+                        }
+                    }
+                }
+            }
+        }
+    }
+    );
 };
 
 updateSlideTitle = function(slide) {
     console.log("update title");
-    var title = prompt("new title", slide.title);
+    var title = prompt("new title", slide.informations.title);
     console.log("update title : remove lock of slide", slide._id);
 
     if (title != null) {
         //cancel, pas d'update
-        Slides.update(slide._id, {$set:
-                    {title: title}
+//        Slides.update(slide._id, {$set:
+//                    {title: title}
+//        
+//        
+//        //error untrusted code
+//        Slideshow.update(
+//                {_id: Slideshow.findOne({})._id, "slides._id": slide._id},
+//        {
+//            $set: {
+//                "slides.$.informations.title": title
+//            }
+//        }
+//        );
+
+        Meteor.call("updateSlideTitle", Slideshow.findOne({})._id, slide._id, title, function(error, result) {
+            console.log("callbacl d'update title", error, result);
         });
+
     }
 
     //supression du lock
@@ -338,29 +406,64 @@ updateSlideTitle = function(slide) {
 };
 
 updateSlidePos = function(slide, event) {
+//    return;
     var $slide = $("#" + slide._id);
-    var top = $slide.css('top');
-    var left = $slide.css('left');
-
+    var top = parseInt($slide.css('top'));
+    var left = parseInt($slide.css('left'));
+    var pos = {
+        x: left,
+        y: top,
+        z: 0
+    };
     //pass bien du tout, ce devrai etre au server de faire cela !
     //
     //petite verif qu'on se superpose pas avec une slide
-    var closer = getCloserSlide(slide._id, {x: newLeft + "px", y: newTop});
+//    var closer = getCloserSlide(slide._id, {x: newLeft + "px", y: newTop});
 //    console.log(closer.length);
 //    console.log(slide._id,  newTop, newLeft, closer);
 //    console.log(getCloserSlide(slide._id, {x: newTop, y: newLeft}));
-    if (closer.length != 0) {
-        console.log("updateSlidePosMove : trop proche d'une slide")
-        return;
-    }
+//    if (closer.length != 0) {
+//        console.log("updateSlidePosMove : trop proche d'une slide")
+//        return;
+//    }
 
-    return Slides.update(slide._id, {$set:
-                {top: top, left: left}
-    });
+//    return Slides.update(slide._id, {$set:
+//                {top: top, left: left}
+//    });
+
+//Not permitted. Untrusted code may only update documents by ID. [403]
+
+//obligé de passer par l'index afin d'éviter le untrusted code
+machin = slide;
+trucBidule = Slideshow.findOne({}).slides;
+var index = Slideshow.findOne({}).slides.indexOf(slide); //pas aussi simple, il faut extraire slide.id et le chercher dans les elements de .slides
+console.log("update pos slide index ",index);
+var str = "slides."+0+".displayOptions.jmpress.positions";
+    return Slideshow.update(
+                {_id: Slideshow.findOne({})._id},
+        {
+            $set: {  //essayer avec un callback
+                'slides.0.displayOptions.jmpress.positions': {
+//                str: {
+                    x: left,
+                    y: top,
+                    z: 0
+                }
+                }
+            }
+        
+        );
+
+    //gros gros gros soucis, ca ne pase plus par le .allow !!!
+    //il faut le server ppour mettre à jour des slides....
+//    Meteor.call("updateSlidePos", Slideshow.findOne({})._id, slide._id, pos, function(error, result) {
+//        console.log("callbacl d'update pos", error, result);
+//    });
 };
 
 
 updateSlidePosMove = function(slide, event) {
+    return;
     var $slide = $("#" + slide._id);
     var newTop = parseInt($slide.css('top'));
     var newLeft = parseInt($slide.css('left'));
@@ -485,21 +588,21 @@ updateSlideshow = function(options) {
 
 };
 
-removeSlidehow = function(){
+removeSlidehow = function() {
     //il n'y a qu'une presentation sur le client
-    Meteor.call('removeSlideshow', Slideshow.findOne({})._id, Meteor.userId(),function(error, result) {
+    Meteor.call('removeSlideshow', Slideshow.findOne({})._id, Meteor.userId(), function(error, result) {
         if (typeof error !== "undefined") {
             console.log("removeSlideshow : remove error ", error);
         } else {
             console.log("removeSlideshow : stop all corresponding subscriptions");
-             //arret de la precedente si existante
+            //arret de la precedente si existante
             if (subscriptionSlideshow !== null)
                 subscriptionSlideshow.stop();
-            
+
         }
     });
 //    try{
-    
+
 //    } catch(err){
 //        console.log("deleteSlideshow : error catched ",err);
 //    }
