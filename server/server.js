@@ -1,11 +1,11 @@
-publishSlides = function() {
-    return Slides.find({}); //normalement il ne devrait y avoir qu'une presentation, 
-    //le requete se fera sur l'identifiant de la présentation
-};
-
-publishJmpressSlides = function() {
-    return Slides.find({type: "jmpressSlide"});
-};
+//publishSlides = function() {
+//    return Slides.find({}); //normalement il ne devrait y avoir qu'une presentation, 
+//    //le requete se fera sur l'identifiant de la présentation
+//};
+//
+//publishJmpressSlides = function() {
+//    return Slides.find({type: "jmpressSlide"});
+//};
 
 
 publishSlidesLock = function() {
@@ -26,6 +26,8 @@ Meteor.methods({
         if (typeof options.title === "undefined") {
             throw new Meteor.Error(24100, "createSlideshow error : title args undefined");
         }
+
+        //create Slideshow in DB
         if (Slideshow.find({"informations.title": options.title}).fetch().length != 0) {
             throw new Meteor.Error(24101, "createSlideshow error : title already exists");
         }
@@ -40,9 +42,22 @@ Meteor.methods({
 
         }
         );
+
         if (typeof slideShow == 'undefined') {
             throw new Meteor.Error(24, "error creating a slideshow");
         }
+
+        //create remote in DB
+        var remote = Remotes.insert({
+            slideshowId: slideShow,
+            activeSlideId: null,
+            presentationMode: 'default'
+        });
+
+        if (typeof remote == 'undefined') {
+            throw new Meteor.Error(24, "error creating a slideshow's remote");
+        }
+
 
         return slideShow;
     },
@@ -52,7 +67,7 @@ Meteor.methods({
 
         //is the slideshow already publish ?
         if (typeof slideshowPublished[options.title] === "undefined") {
-            console.log("getSlideshow : publish");
+            console.log("getSlideshow : publish slideshow");
 
 
             //je peux pas faire autrement parce que le publish est asynchrone !
@@ -63,22 +78,37 @@ Meteor.methods({
                 throw new Meteor.Error(24200, "getSlideshow : publish error, seems like slideshow with title '", options.title, "' doesnt exists");
 
 
-
-//          try {
             Meteor.publish(options.title, function() {
                 return Slideshow.find({
                     'informations.title': options.title
                 });
-
-
             });
-//          }catch(err){
-//            cConsole.log(err);
-//          }
-
-
 
             slideshowPublished[options.title] = [];
+            
+            //peut etre évité de faire pleins de fois la requete !!!
+            var newCreatedSlideshow = Slideshow.findOne({
+                'informations.title': options.title
+            });
+          
+            var remote = Remotes.find({
+                'slideshowId': newCreatedSlideshow._id
+            });
+            if (remote.fetch().length == 0)
+                throw new Meteor.Error(24200, "getSlideshow : publish error, seems like remote for slideshow with title '", options.title, "' doesnt exists");
+
+                var strRemoteName = "remote" + options.title;
+                console.log("remote published :", Remotes.findOne({
+                    'slideshowId': newCreatedSlideshow._id
+                })._id);
+            Meteor.publish(strRemoteName, function() {
+                return Remotes.find({
+                    'slideshowId': newCreatedSlideshow._id
+                });
+            });
+            
+
+
         }
 
         //add user to the list of current editors
@@ -86,6 +116,9 @@ Meteor.methods({
             slideshowPublished[options.title].push(userId);
 
         console.log("slideshowPublised ", slideshowPublished);
+
+
+
 
         return "what to return ?";
 
@@ -98,6 +131,9 @@ Meteor.methods({
         }
         Slideshow.remove({_id: slideshowId});
     },
+    /*
+     * il faudrait que le slideshow.slides.allow utilise ces methodes
+     */
     updateSlideTitle: function(slideshowId, slideId, title) {
         console.log("updateSlideTitle slideshow : ", slideshowId, " slideId : ", slideId, " title : ", title);
         Slideshow.update(
@@ -109,6 +145,9 @@ Meteor.methods({
         }
         );
     },
+    /*
+     * il faudrait que le slideshow.slides.allow utilise ces methodes
+     */
     updateSlidePos: function(slideshowId, slideId, pos) {
         console.log("updateSlideTitle slideshow : ", slideshowId, " slideId : ", slideId, " title : ", pos);
 
@@ -120,10 +159,15 @@ Meteor.methods({
             }
         }
         );
+    },
+    clearServerData: function() {
+        Slideshow.remove({});
+        SlidesLock.remove({});
+        Remotes.remove({});
     }
 
 
-
+      
 
 });
 
@@ -151,18 +195,18 @@ hasAccessSlideshow = function(slideshowId, userId) {
     return true;
 };
 
-stubGetSlideShow = function() {
+//stubGetSlideShow = function() {
 //    Meteor.publish('test4',function(){
 //       return Slideshow.find({'informations.title':'test4'}); 
 //    });
-    Meteor.call('getSlideshow', {title: "test4"}, 'testID');
-};
+//    Meteor.call('getSlideshow', {title: "test5"}, 'testID');
+//};
 
 
-userAllowed = function(userId){
-    if( userId === null )
-        return false;
-};
+//userAllowed = function(userId){
+//    if( userId === null )
+//        return false;
+//};
 
 
 if (Meteor.isServer) {
@@ -172,21 +216,21 @@ if (Meteor.isServer) {
      * value : [userIds...]
      */
     slideshowPublished = {};
-    presentationModeArray = ["default", "hybrid"];
+    presentationModeArray = ["default", "hybrid"];   //enum des types de pérsentations
 
-    Slides = new Meteor.Collection("slides");
+//    Slides = new Meteor.Collection("slides");
 //    Slides = new Meteor.Collection("slide");
     Slideshow = new Meteor.Collection("slideshow");
     SlidesLock = new Meteor.Collection("slidesLock");
-    RemoteSlides = new Meteor.Collection("remoteSlides");
+    Remotes = new Meteor.Collection("remoteSlides");
 
     //publication des données
-    Meteor.publish('slides', publishSlides);
-    Meteor.publish('jmpressSlides', publishJmpressSlides);
+//    Meteor.publish('slides', publishSlides);
+//    Meteor.publish('jmpressSlides', publishJmpressSlides);
     Meteor.publish('slidesLock', publishSlidesLock);
-    Meteor.publish('remoteSlides', publishRemoteSlides);
+//    Meteor.publish('remoteSlides', publishRemoteSlides);
 
-    stubGetSlideShow();
+//    stubGetSlideShow();
 
 
     Meteor.startup(function() {
@@ -206,6 +250,11 @@ if (Meteor.isServer) {
                 throw new Meteor.Error("Slideshow.allow.update : you are not allowed to update this slideshow");
                 return false;
             }
+
+            //IMPORTANT
+            //traiter les cas ou le client met à jour plusieurs choses en meme temps
+            //tel que plusieurs positions, title et positions...
+
 
             //manage data that are not slides
             if (!_.contains(fields, "slides")) {
@@ -229,7 +278,7 @@ if (Meteor.isServer) {
             }
 
 
-            //un mode secure pour verifier qui'il n'y ait pas d'update non conforme !
+            //pour debug à true, doit etre passé à false
             console.log("Slideshow.allow.update : default allow, true");
             return true;
 
@@ -250,13 +299,14 @@ if (Meteor.isServer) {
     });
 
 
-    RemoteSlides.allow({
+    Remotes.allow({
         insert: function() {
             return false;
         },
         update: function(userId, newActiveSlide, fields, modifier) {
+            return true;
             //si le client veut ajouter une slide active, le server refuse s'il y deja une slide active
-            if (modifier.$set.state === "active" && typeof RemoteSlides.findOne({state: "active"}) != "undefined") {
+            if (modifier.$set.state === "active" && typeof Remotes.findOne({state: "active"}) != "undefined") {
                 console.log("RemoteSides.allow.update : try to add an active with one alreay set");
                 return false;
             }
@@ -315,8 +365,8 @@ if (Meteor.isServer) {
 
 
     //le server ontrole certaines actions sur les slides
-    Slides.allow({
-        insert: function(userId, slide, fields, modifier) {
+//    Slides.allow({
+//        insert: function(userId, slide, fields, modifier) {
 //            console.log("info : slides.allaow.insert : true ", slide);
 //            //je ne sais pas si c'est la bonne méthode de faire cela ici => ca va dans le subscribe, this.changed !!!
 //            RemoteSlides.insert({
@@ -326,8 +376,8 @@ if (Meteor.isServer) {
 //
 //
 //            return true;
-        },
-        update: function(userId, slide, fields, modifier) {
+//        },
+//        update: function(userId, slide, fields, modifier) {
 
 //            console.log("slides.allow.update : server");
 
@@ -365,9 +415,9 @@ if (Meteor.isServer) {
 
 
 
-            //update de title et position en exclusivité avec priorité au title
+    //update de title et position en exclusivité avec priorité au title
 
-            //texte
+    //texte
 //            if (_.contains(fields, 'title')) {
 //                var lock = SlidesLock.findOne({$and: [
 //                        {slideId: slide._id}, {userId: userId}
@@ -381,52 +431,53 @@ if (Meteor.isServer) {
 //                return true;
 //            }
 
+///   
+    //positionet fordidden zone
+//            if (_.contains(fields, 'top') || _.contains(fields, 'left')) {
+//                return true;
 
-            //positionet fordidden zone
-            if (_.contains(fields, 'top') || _.contains(fields, 'left')) {
-                return true;
+//                var topSlide = parseInt(modifier.$set.top);
+//                var leftSlide = parseInt(modifier.$set.left);
+//                var widthSlide = 150;
+//                var heightSlide = 30;
+//                var widthForbidenZone = 200;  // 2 d !
+//                var heightForbidenZone = 200;
+//                var topForbidenZone = 200;
+//                var leftForbidenZone = 200;
 
-                var topSlide = parseInt(modifier.$set.top);
-                var leftSlide = parseInt(modifier.$set.left);
-                var widthSlide = 150;
-                var heightSlide = 30;
-                var widthForbidenZone = 200;  // 2 d !
-                var heightForbidenZone = 200;
-                var topForbidenZone = 200;
-                var leftForbidenZone = 200;
+//                si la mise à jour de la position proposée est dans la zone, on refuse l'update
+//                if (
+//                        (topForbidenZone < topSlide && topSlide < topForbidenZone + heightForbidenZone ||
+//                                topForbidenZone < topSlide + heightSlide && topSlide + heightSlide < topForbidenZone + heightForbidenZone)
+//                        &&
+//                        (leftForbidenZone < leftSlide && leftSlide < leftForbidenZone + widthForbidenZone ||
+//                                leftForbidenZone < leftSlide + widthSlide && leftSlide + widthSlide < leftForbidenZone + widthForbidenZone)
+//                        ) {
+//                    console.log("info : slides.allow.update pos : refuse pos update, forbidden zone");
+//                    return false;
+//                }
+//                console.log("info : slides.allow.update pos : allow pos update");
+//                return true;
+//            }
+//c
+//            console.log("info : slidesLock.allow.update pos : case not expected, return false");
+//            return false;
 
-                //si la mise à jour de la position proposée est dans la zone, on refuse l'update
-                if (
-                        (topForbidenZone < topSlide && topSlide < topForbidenZone + heightForbidenZone ||
-                                topForbidenZone < topSlide + heightSlide && topSlide + heightSlide < topForbidenZone + heightForbidenZone)
-                        &&
-                        (leftForbidenZone < leftSlide && leftSlide < leftForbidenZone + widthForbidenZone ||
-                                leftForbidenZone < leftSlide + widthSlide && leftSlide + widthSlide < leftForbidenZone + widthForbidenZone)
-                        ) {
-                    console.log("info : slides.allow.update pos : refuse pos update, forbidden zone");
-                    return false;
-                }
-                console.log("info : slides.allow.update pos : allow pos update");
-                return true;
-            }
-
-            console.log("info : slidesLock.allow.update pos : case not expected, return false");
-            return false;
-        },
-        remove: function() {
-            return true;
-        }
-    });
+//        },
+//        remove: function() {
+//            return true;
+//        }
+//    });
 }
 
 slideAllowInsert = function(userId, slideshow, fields, modifier) {
-    var slideId = modifier.$push.slides._id
+    var slideId = modifier.$push.slides._id;
     console.log("info : slides.allaow.insert : true : ", slideId);
     //je ne sais pas si c'est la bonne méthode de faire cela ici => ca va dans le subscribe, this.changed !!!
-    RemoteSlides.insert({
-        state: null,
-        slideId: slideId
-    });
+//    Remotes.insert({
+//        state: null,
+//        slideId: slideId
+//    });
 
 
     return true;
@@ -442,7 +493,7 @@ slideAllowUpdateTitle = function(userId, slideshow, fields, modifier, slideId) {
         ]});
 
     if (typeof lock == 'undefined') {
-        console.log("info : slides.allow.update : client trying to update without lock slide : ", slide._id, "client :", userId);
+        console.log("info : slides.allow.update : client trying to update without lock slide : ", slideId, "client :", userId);
         return false;
     }
     console.log("info : slides.allow.update : allow title update");
@@ -462,23 +513,24 @@ slideAllowUpdatePositions = function(userId, slideshow, fields, modifier, slideI
 //                return false;
 //            }
 
-    //du coup le server recupere toutes les slides puis boucle pour determiner s'il doit traiter au non
-    var allSlides = Slides.find({}).fetch();
-//            allSlides.forEach(function(slideBd) {
-    for (var i in allSlides) {
-        var slideBd = allSlides[i];
-        if (isCloseTo(slide, slideBd)) {
-            console.log(slide._id, " close to ", slideBd._id);
-            //on peut survoler une slide, mais pas droper dessus
-            //du coup on regarde si le lock sur la slide est encore là, sinon
-            //c'est que le client veut faire un drop
-            //je  ne sais pas si c'est top, si le client meure en cours de drag la slide pourrait
-            //etre posée sur une autre
-
-//                    return false;
-        }
+//    //du coup le server recupere toutes les slides puis boucle pour determiner s'il doit traiter au non
+//    var allSlides = Slides.find({}).fetch();
+////            allSlides.forEach(function(slideBd) {
+//    for (var i in allSlides) {
+//        var slideBd = allSlides[i];
+//        if (isCloseTo(slide, slideBd)) {
+//            console.log(slide._id, " close to ", slideBd._id);
+//            //on peut survoler une slide, mais pas droper dessus
+//            //du coup on regarde si le lock sur la slide est encore là, sinon
+//            //c'est que le client veut faire un drop
+//            //je  ne sais pas si c'est top, si le client meure en cours de drag la slide pourrait
+//            //etre posée sur une autre
+//
+////                    return false;
+//        }
 //                console.log("girafe");
-    }
+    return true;
+//    }
 //            });
 };
 
@@ -495,20 +547,26 @@ slideshowAllowSlides = function(userId, slideshow, fields, modifier) {
         console.log("slideshowAllowSlides : update");
         var query = Object.keys(modifier.$set)[0];
         console.log("query : ", query);
-
-        var slideId = "truc";
-
-
+        
+//        console.log(slideshow);
+       //recuperer l'id de la slide via l'index présent dans la query
+       //vraiment pas top, parce qu'il faut aller choper l'id
+       //via une requete
+//       var slideId = parseInt(str.match("[0-9]")[0]);
+       var slide = slideshow.slides[0];
+//       console.log("slide : ",slide);
+       var slideId = slide._id;
+//       console.log("slideId :",slideId);
 
 
         if (query.indexOf("title") !== -1) {
             console.log("slideshowAllowSlides : update title");
-            slideAllowUpdateTitle(userId, slideshow, fields, modifier, slideId);
+            return slideAllowUpdateTitle(userId, slideshow, fields, modifier, slideId);
         }
 
         if (query.indexOf("positions") !== -1) {
             console.log("slideshowAllowSlides : udpate positions");
-            slideAllowUpdatePositions(userId, slideshow, fields, modifier, slideId);
+            return slideAllowUpdatePositions(userId, slideshow, fields, modifier, slideId);
         }
 
     }
@@ -523,8 +581,39 @@ slideshowAllowSlides = function(userId, slideshow, fields, modifier) {
 
 
 
-
-
-
+/****************************
+ //positionet fordidden zone
+ //            if (_.contains(fields, 'top') || _.contains(fields, 'left')) {
+ //                return true;
+ 
+ //                var topSlide = parseInt(modifier.$set.top);
+ //                var leftSlide = parseInt(modifier.$set.left);
+ //                var widthSlide = 150;
+ //                var heightSlide = 30;
+ //                var widthForbidenZone = 200;  // 2 d !
+ //                var heightForbidenZone = 200;
+ //                var topForbidenZone = 200;
+ //                var leftForbidenZone = 200;
+ 
+ //                si la mise à jour de la position proposée est dans la zone, on refuse l'update
+ //                if (
+ //                        (topForbidenZone < topSlide && topSlide < topForbidenZone + heightForbidenZone ||
+ //                                topForbidenZone < topSlide + heightSlide && topSlide + heightSlide < topForbidenZone + heightForbidenZone)
+ //                        &&
+ //                        (leftForbidenZone < leftSlide && leftSlide < leftForbidenZone + widthForbidenZone ||
+ //                                leftForbidenZone < leftSlide + widthSlide && leftSlide + widthSlide < leftForbidenZone + widthForbidenZone)
+ //                        ) {
+ //                    console.log("info : slides.allow.update pos : refuse pos update, forbidden zone");
+ //                    return false;
+ //                }
+ //                console.log("info : slides.allow.update pos : allow pos update");
+ //                return true;
+ //            }
+ //c
+ //            console.log("info : slidesLock.allow.update pos : case not expected, return false");
+ //            return false;
+ 
+ /// FIN DE  PAS ENCORE IMPLEMENTE /////
+ *****************************/
 
 

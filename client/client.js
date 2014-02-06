@@ -2,27 +2,41 @@ if (Meteor.isClient) {
 //    subscriptionSlide = Meteor.subscribe("slides");
 //    Session.set("slideSubscription", "slides");
     Meteor.subscribe("slidesLock");
-    Meteor.subscribe("remoteSlides");
+//    Meteor.subscribe("remoteSlides");
 
 //    Slides = new Meteor.Collection("slides");
     SlidesLock = new Meteor.Collection("slidesLock");
-    RemoteSlides = new Meteor.Collection("remoteSlides");
+//    RemoteSlides = new Meteor.Collection("remoteSlides");
 
-    Slideshow = null; //set with getSlideshow
+//    Slideshow = null; //set with getSlideshow
     subscriptionSlideshow = null; //idem
+    subscriptionRemote = null; //idem
 
 
     ///test
 
     Slideshow = new Meteor.Collection("slideshow");
+    Remote = new Meteor.Collection("remoteSlides");
 //    subscriptionSlideshow =  Meteor.subscribe("test4");
 
+    
     //init slideArea with all slides presents in db
-    Template.slideArea.slideshow = function() {
+//    Template.slideArea.slideshow.slides = function() {
+    Template.slideArea.slides = function() {
 //        if(typeof  Slideshow.findOne({}) !== "undefined")
 //            return Slideshow.findOne({}).slides;
-        return Slideshow.find({});
+if(typeof Slideshow.findOne() === 'undefined') {
+    console.log("slideArea empty");
+            return [];
+}
+console.log("NE PASSE JAMAIS LA DEDANS");
+        return Slideshow.findOne({}).slides; //ca va pas du tout !!! dès que quelque chose dans slideshow, genre une slide, toutes les slides sont maj !!!
     };
+    
+    
+    
+    
+    
 
     ///fin test
 
@@ -63,7 +77,7 @@ if (Meteor.isClient) {
 
         console.log("init pres pour test");
         Session.set("clientMode", "editor");
-        getSlideshow({title: 'test5'});
+        getSlideshow({title: 'test1'});
 
     });
 
@@ -71,16 +85,17 @@ if (Meteor.isClient) {
     //pour ecoute les changements dans la souscription remoteSlide
     //suppression du active de la derniere slide
     Deps.autorun(function() {
-        var remote = RemoteSlides.find({state: "active"}).fetch();
-        if (typeof remote[0] !== "undefined") { //pour eviter une erreur la premeire fois
+//        var remote = Remote.findOne({slideshowId: Slideshow.findOne({})._id});
+        var remote = Remote.findOne({}); //le client n'a qu'une remote
+        if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
 
             var type = Session.get("clientMode");
             if (type === "jmpress") {
                 console.log("follow slide !");
-                $("#slideArea").jmpress("goTo", "#" + remote[0].slideId)
+                $("#slideArea").jmpress("goTo", "#" + remote.activeSlideId)
             } else {
-                console.log("remote slide active state changed to ", remote[0].slideId);
-                var $slide = $("#" + remote[0].slideId);
+                console.log("remote slide active state changed to ", remote.activeSlideId);
+                var $slide = $("#" + remote.activeSlideId);
 
                 $(".slide.active").removeClass("active");
                 $slide.addClass("active");
@@ -94,11 +109,13 @@ if (Meteor.isClient) {
     //il me semble que c'est parce qu'à cause de ca les dependances de isActive chnge à chaque fois
     //que remote est update
     Template.slide.isActive = function() {
-        if (Session.get("clietMode") === "jmpress")
+        if (Session.get("clientMode") === "jmpress")
             return "";
-        var remote = RemoteSlides.find({state: "active"}).fetch();
+        var remote = Remotes.findOne({
+            slideshowId: Slideshow.findOne({})._id //, activeSlideId: notnull
+        });
         if (typeof remote[0] !== "undefined") { //pour eviter une erreur la premeire fois
-            if (this._id === remote[0].slideId) {
+            if (this._id === remote.activeSlideId) {
                 return "active";
             } else {
                 return "";
@@ -118,12 +135,20 @@ if (Meteor.isClient) {
     //subscribe to plane or jmpress or all (exclu)
     Template.loadEditor.events({//a revoir
         'click input': function() {
-            $("#slideArea").jmpress("deinit");
+            
             Session.set("clientMode", "editor");
-            var title = prompt("load slideshow :", Slideshow.findOne({}).informations.title);
-            subscriptionSlideshow.stop();
-            getSlideshow({title: title});
+            
+            $("#slideArea").jmpress("deinit");
+//            var title = prompt("load slideshow :", Slideshow.findOne({}).informations.title);
+//            subscriptionSlideshow.stop();
+//            getSlideshow({title: title});
 
+            //pour reconnecter les slides au server,
+            //il faut trouver un moyen pour ne pas perdre la connection, sinon
+            //l'udpate wysiwyg du texte ne fonctionnera pas
+            getSlideshow({title:Slideshow.findOne().informations.title});
+
+       
         }
     });
 
@@ -133,9 +158,9 @@ if (Meteor.isClient) {
 //            subscriptionSlide = Meteor.subscribe("jmpressSlides");
 //            Session.set("slideSubscription", "jmpressSlides");
             Session.set("clientMode", "jmpress");
-            var title = prompt("load slideshow :", Slideshow.findOne({}).informations.title);
-            subscriptionSlideshow.stop();
-            getSlideshow({title: title});
+//            var title = prompt("load slideshow :", Slideshow.findOne({}).informations.title);
+//            subscriptionSlideshow.stop();
+//            getSlideshow({title: title});
 
             //magouille parce que le callback de subscribe n'est pas un callback de Template.render (lui meme étant un callback)
             setTimeout(initJmpress, 200);
@@ -150,7 +175,7 @@ if (Meteor.isClient) {
 
         //une bonne partie de cela devrait disparaitre lorsque le draggable de jquery sera enlevé        
         //BAD BAD BAD BAD BAD il faut trouver un moyen pour que ce soit meteor qui s'en charge !
-        self = this;
+        var self = this;
         var $slide = $(self.find(".slide"));
         var $slide = $("#" + this.data._id);
         var left = self.data.displayOptions.jmpress.positions.x;
@@ -485,7 +510,7 @@ updateSlidePosMove = function(slide, event) {
     //petite verif que la slide a effectivement bougée
     if (slide.displayOptions.jmpress.positions.x == left && slide.displayOptions.jmpress.positions.y == top) {
         console.log("updateSlidePosMove : slide didn't really move");
-        return;
+//        return;
     }
 
 
@@ -541,20 +566,31 @@ updateSlidePosMove = function(slide, event) {
 
 setActive = function(activeSlide) {
     //suppression de l'ancienne active
-    if (typeof RemoteSlides.findOne({state: "active"}) != "undefined") {
-        RemoteSlides.update(
-                RemoteSlides.findOne({state: "active"})._id,
-                {$set:
-                            {state: null}
-                });
-    }
+//    var remote = Remote.findOne({
+//        slideshowId: Slideshow.findOne({})._id //, activeSlideId: notnull
+//    });
+    
+    //le client n'a qu'une seule remote
+    var remote = Remote.findOne();
+
+//    if (typeof Remote.findOne({state: "active"}) != "undefined") {
+//    if( remote.activeSlideId !== null){
+    Remote.update( remote._id ,
+    {$set:
+                {activeSlideId: null}
+    });
+//    }
 
     //ajout de la nouvelle active
-    RemoteSlides.update(
-            RemoteSlides.findOne({slideId: activeSlide})._id,
-            {$set:
-                        {state: "active"}
-            });
+//    RemoteSlides.update(
+//            RemoteSlides.findOne({slideId: activeSlide})._id,
+//            {$set:
+//                        {state: "active"}
+//            });
+    Remote.update( remote._id,
+    {$set:
+                {activeSlideId: activeSlide}
+    });
 
 };
 
@@ -641,7 +677,7 @@ removeSlidehow = function() {
 //        console.log("deleteSlideshow : error catched ",err);
 //    }
 };
-
+   
 
 getSlideshow = function(options) {
     console.log("getSlideshow ", options);
@@ -649,21 +685,42 @@ getSlideshow = function(options) {
         if (typeof error !== "undefined") {
             console.log("getSlideshow : get error ", error);
         } else {
-            //arret de la precedente si existante
+            //arret des precedentes si existante
             if (subscriptionSlideshow !== null)
                 subscriptionSlideshow.stop();
+            if (subscriptionRemote !== null)
+                subscriptionRemote.stop();
 
-            //nouvelle sub
+            //nouvelles sub
             subscriptionSlideshow = Meteor.subscribe(options.title);
+            subscriptionRemote = Meteor.subscribe("remote"+options.title);
 
             if (Slideshow === null)
                 Slideshow = new Meteor.Collection("slideshow");
+            if (Remote === null)
+                Remote = new Meteor.Collection("remoteSlides");
 
-
+//
+//                 Template.slideArea.slideshow = function() {
+////        if(typeof  Slideshow.findOne({}) !== "undefined")
+////            return Slideshow.findOne({}).slides;
+//        return Slideshow.find({}); //ca va pas du tout !!! dès que quelque chose dans slideshow, genre une slide, toutes les slides sont maj !!!
+//    };
+                
+                
             //sub de lock
             //sub de remote
-
+                
             console.log("getSlideshow ", result, ": done with subscribes");
         }
+    });
+};
+
+
+
+clearServerData = function(str) {
+    console.log("clearServerData");
+    Meteor.call('clearServerData', function(error, result) {
+        console.log("clearServerData : server answered with ", result);
     });
 };
