@@ -69,6 +69,7 @@ if (Meteor.isClient) {
 
     //init slideArea with all slides presents in db
     Template.slideArea.slides = function() {
+//        return Slides.find({}).fetch();
         return Slides.find({});
     };
 
@@ -82,6 +83,7 @@ if (Meteor.isClient) {
         var left = self.data.left;
         var top = self.data.top;
         var ratio = 10;
+        console.log("render :",this.data._id, top, left);
 
         //pour toutes
         if (self.data.toFadeIn) { //pour ne fadeIn qu'une fois
@@ -97,7 +99,7 @@ if (Meteor.isClient) {
         var type = Session.get("slideSubscription");
         if (type === "planeSlides" || type === "slides") {
             //pour plane
-            console.log("render plane et all");
+//            console.log("render plane et all");
             $slide.css("left", left).css("top", top);
             $slide.draggable();
         }

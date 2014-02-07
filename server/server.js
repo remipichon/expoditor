@@ -1,6 +1,43 @@
 publishSlides = function() {
-    return Slides.find({});
+//    return Slides.find({});
+    var self = this;
+
+
+    //on passe pas par le .allow
+    var handle = Slides.find({}).observeChanges({
+        added: function(id) {
+            //collection, id, fields
+            var slide = Slides.findOne({
+                _id: id
+            });
+            console.log("publishSlides.added", slide._id);
+            self.added("slides", id, slide);
+        },
+        changed: function(id) {
+            var slide = Slides.findOne({
+                _id: id
+            });
+            console.log("publishSlides.changed",slide._id);
+            //l'ennui c'est que ca fire tout, et pas que les changements
+            self.changed("slides",id,slide);
+
+//            self.changed("slides",id,{top:slide.top});
+        }
+
+    });
+
+
+
+
+
+
+
+
+
+
+
 };
+
 
 publishJmpressSlides = function() {
     return Slides.find({type: "jmpressSlide"});
@@ -81,10 +118,11 @@ if (Meteor.isServer) {
     //le server ontrole certaines actions sur les slides
     Slides.allow({
         insert: function() {
-            console.log("info : slides.allaow.insert : true");
+            console.log("info : slides.allow.insert : true");
             return true;
         },
         update: function(userId, slide, fields, modifier) {
+            console.log("info : slides.allow.update");
             //update de title et position en exclusivité avec priorité au title
 
             //texte
@@ -105,7 +143,7 @@ if (Meteor.isServer) {
             //position
             if (_.contains(fields, 'top') || _.contains(fields, 'left')) {
                 return true;
-                
+
                 var topSlide = parseInt(modifier.$set.top);
                 var leftSlide = parseInt(modifier.$set.left);
                 var widthSlide = 150;
