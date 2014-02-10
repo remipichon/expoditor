@@ -1,42 +1,109 @@
-publishSlides = function() {
+addHandleSlide = function(self) {
+
+};
+
+publishSlides = function() { //pseudo slideshow
 //    return Slides.find({});
+    var pseudoSlideshowId = "CxqBw4c2oyDDoHkYr";
     var self = this;
+//    console.log("\nobservechange\n",
+//            Slides.find({_id: "qkBPHySDuarpWvmPs"
+//                , "sub1.attr121": "121Value"
+//    }
+//    , {fields: {"sub1.$": 1}}  //donc là on ne chope qu'une slide
+//    )
+//            .fetch()
+//
+//            );
+    
+    //publication du slideshow
+     var slide = Slides.findOne({
+                _id: pseudoSlideshowId
+            });
+     console.log("publication pseudo slideshow", slide._id);
+     self.added("slides", pseudoSlideshowId, slide);
 
 
-    //on passe pas par le .allow
-    var handle = Slides.find({}).observeChanges({
-        added: function(id) {
+    //pour ajouter une slide, on ne regarde que l'attribut slide (sub1) (ne prend pas en compte la structure complexe)
+    var handle = Slides.find({_id: pseudoSlideshowId, "sub1.newOne":1}).observeChanges({//il faut restreindre l'observe
+        changed: function(id,fields) {  
             //collection, id, fields
-            var slide = Slides.findOne({
+            var slide = Slides.find({
                 _id: id
             });
-            console.log("publishSlides.added", slide._id);
-            self.added("slides", id, slide);
-        },
-        changed: function(id) {
-            var slide = Slides.findOne({
-                _id: id
-            });
-            console.log("publishSlides.changed",slide._id);
-            //l'ennui c'est que ca fire tout, et pas que les changements
-            self.changed("slides",id,slide);
-
-//            self.changed("slides",id,{top:slide.top});
+            console.log("add pseudo slide", id,fields);
+//          
+            Slides.update({_id: pseudoSlideshowId, "sub1.newOne":1},{$set:{ "sub1.$.newOne":0}});
+              self.added("slides", id, slide);
         }
+    });
+    
+    return;
 
+    //pour les modifications sur les slides
+    //pour le test, on regarde que la slide juste crée (sera ensuite le slideshow)
+    //et puis on met un observeChanges par slide
+
+
+    var handle = Slides.find({_id: pseudoSlideshowId, "sub1._id": "id1"}, {fields: {"sub1.$": 1}}).observeChanges({//il faut restreindre l'observe  
+        changed: function(id, fields) {
+            console.log("id1: publishSlides.changed", id, fields);
+        }
+    });
+
+    var handle = Slides.find({_id: pseudoSlideshowId, "sub1._id": "id2"}, {fields: {"sub1.$": 1}}).observeChanges({//il faut restreindre l'observe  
+        changed: function(id, fields) {
+            console.log("id2: publishSlides.changed", id, fields);
+        }
     });
 
 
+    return;
+    /*
+     changed: function(id, fields) {
+     console.log("publishSlides.changed", id, fields);
+     var slide = Slides.findOne({
+     _id: id
+     });
+     self.changed("slides", id, slide); //mais on peut publish separement self.changed("slides",id,{top:slide.top});
+     }
+     */
+
+    //////requete de test coté client
+
+    //ajout de pseudo slide (ajout via push dans sub1 via push)
+    Slides.update({_id: "CxqBw4c2oyDDoHkYr"},
+    {$push: {
+            sub1: {
+                _id: "id3",
+                attr1: "three",
+                newOne : 1 //magouille degeulasse, flag pour dire au publish de l'ajouter
+        
+            }
+        }
+    }); 
 
 
-
-
-
+    //modification d'une pseudo slide (
+    Slides.update("CxqBw4c2oyDDoHkYr",
+            {$set: {"sub1.0.attr1": "pouet5"}});
 
 
 
 
 };
+
+Meteor.methods({
+    //ne sert à rien
+    testUpdateSubDocument: function(id, str) {
+//        console.log("meteor methods ",id,str);
+        Slides.update({_id: id, "subDocument": "subSubDocument"},
+        {$set:
+                    {subSubAttr1: str}
+        }
+        );
+    }
+});
 
 
 publishJmpressSlides = function() {
@@ -122,6 +189,7 @@ if (Meteor.isServer) {
             return true;
         },
         update: function(userId, slide, fields, modifier) {
+            return true;
             console.log("info : slides.allow.update");
             //update de title et position en exclusivité avec priorité au title
 

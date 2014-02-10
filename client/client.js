@@ -247,7 +247,35 @@ initJmpress = function() {
 createSlide = function(options) {
     var top = 50;
     var left = 50;
-    return  Slides.insert({title: options.title, top: top, left: left, type: options.type});
+    return  Slides.insert({
+        title: options.title, 
+        top: top, 
+        left: left, 
+        type: options.type, 
+        sub1: [   //mes slides
+            
+            {    //une slide
+                _id: "id1",
+                attr1: "one"
+            },
+            {
+                _id: "id2",
+                attr1: "two"
+        
+        }
+        ]
+//        sub1: {   //mes slides
+//            attr11: "11Value",
+//            sub12: {    //une slide
+//                attr121: "121Value",
+//                attr122: "122Value"
+//            },
+//            sub13: {
+//                attr131: "131Value",
+//                attr132: "132Value"
+//            }
+//        }
+    });
 };
 
 updateSlideTitle = function(slide) {
