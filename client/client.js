@@ -10,33 +10,35 @@ if (Meteor.isClient) {
 
 //    Slideshow = null; //set with getSlideshow
     subscriptionSlideshow = null; //idem
+    subscriptionSlides = null; //idem
     subscriptionRemote = null; //idem
 
 
     ///test
 
     Slideshow = new Meteor.Collection("slideshow");
+    Slides = new Meteor.Collection("slides");
     Remote = new Meteor.Collection("remoteSlides");
 //    subscriptionSlideshow =  Meteor.subscribe("test4");
 
-    
+
     //init slideArea with all slides presents in db
 //    Template.slideArea.slideshow.slides = function() {
     Template.slideArea.slides = function() {
 //        if(typeof  Slideshow.findOne({}) !== "undefined")
 //            return Slideshow.findOne({}).slides;
-if(typeof Slideshow.findOne() === 'undefined') {
-    console.log("slideArea empty");
+        if (typeof Slides.findOne() === 'undefined') {
+            console.log("slideArea empty");
             return [];
-}
-console.log("NE PASSE JAMAIS LA DEDANS");
-        return Slideshow.findOne({}).slides; //ca va pas du tout !!! dès que quelque chose dans slideshow, genre une slide, toutes les slides sont maj !!!
+        }
+//        console.log("NE PASSE JAMAIS LA DEDANS");
+        return Slides.find({}); //ca va pas du tout !!! dès que quelque chose dans slideshow, genre une slide, toutes les slides sont maj !!!
     };
-    
-    
-    
-    
-    
+
+
+
+
+
 
     ///fin test
 
@@ -77,7 +79,7 @@ console.log("NE PASSE JAMAIS LA DEDANS");
 
         console.log("init pres pour test");
         Session.set("clientMode", "editor");
-        getSlideshow({title: 'test1'});
+//        getSlideshow({title: 'test1'});
 
     });
 
@@ -123,6 +125,32 @@ console.log("NE PASSE JAMAIS LA DEDANS");
         }
     };
 
+    /*
+     * manage slideshow
+     */
+    Template.createSlideshow.events({
+        "click input": function() {
+            createSlideshowControler();
+        }
+    });
+
+    Template.updateSlideshow.events({
+        "click input": function() {
+            updateSlideshowControler();
+        }
+    });
+
+    Template.deleteSlideshow.events({
+        "click input": function() {
+            deleteSlideshowControler();
+        }
+    });
+
+    Template.loadSlideshow.events({
+        "click input": function() {
+            getSlideshowControler();
+        }
+    });
 
     Template.createSlide.events({
         'click input': function() {
@@ -135,9 +163,9 @@ console.log("NE PASSE JAMAIS LA DEDANS");
     //subscribe to plane or jmpress or all (exclu)
     Template.loadEditor.events({//a revoir
         'click input': function() {
-            
+
             Session.set("clientMode", "editor");
-            
+
             $("#slideArea").jmpress("deinit");
 //            var title = prompt("load slideshow :", Slideshow.findOne({}).informations.title);
 //            subscriptionSlideshow.stop();
@@ -146,9 +174,9 @@ console.log("NE PASSE JAMAIS LA DEDANS");
             //pour reconnecter les slides au server,
             //il faut trouver un moyen pour ne pas perdre la connection, sinon
             //l'udpate wysiwyg du texte ne fonctionnera pas
-            getSlideshow({title:Slideshow.findOne().informations.title});
+            getSlideshow({title: Slideshow.findOne().informations.title});
 
-       
+
         }
     });
 
@@ -276,6 +304,8 @@ console.log("NE PASSE JAMAIS LA DEDANS");
             var self = this;
             $("#" + this._id).fadeOut(1000, function() {
                 console.log("delete slide");
+                //TODO
+                //passer par une fonction
                 Slides.remove(self._id);
             });
         }
@@ -359,33 +389,59 @@ createSlide = function(options) {
     console.log("create ", options.type);
     var top = 50;
     var left = 50;
-//    return  Slides.insert({title: options.title, top: top, left: left, type: options.type});
-    return Slideshow.update(
-            {_id: Slideshow.findOne({})._id},
-    {$push: {
-            slides: {
-                _id: Random.id(),
-                informations: {
-                    title: options.title
+    return  Slides.insert({
+        _id: Random.id(),
+        informations: {
+            title: options.title
+        },
+        slideshowReference: [Slideshow.findOne({})._id], //le serveur doit verifier cela
+        displayOptions: {
+            jmpress: {
+                positions: {
+                    x: left,
+                    y: top,
+                    z: 0
                 },
-                displayOptions: {
-                    jmpress: {
-                        positions: {
-                            x: left,
-                            y: top,
-                            z: 0
-                        },
-                        rotates: {
-                            x: 0,
-                            y: 0,
-                            z: 0
-                        }
-                    }
+                rotates: {
+                    x: 0,
+                    y: 0,
+                    z: 0
                 }
             }
         }
-    }
-    );
+    });
+
+
+
+
+
+//            {title: options.title, top: top, left: left, type: options.type});
+//    return Slideshow.update(
+//            {_id: Slideshow.findOne({})._id},
+//    {$push: {
+//            slides: {
+//                _id: Random.id(),
+//                informations: {
+//                    title: options.title
+//                },
+//                displayOptions: {
+//                    jmpress: {
+//                        positions: {
+//                            x: left,
+//                            y: top,
+//                            z: 0
+//                        },
+//                        rotates: {
+//                            x: 0,
+//                            y: 0,
+//                            z: 0
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//    );
 };
 
 
@@ -417,20 +473,27 @@ updateSlideTitleModel = function(slide) {
     var title = prompt("new title", slide.informations.title);
 
     if (title != null) {
-        //obligé de passer par l'index afin d'éviter //Not permitted. Untrusted code may only update documents by ID. [403]
-        var slideIndex = getIndexOfSlide(slide); //pas aussi simple, il faut extraire slide.id et le chercher dans les elements de .slides
-
-        var query = {};                 // create an empty object
-        query['slides.' + slideIndex + '.informations.title'] = title;  // and then populate the variable key
-
-        Slideshow.update(
-                {_id: Slideshow.findOne({})._id},
-        {
-            $set: query  //attention, c'est un $set donc ca écrase tout ce qui est maché 
-        }
-        );
-
+        //cancel, pas d'update
+        Slides.update(slide._id, {$set:
+                    {"informations.title": title}
+        });
     }
+
+//    if (title != null) {
+//        //obligé de passer par l'index afin d'éviter //Not permitted. Untrusted code may only update documents by ID. [403]
+//        var slideIndex = getIndexOfSlide(slide); //pas aussi simple, il faut extraire slide.id et le chercher dans les elements de .slides
+//
+//        var query = {};                 // create an empty object
+//        query['slides.' + slideIndex + '.informations.title'] = title;  // and then populate the variable key
+//
+//        Slideshow.update(
+//                {_id: Slideshow.findOne({})._id},
+//        {
+//            $set: query  //attention, c'est un $set donc ca écrase tout ce qui est maché 
+//        }
+//        );
+//
+//    }
     console.log("update title : remove lock of slide", slide._id);
 
     //supression du lock
@@ -442,7 +505,7 @@ updateSlideTitleModel = function(slide) {
 };
 
 updateSlidePos = function(slide, event) {
-//    return;
+
     var $slide = $("#" + slide._id);
     var top = parseInt($slide.css('top'));
     var left = parseInt($slide.css('left'));
@@ -472,46 +535,53 @@ updateSlidePos = function(slide, event) {
 //        return;
 //    }
 
+    return Slides.update(slide._id, {$set:
+                {"displayOptions.jmpress.positions": pos}
+    });
+
+
+
     //obligé de passer par l'index afin d'éviter //Not permitted. Untrusted code may only update documents by ID. [403]
-    var slideIndex = getIndexOfSlide(slide); //pas aussi simple, il faut extraire slide.id et le chercher dans les elements de .slides
-
-    var query = {};                 // create an empty object
-    query['slides.' + slideIndex + '.displayOptions.jmpress.positions'] = {
-        x: left,
-        y: top,
-        z: 0
-    };  // and then populate the variable key
-
-    return Slideshow.update(
-            {_id: Slideshow.findOne({})._id},
-    {
-        $set: query
-    }
-    );
+//    var slideIndex = getIndexOfSlide(slide); //pas aussi simple, il faut extraire slide.id et le chercher dans les elements de .slides
+//
+//    var query = {};                 // create an empty object
+//    query['slides.' + slideIndex + '.displayOptions.jmpress.positions'] = {
+//        x: left,
+//        y: top,
+//        z: 0
+//    };  // and then populate the variable key
+//
+//    return Slideshow.update(
+//            {_id: Slideshow.findOne({})._id},
+//    {
+//        $set: query
+//    }
+//    );
 
 };
 
 
-getIndexOfSlide = function(slide) {
-    var allSlides = Slideshow.findOne({}).slides;
-    for (var i = 0; i < allSlides.length; i++) {
-        if (allSlides[i]._id === slide._id)
-            return i;
-    }
-    return -1;
-};
+//getIndexOfSlide = function(slide) {
+//    var allSlides = Slideshow.findOne({}).slides;
+//    for (var i = 0; i < allSlides.length; i++) {
+//        if (allSlides[i]._id === slide._id)
+//            return i;
+//    }
+//    return -1;
+//};
 
 updateSlidePosMove = function(slide, event) {
+    updateSlidePos(slide, event);
 //    return;
-    var $slide = $("#" + slide._id);
-    var top = parseInt($slide.css('top'));
-    var left = parseInt($slide.css('left'));
-
-    //petite verif que la slide a effectivement bougée
-    if (slide.displayOptions.jmpress.positions.x == left && slide.displayOptions.jmpress.positions.y == top) {
-        console.log("updateSlidePosMove : slide didn't really move");
-//        return;
-    }
+//    var $slide = $("#" + slide._id);
+//    var top = parseInt($slide.css('top'));
+//    var left = parseInt($slide.css('left'));
+//
+//    //petite verif que la slide a effectivement bougée
+//    if (slide.displayOptions.jmpress.positions.x == left && slide.displayOptions.jmpress.positions.y == top) {
+//        console.log("updateSlidePosMove : slide didn't really move");
+////        return;
+//    }
 
 
     //petite verif qu'on se superpose pas avec une slide
@@ -523,6 +593,10 @@ updateSlidePosMove = function(slide, event) {
 //        console.log("updateSlidePosMove : trop proche d'une slide");
     //  return;
 //    }
+
+//     return Slides.update(slide._id, {$set:
+//                {"displayOptions.jmpress.positions": pos}
+//    });
 
 
 
@@ -543,21 +617,21 @@ updateSlidePosMove = function(slide, event) {
 //    }
 
     //obligé de passer par l'index afin d'éviter //Not permitted. Untrusted code may only update documents by ID. [403]
-    var slideIndex = getIndexOfSlide(slide); //pas aussi simple, il faut extraire slide.id et le chercher dans les elements de .slides
-
-    var query = {};                 // create an empty object
-    query['slides.' + slideIndex + '.displayOptions.jmpress.positions'] = {
-        x: left,
-        y: top,
-        z: 0
-    };  // and then populate the variable key
-
-    return Slideshow.update(
-            {_id: Slideshow.findOne({})._id},
-    {
-        $set: query
-    }
-    );
+//    var slideIndex = getIndexOfSlide(slide); //pas aussi simple, il faut extraire slide.id et le chercher dans les elements de .slides
+//
+//    var query = {};                 // create an empty object
+//    query['slides.' + slideIndex + '.displayOptions.jmpress.positions'] = {
+//        x: left,
+//        y: top,
+//        z: 0
+//    };  // and then populate the variable key
+//
+//    return Slideshow.update(
+//            {_id: Slideshow.findOne({})._id},
+//    {
+//        $set: query
+//    }
+//    );
 };
 
 
@@ -569,16 +643,16 @@ setActive = function(activeSlide) {
 //    var remote = Remote.findOne({
 //        slideshowId: Slideshow.findOne({})._id //, activeSlideId: notnull
 //    });
-    
+
     //le client n'a qu'une seule remote
     var remote = Remote.findOne();
 
 //    if (typeof Remote.findOne({state: "active"}) != "undefined") {
 //    if( remote.activeSlideId !== null){
-    Remote.update( remote._id ,
-    {$set:
-                {activeSlideId: null}
-    });
+    Remote.update(remote._id,
+            {$set:
+                        {activeSlideId: null}
+            });
 //    }
 
     //ajout de la nouvelle active
@@ -587,10 +661,10 @@ setActive = function(activeSlide) {
 //            {$set:
 //                        {state: "active"}
 //            });
-    Remote.update( remote._id,
-    {$set:
-                {activeSlideId: activeSlide}
-    });
+    Remote.update(remote._id,
+            {$set:
+                        {activeSlideId: activeSlide}
+            });
 
 };
 
@@ -616,34 +690,64 @@ setActive = function(activeSlide) {
  getCloserSlide(pos);
  */
 
-testCallClient = function(str) {
-    console.log("call server");
-    Meteor.call('testCallServer', str, function(error, result) {
-        console.log("server answered with ", result);
-    });
+//testCallClient = function(str) {
+//    console.log("call server");
+//    Meteor.call('testCallServer', str, function(error, result) {
+//        console.log("server answered with ", result);
+//    });
+//};
+
+createSlideshowControler = function(callbackReturn) {
+    //TODO
+    //popup maison
+    if (typeof callbackReturn !== "undefined") { //it is the callback
+        if (callbackReturn !== 1) {//there was an error
+//            truc = callbackReturn;
+            alert("an error occured when creating slideshow : " + callbackReturn.reason);
+        } else {
+            alert("slideshow successfully created");
+        }
+        return;
+    }
+
+    var title = prompt("Type a title for the new slideshow");
+    if (title !== null) {
+        createSlideshowModel({title: title}, createSlideshowControler);
+    }
+
+
 };
 
-
-createSlideshow = function(options) {
+createSlideshowModel = function(options, callback) {
     console.log("createSlideshow ", options);
     Meteor.call('createSlideshow', options, function(error, result) {
         if (typeof error !== "undefined") {
+//            truc = error;
             console.log("createSlideshow : create error ", error);
+            callback(error);
         } else {
             console.log("createSlideshow ", result);
             getSlideshow({title: options.title, presentationMode: "default"});
+            callback(1);
         }
     });
 };
 
+
+
+updateSlideshowControler = function() {
+    var presentationMode = Slideshow.findOne({}).presentationMode;
+    presentationMode = prompt("Enter a new presentationMode for slideshow (default,hybrid) ", presentationMode);
+    updateSlideshowModel({presentationMode: presentationMode});
+};
 /*
  * update things that ar note slide
  // */
-updateSlideshow = function(options) {
-    if (typeof options.slide !== "undefined") {
-        console.log("updateSlideshow : you cannot update slide with this function");
-        return;
-    }
+updateSlideshowModel = function(options) {
+//    if (typeof options.slide !== "undefined") {
+//        console.log("updateSlideshow : you cannot update slide with this function DOESNT EXIST ANYMORE");
+//        return;
+//    }
     if (typeof options.presentationMode === "undefined") {
         console.log("updateSlideshow : presentationMode undefined");
         return;
@@ -658,7 +762,17 @@ updateSlideshow = function(options) {
 
 };
 
-removeSlidehow = function() {
+deleteSlideshowControler = function() {
+    var title = Slideshow.findOne().informations.title;
+    var answ = confirm("Do you really want to delete all slideshow " + title + " ? It will affect all users, you should'nt do that...");
+    if (answ) {
+        deleteSlideshowModel();
+    } else {
+    }
+};
+
+
+deleteSlideshowModel = function() {
     //il n'y a qu'une presentation sur le client
     Meteor.call('removeSlideshow', Slideshow.findOne({})._id, Meteor.userId(), function(error, result) {
         if (typeof error !== "undefined") {
@@ -677,9 +791,44 @@ removeSlidehow = function() {
 //        console.log("deleteSlideshow : error catched ",err);
 //    }
 };
-   
 
-getSlideshow = function(options) {
+
+getSlideshowList = function(callback) {
+    //il n'y a qu'une presentation sur le client
+    Meteor.call('getSlideshowList', {}, Meteor.userId(), function(error, result) {
+        if (typeof error !== "undefined") {
+           
+            console.log("getSlideshowList : ", error);
+            callback(error);
+        } else {
+            console.log("getSlideshowList : ", result);
+            callback(result);        
+        }
+    });
+//    tr
+};
+
+getSlideshowControler = function(callbackReturn) {
+
+    if (typeof callbackReturn === "undefined") {
+        getSlideshowList(getSlideshowControler);
+        return;
+    }
+   if( typeof callbackReturn !== "undefined" && typeof callbackReturn.errorType === "undefined") { //pas d'erreur
+        var title = prompt("which slideshow to load ? " + callbackReturn.titlesArray);
+        getSlideshowModel({title:title});
+   } else {
+       console.log("getSlideshowControler : error : ",callbackReturn);
+   }
+   
+};
+
+
+getSlideshowModel = function(options) {
+    if (Meteor.userId() === null) {
+        alert("you have to be connected as a user \nlogin : user1@yopmail.com \npswd : user1user1");
+        return;
+    }
     console.log("getSlideshow ", options);
     Meteor.call("getSlideshow", options, Meteor.userId(), function(error, result) {
         if (typeof error !== "undefined") {
@@ -688,15 +837,20 @@ getSlideshow = function(options) {
             //arret des precedentes si existante
             if (subscriptionSlideshow !== null)
                 subscriptionSlideshow.stop();
+            if (subscriptionSlides !== null)
+                subscriptionSlides.stop();
             if (subscriptionRemote !== null)
                 subscriptionRemote.stop();
 
             //nouvelles sub
             subscriptionSlideshow = Meteor.subscribe(options.title);
-            subscriptionRemote = Meteor.subscribe("remote"+options.title);
+            subscriptionSlides = Meteor.subscribe("slides" + options.title);
+            subscriptionRemote = Meteor.subscribe("remote" + options.title);
 
             if (Slideshow === null)
                 Slideshow = new Meteor.Collection("slideshow");
+            if (Remote === null)
+                Slides = new Meteor.Collection("slides");
             if (Remote === null)
                 Remote = new Meteor.Collection("remoteSlides");
 
@@ -706,11 +860,11 @@ getSlideshow = function(options) {
 ////            return Slideshow.findOne({}).slides;
 //        return Slideshow.find({}); //ca va pas du tout !!! dès que quelque chose dans slideshow, genre une slide, toutes les slides sont maj !!!
 //    };
-                
-                
+
+
             //sub de lock
             //sub de remote
-                
+
             console.log("getSlideshow ", result, ": done with subscribes");
         }
     });

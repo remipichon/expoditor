@@ -1,0 +1,51 @@
+
+slideshow
+{
+    "_id": "id",
+    "informations": {
+            "authors": "",
+            "title": "title",
+            "date": ""
+    },
+        "presentationMode": "default",
+        "slides": []
+}
+
+slides
+{
+    "_id": "id",
+    "slideshowReference": [
+        "slideshow's _id"  
+    ]    
+    "informations": {
+                    "title": "title"
+                },
+    "elements": [],
+    "displayOptions": {
+        "jmpress": {
+            "positions": {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+            },
+            "rotates": {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+            },
+            "scale": 1,
+            "time-delay": 1
+        },
+        "deckjs": {
+            "transition": "horizontal",
+            "time-delay": 1
+        },
+        "revealjs": {
+            "transition": "horizontal",
+            "time-delay": 1
+        },
+        "turnjs": {
+        }
+    }
+
+}

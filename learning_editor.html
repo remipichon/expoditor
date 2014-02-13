@@ -12,22 +12,35 @@
 </body>
 
 <template name="buttons">
-    {{> createSlide}}
-    {{> loadEditor}}
-    {{> loadJmpress}}
+    <p>
+        {{> createSlideshow}}
+        {{> updateSlideshow}}
+        {{> deleteSlideshow}}
+        {{> loadSlideshow}}
+    </p>    
+    <p>
+        {{> createSlide}}
+        {{> loadEditor}}
+        {{> loadJmpress}}
+    </p>
 </template>
 <template name="createSlide"><input id="createSlide" class="button" type="button" value="createSlide"/></template>
 <template name="loadEditor"><input id="loadEditor" class="button" type="button" value="loadEditor" /></template>
 <template name="loadJmpress"><input id="loadJmpress" class="button" type="button" value="loadJmpress"/></template>
 
+<template name="createSlideshow"><input id="createSlideshow" class="button" type="button" value="createSlideshow"/></template>
+<template name="updateSlideshow"><input id="updateSlideshow" class="button" type="button" value="updateSlideshow"/></template>
+<template name="deleteSlideshow"><input id="deleteSlideshow" class="button" type="button" value="deleteSlideshow"/></template>
+<template name="loadSlideshow"><input id="loadSlideshow" class="button" type="button" value="loadSlideshow"/></template>
+
 
 
 <template name="slideArea">
-    
+
     {{!#each slideshow}}
-        {{#each slides}}
-        {{> slide}}
-        {{/each}}
+    {{#each slides}}
+    {{> slide}}
+    {{/each}}
     {{!/each}}
 
     {{! <div id="forbidenZone"></div> }}
@@ -37,14 +50,14 @@
 <template name="slide">
 
     {{!style en constant pour le draggable, render à la mano}}
-{{#constant}}
+    {{#constant}}
     <div id="{{_id}}" class="step slide" style="top:{{getEditorData "y"}}px; left:{{getEditorData "x"}}px" 
          {{getPresentationData "x" "jmpress"}} {{getPresentationData "y" "jmpress"}} {{getPresentationData "z" "jmpress"}}>
 
-        <p class='title'> {{informations.title}} </p>
-        {{> deleteSlide }}
-    </div>
-    {{/constant}}
+         <p class='title'> {{informations.title}} </p>
+                                                {{> deleteSlide }}
+                                            </div>
+                                            {{/constant}}
 
-</template>    
-<template name="deleteSlide"><span class="delete"> X </span></template>
+    </template>    
+    <template name="deleteSlide"><span class="delete"> X </span></template>
