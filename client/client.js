@@ -1,344 +1,281 @@
-if (Meteor.isClient) {
-//    subscriptionSlide = Meteor.subscribe("slides");
-//    Session.set("slideSubscription", "slides");
-    Meteor.subscribe("slidesLock");
-//    Meteor.subscribe("remoteSlides");
 
-//    Slides = new Meteor.Collection("slides");
-    SlidesLock = new Meteor.Collection("slidesLock");
-//    RemoteSlides = new Meteor.Collection("remoteSlides");
+/*
+ * va disparaitre
+ */
+Meteor.subscribe("slidesLock");
 
-//    Slideshow = null; //set with getSlideshow
-    subscriptionSlideshow = null; //idem
-    subscriptionSlides = null; //idem
-    subscriptionRemote = null; //idem
+subscriptionSlideshow = null;
+subscriptionSlides = null;
+subscriptionRemote = null;
 
-
-    ///test
-
-    Slideshow = new Meteor.Collection("slideshow");
-    Slides = new Meteor.Collection("slides");
-    Remote = new Meteor.Collection("remoteSlides");
-//    subscriptionSlideshow =  Meteor.subscribe("test4");
+Slideshow = new Meteor.Collection("slideshow");
+Slides = new Meteor.Collection("slides");
+SlidesLock = new Meteor.Collection("slidesLock");
+Remote = new Meteor.Collection("remoteSlides");
 
 
-    //init slideArea with all slides presents in db
-//    Template.slideArea.slideshow.slides = function() {
-    Template.slideArea.slides = function() {
-//        if(typeof  Slideshow.findOne({}) !== "undefined")
-//            return Slideshow.findOne({}).slides;
-        if (typeof Slides.findOne() === 'undefined') {
-            console.log("slideArea empty");
-            return [];
-        }
-//        console.log("NE PASSE JAMAIS LA DEDANS");
-        return Slides.find({}); //ca va pas du tout !!! dès que quelque chose dans slideshow, genre une slide, toutes les slides sont maj !!!
-    };
-
-
-
-
-
-
-    ///fin test
-
-
-    Meteor.startup(function() {
-        //listener jquery
-        //keypress ne fire pas les arrow sont webkit et IE
-        $(document).on("keypress", function(event) {
-            if (Session.get("clientMode") === "jmpress") {
-                var activeSlide = $("#slideArea .active").attr("id");
-                switch (event.keyCode) {
-                    case 37: // left
-                        setActive(activeSlide);
-                        break;
-                    case 38: // up
-                        setActive(activeSlide);
-                        break;
-                    case 39: // right
+/*****
+ * manage live Remote
+ ****/
+Meteor.startup(function() {
+    //listener jquery pour la remote
+    //keypress ne fire pas les arrow sont webkit et IE
+    $(document).on("keypress", function(event) {
+        if (Session.get("clientMode") === "jmpress") {
+            var activeSlide = $("#slideArea .active").attr("id");
+            switch (event.keyCode) {
+                case 37: // left
+                    setActive(activeSlide);
+                    break;
+                case 38: // up
+                    setActive(activeSlide);
+                    break;
+                case 39: // right
 //                        console.log("right arrow");
-                        setActive(activeSlide);
-                        break;
-                    case 8: // space
-//                        console.log("space");
-                        setActive(activeSlide);
-                        break;
-                    case 32 : // space
-//                        console.log("space");
-                        setActive(activeSlide);
-                        break;
-                    case 40: // down
-                        setActive(activeSlide);
-                        break;
-                    default:
-                        return; // exit this handler for other keys
-                }
-            }
-        });
-
-        console.log("init pres pour test");
-        Session.set("clientMode", "editor");
-//        getSlideshow({title: 'test1'});
-
-    });
-
-
-    //pour ecoute les changements dans la souscription remoteSlide
-    //suppression du active de la derniere slide
-    Deps.autorun(function() {
-//        var remote = Remote.findOne({slideshowId: Slideshow.findOne({})._id});
-        var remote = Remote.findOne({}); //le client n'a qu'une remote
-        if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
-
-            var type = Session.get("clientMode");
-            if (type === "jmpress") {
-                console.log("follow slide !");
-                $("#slideArea").jmpress("goTo", "#" + remote.activeSlideId)
-            } else {
-                console.log("remote slide active state changed to ", remote.activeSlideId);
-                var $slide = $("#" + remote.activeSlideId);
-
-                $(".slide.active").removeClass("active");
-                $slide.addClass("active");
-            }
-        }
-
-
-    });
-    //fonctionne pas parce que la slide est en constant
-    //provoque un render de chaque slide jmpress
-    //il me semble que c'est parce qu'à cause de ca les dependances de isActive chnge à chaque fois
-    //que remote est update
-    Template.slide.isActive = function() {
-        if (Session.get("clientMode") === "jmpress")
-            return "";
-        var remote = Remotes.findOne({
-            slideshowId: Slideshow.findOne({})._id //, activeSlideId: notnull
-        });
-        if (typeof remote[0] !== "undefined") { //pour eviter une erreur la premeire fois
-            if (this._id === remote.activeSlideId) {
-                return "active";
-            } else {
-                return "";
-            }
-        }
-    };
-
-    /*
-     * manage slideshow
-     */
-    Template.createSlideshow.events({
-        "click input": function() {
-            createSlideshowControler();
-        }
-    });
-
-    Template.updateSlideshow.events({
-        "click input": function() {
-            updateSlideshowControler();
-        }
-    });
-
-    Template.deleteSlideshow.events({
-        "click input": function() {
-            deleteSlideshowControler();
-        }
-    });
-
-    Template.loadSlideshow.events({
-        "click input": function() {
-            getSlideshowControler();
-        }
-    });
-
-    Template.createSlide.events({
-        'click input': function() {
-            var d = new Date;
-            var title = d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
-            createSlide({title: title, type: 'default'});
-        }
-    });
-
-    //subscribe to plane or jmpress or all (exclu)
-    Template.loadEditor.events({//a revoir
-        'click input': function() {
-
-            Session.set("clientMode", "editor");
-
-            $("#slideArea").jmpress("deinit");
-//            var title = prompt("load slideshow :", Slideshow.findOne({}).informations.title);
-//            subscriptionSlideshow.stop();
-//            getSlideshow({title: title});
-
-            //pour reconnecter les slides au server,
-            //il faut trouver un moyen pour ne pas perdre la connection, sinon
-            //l'udpate wysiwyg du texte ne fonctionnera pas
-            getSlideshow({title: Slideshow.findOne().informations.title});
-
-
-        }
-    });
-
-    Template.loadJmpress.events({//a revoir
-        'click input': function() {
-//            subscriptionSlide.stop();
-//            subscriptionSlide = Meteor.subscribe("jmpressSlides");
-//            Session.set("slideSubscription", "jmpressSlides");
-            Session.set("clientMode", "jmpress");
-//            var title = prompt("load slideshow :", Slideshow.findOne({}).informations.title);
-//            subscriptionSlideshow.stop();
-//            getSlideshow({title: title});
-
-            //magouille parce que le callback de subscribe n'est pas un callback de Template.render (lui meme étant un callback)
-            setTimeout(initJmpress, 200);
-
-        }
-    });
-
-
-
-    //callback of render to add draggable and fadeInt when first render
-    Template.slide.rendered = function() {
-
-        //une bonne partie de cela devrait disparaitre lorsque le draggable de jquery sera enlevé        
-        //BAD BAD BAD BAD BAD il faut trouver un moyen pour que ce soit meteor qui s'en charge !
-        var self = this;
-        var $slide = $(self.find(".slide"));
-        var $slide = $("#" + this.data._id);
-        var left = self.data.displayOptions.jmpress.positions.x;
-        var top = self.data.displayOptions.jmpress.positions.y;
-        console.log("render new pos ", left, top);
-        var ratio = 10;
-
-//        //pour toutes
-//        if (self.data.toFadeIn) { //pour ne fadeIn qu'une fois
-//            $("#" + self.data._id).fadeOut(0).fadeIn(1000);  //petite magouille
-//            self.data.toFadeIn = false;
-//        }
-        //title
-        $slide.children('.title').html(self.data.informations.title);
-
-        //pos CSS (mode draggable) et jmpress       
-        $slide.attr("data-x", parseInt(left) * ratio).attr("data-y", parseInt(top) * ratio);
-
-        var type = Session.get("clientMode");
-        if (type === "editor") {
-            //pour plane
-            console.log("render for editor");
-            $slide.css("left", left).css("top", top);
-            $slide.draggable();
-        }
-
-        if (type === "jmpress") {
-            //pour jmpress
-            console.log("render jmpress");
-            //pas top
-            $slide.css("left", 0).css("top", 0);
-
-            //lors de l'abonnement, on crée toutes les slides d'un coup puis jmpress passe par là.
-            //donc on ne reinit les slides qu'au rerender (je crois qu'il y a un astuce meteor pour m'eviter de faire ca)
-            if ($("#slideArea").jmpress('initialized')) {
-
-                //encore une magouille. Si #slideArea a plus d'un fils c'est que $slide en est un, il faut donc la deplacer dans le div container de camera jmpress
-                if ($("#slideArea >").length != 1) {
-                    $("#slideArea div:not(.slide)").append($slide);
-                }
-
-                console.log("init de la slide");
-                //deplacement de slide
-//            $("#slideArea >").append($slide);
-                $("#slideArea").jmpress('init', $slide);
-            }
-        }
-
-
-    };
-
-    //petite magouille in order to fadeInt when create only
-    Template.slide.created = function() {
-        this.data.toFadeIn = true;
-    };
-
-    Template.slide.destroyed = function() {
-        console.log("slide destroyed", this.data._id);
-        //si un detruit une slide de jmpress, il faut l'enlever du DOM
-        if (Session.get("clientMode", "jmpress")) { //je comprend pas pourquoi c'est fire à chaque fois, mais ca pose pas de probleme alors je verra plus tard
-            console.log("       slide jmpress removed");
-            $("#" + this.data._id).remove();
-        }
-    };
-
-    //update title
-    Template.slide.events({
-        'dblclick': function() {
-
-            updateSlideTitleControler(this);
-
-
-
-        }
-    });
-
-    //update pos on move
-    Template.slide.events({
-        'mousemove': function(event) {
-            if (event.which == 1) {
-                updateSlidePosMove(this, event);
-            }
-
-        }
-    });
-
-    //update pos slide at the end of a move
-    Template.slide.events({
-        'mouseup': function(event) {
-            updateSlidePos(this, event);
-        }
-    });
-
-    //try : catch delete to add fadeOut (doen't work on others clients)
-    Template.deleteSlide.events({
-        'click': function(event) {
-            event.stopPropagation();
-            var self = this;
-            $("#" + this._id).fadeOut(1000, function() {
-                console.log("delete slide");
-                //TODO
-                //passer par une fonction
-                Slides.remove(self._id);
-            });
-        }
-    });
-
-
-    //template method
-    Template.slide.getPresentationData = function(axis, technoSlideshow) { //pas encore utilisé à cause du draggable de jqueryreu
-        if (technoSlideshow === "jmpress") {
-            var ratio = 10;
-            switch (axis) {
-                case "x":
-                    var coord = parseInt(this.displayOptions.jmpress.positions.x) * ratio;
+                    setActive(activeSlide);
                     break;
-                case "y":
-                    var coord = parseInt(this.displayOptions.jmpress.positions.y) * ratio;
+                case 8: // space
+//                        console.log("space");
+                    setActive(activeSlide);
                     break;
-                case "z":
-                    var coord = 0;
+                case 32 : // space
+//                        console.log("space");
+                    setActive(activeSlide);
+                    break;
+                case 40: // down
+                    setActive(activeSlide);
                     break;
                 default:
-                    return "";
-
+                    return; // exit this handler for other keys
             }
-//            console.log(coord, parseInt(this.displayOptions.jmpress.positions.y));
-            return 'data-' + axis + '=' + coord + '';
         }
-    };
+    });
 
-    //template method
-    Template.slide.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
-        truc = this;
-        var ratio = 1;
+    console.log("init pres pour test");
+    Session.set("clientMode", "editor");
+//        getSlideshow({title: 'test1'});
+
+});
+/*
+ * listen to change on remote
+ * TODO : manage remoteMode
+ */
+Deps.autorun(function() {
+    var remote = Remote.findOne({}); //le client n'a qu'une remote
+    if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
+        var type = Session.get("clientMode");
+        if (type === "jmpress") {
+            console.log("follow slide !");
+            $("#slideArea").jmpress("goTo", "#" + remote.activeSlideId)
+        } else {
+            console.log("remote slide active state changed to ", remote.activeSlideId);
+            var $slide = $("#" + remote.activeSlideId);
+
+            $(".slide.active").removeClass("active");
+            $slide.addClass("active");
+        }
+    }
+});
+
+
+
+/******
+ * events sur les templates * 
+ ******/
+/***
+ * buttons
+ ***/
+Template.createSlideshow.events({
+    "click input": function() {
+        createSlideshowControler();
+    }
+});
+
+Template.updateSlideshow.events({
+    "click input": function() {
+        updateSlideshowControler();
+    }
+});
+
+Template.deleteSlideshow.events({
+    "click input": function() {
+        deleteSlideshowControler();
+    }
+});
+
+Template.loadSlideshow.events({
+    "click input": function() {
+        getSlideshowControler();
+    }
+});
+
+Template.createSlide.events({
+    'click input': function() {
+        var d = new Date;
+        var title = d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
+        createSlide({title: title, type: 'default'});
+    }
+});
+
+
+Template.loadEditor.events({
+    'click input': function() {
+        Session.set("clientMode", "editor");
+        $("#slideArea").jmpress("deinit");
+        getSlideshow({title: Slideshow.findOne().informations.title});
+    }
+});
+
+/*
+ * TODO : est que le setTimeout est toujours necessaire ?
+ */
+Template.loadJmpress.events({
+    'click input': function() {
+        Session.set("clientMode", "jmpress");
+        //magouille parce que le callback de subscribe n'est pas un callback de Template.render (lui meme étant un callback)
+        setTimeout(initJmpress, 200);
+
+    }
+});
+
+
+/***
+ * mouse action
+ ***/
+
+//update title
+Template.slide.events({
+    'dblclick': function() {
+        updateSlideTitleControler(this);
+    }
+});
+
+//update pos on move
+Template.slide.events({
+    'mousemove': function(event) {
+        if (event.which == 1) {
+            updateSlidePosMove(this, event);
+        }
+
+    }
+});
+
+//update pos slide at the end of a move
+Template.slide.events({
+    'mouseup': function(event) {
+        updateSlidePos(this, event);
+    }
+});
+
+
+
+/*******
+ * inject data into template
+ * render
+ ******/
+Template.slideArea.slides = function() {
+    if (typeof Slides.findOne() === 'undefined') {
+        console.log("slideArea empty");
+        return [];
+    }
+    return Slides.find({});
+};
+
+
+
+/*
+ * callback of render to add draggable and fadeInt when first render
+ * TODO : refactor all with the implement of elements
+ */
+Template.slide.rendered = function() {
+    //une bonne partie de cela devrait disparaitre lorsque le draggable de jquery sera enlevé  
+    var self = this;
+    var $slide = $(self.find(".slide"));
+    var $slide = $("#" + this.data._id);
+    var left = self.data.displayOptions.jmpress.positions.x;
+    var top = self.data.displayOptions.jmpress.positions.y;
+    console.log("render new pos ", left, top);
+    var ratio = 10;
+
+    //title
+    $slide.children('.title').html(self.data.informations.title);
+
+    //pos CSS (mode draggable) et jmpress       
+    $slide.attr("data-x", parseInt(left) * ratio).attr("data-y", parseInt(top) * ratio);
+
+    var type = Session.get("clientMode");
+    if (type === "editor") {
+        //pour plane
+        console.log("render for editor");
+        $slide.css("left", left).css("top", top);
+        $slide.draggable();
+    }
+
+    if (type === "jmpress") {
+        //pour jmpress
+        console.log("render jmpress");
+        //pas top
+        $slide.css("left", 0).css("top", 0);
+
+        //lors de l'abonnement, on crée toutes les slides d'un coup puis jmpress passe par là.
+        //donc on ne reinit les slides qu'au rerender (je crois qu'il y a un astuce meteor pour m'eviter de faire ca)
+        if ($("#slideArea").jmpress('initialized')) {
+
+            //encore une magouille. Si #slideArea a plus d'un fils c'est que $slide en est un, il faut donc la deplacer dans le div container de camera jmpress
+            if ($("#slideArea >").length != 1) {
+                $("#slideArea div:not(.slide)").append($slide);
+            }
+
+            console.log("init de la slide");
+            //deplacement de slide
+//            $("#slideArea >").append($slide);
+            $("#slideArea").jmpress('init', $slide);
+        }
+    }
+
+
+};
+
+
+Template.slide.destroyed = function() {
+    console.log("slide destroyed", this.data._id);
+    //si un detruit une slide de jmpress, il faut l'enlever du DOM
+    if (Session.get("clientMode", "jmpress")) { //je comprend pas pourquoi c'est fire à chaque fois, mais ca pose pas de probleme alors je verra plus tard
+        console.log("       slide jmpress removed");
+        $("#" + this.data._id).remove();
+    }
+};
+
+
+
+/******
+ * template method
+ ******/
+Template.slide.isActive = function() {
+    if (Session.get("clientMode") === "jmpress")
+        return "";
+    var remote = Remotes.findOne({
+        slideshowId: Slideshow.findOne({})._id //, activeSlideId: notnull
+    });
+    if (typeof remote[0] !== "undefined") { //pour eviter une erreur la premeire fois
+        if (this._id === remote.activeSlideId) {
+            return "active";
+        } else {
+            return "";
+        }
+    }
+};
+
+/*
+ * return position according to technoSlideshow
+ * @param {type} axis
+ * @param {type} technoSlideshow
+ * @returns {String}
+ * TODO : implements Deck.js 
+ */
+Template.slide.getPresentationData = function(axis, technoSlideshow) { //pas encore utilisé à cause du draggable de jqueryreu
+    if (technoSlideshow === "jmpress") {
+        var ratio = 10;
         switch (axis) {
             case "x":
                 var coord = parseInt(this.displayOptions.jmpress.positions.x) * ratio;
@@ -353,26 +290,22 @@ if (Meteor.isClient) {
                 return "";
 
         }
-        return coord;
-    };
+//            console.log(coord, parseInt(this.displayOptions.jmpress.positions.y));
+        return 'data-' + axis + '=' + coord + '';
+    }
+};
 
-}
+
+/*********
+ * client methods
+ ********/
+
+
 
 
 initJmpress = function() {
     console.log("init jmpress");
-    //preparer toutes les slides, ajout les attributs data-
-//    $('#slideArea .slide').each(function(index, slide) {
-//        var $slide = $(slide);
-//        $slide.attr("data-x", parseInt($slide.css("left")) * 10);
-//        $slide.attr("data-y", parseInt($slide.css("top")) * 10);
-//        $slide.attr("data-z", 0);
-////     $slide.removeAttr("style");
-//        $slide.children('.title').removeClass("title").addClass("H1Text");
-//    });
-
-
-    //lancer jmpress
+    //launch jmpress first time
     $('#slideArea').jmpress({
         viewPort: {
             height: 400,
@@ -381,9 +314,6 @@ initJmpress = function() {
         }
     });
 };
-
-
-
 
 createSlide = function(options) {
     console.log("create ", options.type);
@@ -394,7 +324,7 @@ createSlide = function(options) {
         informations: {
             title: options.title
         },
-        slideshowReference: [Slideshow.findOne({})._id], //le serveur doit verifier cela
+        slideshowReference: [Slideshow.findOne({})._id],
         displayOptions: {
             jmpress: {
                 positions: {
@@ -410,43 +340,13 @@ createSlide = function(options) {
             }
         }
     });
-
-
-
-
-
-//            {title: options.title, top: top, left: left, type: options.type});
-//    return Slideshow.update(
-//            {_id: Slideshow.findOne({})._id},
-//    {$push: {
-//            slides: {
-//                _id: Random.id(),
-//                informations: {
-//                    title: options.title
-//                },
-//                displayOptions: {
-//                    jmpress: {
-//                        positions: {
-//                            x: left,
-//                            y: top,
-//                            z: 0
-//                        },
-//                        rotates: {
-//                            x: 0,
-//                            y: 0,
-//                            z: 0
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    );
 };
 
-
+/*
+ * set lock is slide is free to edit
+ * TODO : refactor with the implements of elements
+ */
 updateSlideTitleControler = function(slide) {
-    //mise en place du lock si slide dispo
     var userId = Meteor.userId();
     var lock = SlidesLock.findOne({slideId: slide._id});
     if (typeof lock == 'undefined' || lock.userId == null) {
@@ -456,7 +356,7 @@ updateSlideTitleControler = function(slide) {
             SlidesLock.update(
                     SlidesLock.findOne({slideId: slide._id})._id,
                     {$set: {
-                            userId: userId, type: 'title', slideTitle: slide.informations.title //, slideId: this._id
+                            userId: userId, type: 'title', slideTitle: slide.informations.title
                         }});
         }
         console.log("update title, add lock to slide", slide._id);
@@ -473,27 +373,11 @@ updateSlideTitleModel = function(slide) {
     var title = prompt("new title", slide.informations.title);
 
     if (title != null) {
-        //cancel, pas d'update
         Slides.update(slide._id, {$set:
                     {"informations.title": title}
         });
     }
 
-//    if (title != null) {
-//        //obligé de passer par l'index afin d'éviter //Not permitted. Untrusted code may only update documents by ID. [403]
-//        var slideIndex = getIndexOfSlide(slide); //pas aussi simple, il faut extraire slide.id et le chercher dans les elements de .slides
-//
-//        var query = {};                 // create an empty object
-//        query['slides.' + slideIndex + '.informations.title'] = title;  // and then populate the variable key
-//
-//        Slideshow.update(
-//                {_id: Slideshow.findOne({})._id},
-//        {
-//            $set: query  //attention, c'est un $set donc ca écrase tout ce qui est maché 
-//        }
-//        );
-//
-//    }
     console.log("update title : remove lock of slide", slide._id);
 
     //supression du lock
@@ -504,8 +388,10 @@ updateSlideTitleModel = function(slide) {
             });
 };
 
+/*
+ * TODO : remettre au gout du jour le getCloserSlide
+ */
 updateSlidePos = function(slide, event) {
-
     var $slide = $("#" + slide._id);
     var top = parseInt($slide.css('top'));
     var left = parseInt($slide.css('left'));
@@ -515,16 +401,12 @@ updateSlidePos = function(slide, event) {
         z: 0
     };
 
-
     //petite verif que la slide a effectivement bougée
     if (slide.displayOptions.jmpress.positions.x == left && slide.displayOptions.jmpress.positions.y == top) {
         console.log("updateSlidePosMove : slide didn't really move");
         return;
     }
 
-
-
-    //pass bien du tout, ce devrai etre au server de faire cela !
     //petite verif qu'on se superpose pas avec une slide
 //    var closer = getCloserSlide(slide._id, {x: left + "px", y: top});
 //    console.log(closer.length);
@@ -538,68 +420,12 @@ updateSlidePos = function(slide, event) {
     return Slides.update(slide._id, {$set:
                 {"displayOptions.jmpress.positions": pos}
     });
-
-
-
-    //obligé de passer par l'index afin d'éviter //Not permitted. Untrusted code may only update documents by ID. [403]
-//    var slideIndex = getIndexOfSlide(slide); //pas aussi simple, il faut extraire slide.id et le chercher dans les elements de .slides
-//
-//    var query = {};                 // create an empty object
-//    query['slides.' + slideIndex + '.displayOptions.jmpress.positions'] = {
-//        x: left,
-//        y: top,
-//        z: 0
-//    };  // and then populate the variable key
-//
-//    return Slideshow.update(
-//            {_id: Slideshow.findOne({})._id},
-//    {
-//        $set: query
-//    }
-//    );
-
 };
 
-
-//getIndexOfSlide = function(slide) {
-//    var allSlides = Slideshow.findOne({}).slides;
-//    for (var i = 0; i < allSlides.length; i++) {
-//        if (allSlides[i]._id === slide._id)
-//            return i;
-//    }
-//    return -1;
-//};
-
+/*
+ * TODO : remettre au gout du jour la gestion de la distance pour ne pas envoyer tout le temps l'update
+ */
 updateSlidePosMove = function(slide, event) {
-    updateSlidePos(slide, event);
-//    return;
-//    var $slide = $("#" + slide._id);
-//    var top = parseInt($slide.css('top'));
-//    var left = parseInt($slide.css('left'));
-//
-//    //petite verif que la slide a effectivement bougée
-//    if (slide.displayOptions.jmpress.positions.x == left && slide.displayOptions.jmpress.positions.y == top) {
-//        console.log("updateSlidePosMove : slide didn't really move");
-////        return;
-//    }
-
-
-    //petite verif qu'on se superpose pas avec une slide
-//    var closer = getCloserSlide(slide._id, {x: newLeft + "px", y: newTop});
-//    console.log(closer.length);
-//    console.log(slide._id,  newTop, newLeft, closer);
-//    console.log(getCloserSlide(slide._id, {x: newTop, y: newLeft}));
-//    if (closer.length != 0) {
-//        console.log("updateSlidePosMove : trop proche d'une slide");
-    //  return;
-//    }
-
-//     return Slides.update(slide._id, {$set:
-//                {"displayOptions.jmpress.positions": pos}
-//    });
-
-
-
     //histoire de pas trop surcharger le server, on update pas tout le temps
 //    var slideDb = slide;//Slides.findOne({_id: slide._id});
 //    var oldTop = parseInt(slideDb.top);
@@ -615,23 +441,8 @@ updateSlidePosMove = function(slide, event) {
 //        console.log("skip update",distance);
 //        return;
 //    }
+    updateSlidePos(slide, event);
 
-    //obligé de passer par l'index afin d'éviter //Not permitted. Untrusted code may only update documents by ID. [403]
-//    var slideIndex = getIndexOfSlide(slide); //pas aussi simple, il faut extraire slide.id et le chercher dans les elements de .slides
-//
-//    var query = {};                 // create an empty object
-//    query['slides.' + slideIndex + '.displayOptions.jmpress.positions'] = {
-//        x: left,
-//        y: top,
-//        z: 0
-//    };  // and then populate the variable key
-//
-//    return Slideshow.update(
-//            {_id: Slideshow.findOne({})._id},
-//    {
-//        $set: query
-//    }
-//    );
 };
 
 
@@ -639,28 +450,8 @@ updateSlidePosMove = function(slide, event) {
 
 
 setActive = function(activeSlide) {
-    //suppression de l'ancienne active
-//    var remote = Remote.findOne({
-//        slideshowId: Slideshow.findOne({})._id //, activeSlideId: notnull
-//    });
-
-    //le client n'a qu'une seule remote
     var remote = Remote.findOne();
 
-//    if (typeof Remote.findOne({state: "active"}) != "undefined") {
-//    if( remote.activeSlideId !== null){
-    Remote.update(remote._id,
-            {$set:
-                        {activeSlideId: null}
-            });
-//    }
-
-    //ajout de la nouvelle active
-//    RemoteSlides.update(
-//            RemoteSlides.findOne({slideId: activeSlide})._id,
-//            {$set:
-//                        {state: "active"}
-//            });
     Remote.update(remote._id,
             {$set:
                         {activeSlideId: activeSlide}
@@ -669,40 +460,9 @@ setActive = function(activeSlide) {
 };
 
 
-//getCloserSlide = function(slideID, pos) {
-//    //connecter cela au ratio et au css
-//    var H = 70; //height
-//    var W = 90; //width
-//
-//    //pour retourner uniquement les slides proche de la slide dont la pos est passée en parametre
-//    return Slides.find({
-//        $where: function() {
-//            return this._id !== slideID && (Math.pow(W, 2) + Math.pow(H, 2) > Math.pow(parseInt(pos.x) - parseInt(this.left), 2) + Math.pow(parseInt(pos.y) - parseInt(this.top), 2));
-//        }
-//    }).fetch();
-//};
-
-
-//pour test
-/*
- $slide = $("#msZP8jhhaE97f7cKR");
- var pos = {x: $slide.css("left"), y: $slide.css("top")};
- getCloserSlide(pos);
- */
-
-//testCallClient = function(str) {
-//    console.log("call server");
-//    Meteor.call('testCallServer', str, function(error, result) {
-//        console.log("server answered with ", result);
-//    });
-//};
-
 createSlideshowControler = function(callbackReturn) {
-    //TODO
-    //popup maison
-    if (typeof callbackReturn !== "undefined") { //it is the callback
+    if (typeof callbackReturn !== "undefined") { //is it the callback ?
         if (callbackReturn !== 1) {//there was an error
-//            truc = callbackReturn;
             alert("an error occured when creating slideshow : " + callbackReturn.reason);
         } else {
             alert("slideshow successfully created");
@@ -722,7 +482,6 @@ createSlideshowModel = function(options, callback) {
     console.log("createSlideshow ", options);
     Meteor.call('createSlideshow', options, function(error, result) {
         if (typeof error !== "undefined") {
-//            truc = error;
             console.log("createSlideshow : create error ", error);
             callback(error);
         } else {
@@ -740,26 +499,19 @@ updateSlideshowControler = function() {
     presentationMode = prompt("Enter a new presentationMode for slideshow (default,hybrid) ", presentationMode);
     updateSlideshowModel({presentationMode: presentationMode});
 };
-/*
- * update things that ar note slide
- // */
+
+
 updateSlideshowModel = function(options) {
-//    if (typeof options.slide !== "undefined") {
-//        console.log("updateSlideshow : you cannot update slide with this function DOESNT EXIST ANYMORE");
-//        return;
-//    }
     if (typeof options.presentationMode === "undefined") {
         console.log("updateSlideshow : presentationMode undefined");
         return;
     }
 
-    //il n'y a qu'une presentation sur le client
     Slideshow.update(Slideshow.findOne({})._id,
             {$set: {
                     'presentationMode': options.presentationMode
                 }
             });
-
 };
 
 deleteSlideshowControler = function() {
@@ -767,13 +519,11 @@ deleteSlideshowControler = function() {
     var answ = confirm("Do you really want to delete all slideshow " + title + " ? It will affect all users, you should'nt do that...");
     if (answ) {
         deleteSlideshowModel();
-    } else {
-    }
+    } 
 };
 
 
 deleteSlideshowModel = function() {
-    //il n'y a qu'une presentation sur le client
     Meteor.call('removeSlideshow', Slideshow.findOne({})._id, Meteor.userId(), function(error, result) {
         if (typeof error !== "undefined") {
             console.log("removeSlideshow : remove error ", error);
@@ -785,42 +535,33 @@ deleteSlideshowModel = function() {
 
         }
     });
-//    try{
-
-//    } catch(err){
-//        console.log("deleteSlideshow : error catched ",err);
-//    }
 };
 
 
 getSlideshowList = function(callback) {
-    //il n'y a qu'une presentation sur le client
     Meteor.call('getSlideshowList', {}, Meteor.userId(), function(error, result) {
         if (typeof error !== "undefined") {
-           
             console.log("getSlideshowList : ", error);
             callback(error);
         } else {
             console.log("getSlideshowList : ", result);
-            callback(result);        
+            callback(result);
         }
     });
-//    tr
 };
 
 getSlideshowControler = function(callbackReturn) {
-
     if (typeof callbackReturn === "undefined") {
         getSlideshowList(getSlideshowControler);
         return;
     }
-   if( typeof callbackReturn !== "undefined" && typeof callbackReturn.errorType === "undefined") { //pas d'erreur
+    if (typeof callbackReturn !== "undefined" && typeof callbackReturn.errorType === "undefined") { //is it the callback && is there an error 
         var title = prompt("which slideshow to load ? " + callbackReturn.titlesArray);
-        getSlideshowModel({title:title});
-   } else {
-       console.log("getSlideshowControler : error : ",callbackReturn);
-   }
-   
+        getSlideshowModel({title: title});
+    } else {
+        console.log("getSlideshowControler : error : ", callbackReturn);
+    }
+
 };
 
 
@@ -834,7 +575,7 @@ getSlideshowModel = function(options) {
         if (typeof error !== "undefined") {
             console.log("getSlideshow : get error ", error);
         } else {
-            //arret des precedentes si existante
+            //arret des precedentes ubscriptions si existante
             if (subscriptionSlideshow !== null)
                 subscriptionSlideshow.stop();
             if (subscriptionSlides !== null)
@@ -846,24 +587,6 @@ getSlideshowModel = function(options) {
             subscriptionSlideshow = Meteor.subscribe(options.title);
             subscriptionSlides = Meteor.subscribe("slides" + options.title);
             subscriptionRemote = Meteor.subscribe("remote" + options.title);
-
-            if (Slideshow === null)
-                Slideshow = new Meteor.Collection("slideshow");
-            if (Remote === null)
-                Slides = new Meteor.Collection("slides");
-            if (Remote === null)
-                Remote = new Meteor.Collection("remoteSlides");
-
-//
-//                 Template.slideArea.slideshow = function() {
-////        if(typeof  Slideshow.findOne({}) !== "undefined")
-////            return Slideshow.findOne({}).slides;
-//        return Slideshow.find({}); //ca va pas du tout !!! dès que quelque chose dans slideshow, genre une slide, toutes les slides sont maj !!!
-//    };
-
-
-            //sub de lock
-            //sub de remote
 
             console.log("getSlideshow ", result, ": done with subscribes");
         }
