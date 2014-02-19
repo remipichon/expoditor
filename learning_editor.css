@@ -3,7 +3,7 @@
 
 .slide{
     width: 150px;
-    height: 30px;
+    height: 450px;
     color: blue;
     border : dashed black 2px;
     position: absolute;
@@ -13,9 +13,9 @@
     margin: 0;
 }
 
-.slide span{
-    position: absolute;
-    left: 80%;
+.slide.span{
+    /*position: absolute;*/
+    /*left: 80%;*/
     color: red;
     border : dashed black 2px;
 }
@@ -35,4 +35,11 @@
     width: 200px;
     height: 200px;
     
+}
+
+.element p {
+    display: inline-block;
+}
+.element{
+    border : dashed 1px blue;
 }

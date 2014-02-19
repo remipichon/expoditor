@@ -4,26 +4,12 @@
 
 <body>
     {{loginButtons}}
-    {{> hello}}
+
     <div id="slideArea">
         {{> slideArea}}
     </div>
 
 </body>
-
-<template name="hello">
-    <p>{{greeeting}}</p>
-    {{> createJmpressSlide}}
-    {{> createPlaneSlide}}
-    {{> loadJmpressSlide}}
-    {{> loadPlaneSlide}}
-    {{> loadAllSlide}}
-</template>
-<template name="createJmpressSlide"><input class="createSlide Button" type="button" value="createJmpressSlide"/></template>
-<template name="createPlaneSlide"><input class="createSlide Button" type="button" value="createPlaneSlide" /></template>
-<template name="loadJmpressSlide"><input class="loadSlide Button" type="button" value="loadJmpressSlide"/></template>
-<template name="loadPlaneSlide"><input class="loadSlide Button" type="button" value="loadPlaneSlide" /></template>
-<template name="loadAllSlide"><input class="loadSlide Button" type="button" value="loadAllSlide" /></template>
 
 
 
@@ -39,15 +25,45 @@
 
 <template name="slide">
 
-    {{!style en constant pour le draggable, render à la mano}}
-    {{#constant}}
-    <div id="{{_id}}" class="step slide" style="top:{{top}}px; left:{{left}}px" 
-         {{getJmpressData "x"}} {{getJmpressData "y"}} {{getJmpressData "z"}}>
-
-        <p class='title'> {{title}} </p>
+    {{!style en constant pour le draggable, render à la mano}} 
+    {{!#constant}}
+    <div id="{{_id}}" class="step slide" style="top:{{top}}px; left:{{left}}px">
         {{> deleteSlide }}
+        {{> addElement }}
+        <p class='title'> {{title}} </p>
+
+        {{#isolate}}
+        {{!#constant}}
+        {{#each elements}}
+            {{#labelBranch _id}}
+                {{#isolate}}
+                {{!#constant}}
+                {{> element}}
+                {{!/constant}}
+                {{/isolate}}
+            {{/labelBranch}}
+        {{/each}}
+        {{!/constant}}
+        {{/isolate}}
+
     </div>
-    {{/constant}}
+    {{!/constant}}
 
 </template>    
 <template name="deleteSlide"><span class="delete"> X </span></template>
+<template name="addElement"><span class="addElement"> add </span></template>
+
+
+
+<template name="element">
+    {{#constant}}
+    <span class="element">
+        <p id="{{_id}}" class="{{type}}">{{content}}</p>
+       {{>deleteElement}}
+    </span>
+    {{/constant}}
+</template>
+
+<template name="deleteElement">
+     <p class="deleteElement"> X </p>
+</template>
