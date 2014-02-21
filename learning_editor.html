@@ -39,7 +39,7 @@
 
     {{!#each slideshow}}
     {{#each slides}}
-    {{> slide}}
+         {{> slide}}
     {{/each}}
     {{!/each}}
 
@@ -49,15 +49,51 @@
 
 <template name="slide">
 
-    {{!style en constant pour le draggable, render à la mano}}
-    {{#constant}}
+    {{!slide en constant pour le draggable de jquery}}
+    {{!#constant}}
     <div id="{{_id}}" class="step slide" style="top:{{getEditorData "y"}}px; left:{{getEditorData "x"}}px" 
          {{getPresentationData "x" "jmpress"}} {{getPresentationData "y" "jmpress"}} {{getPresentationData "z" "jmpress"}}>
-
+         {{> deleteSlide }}
+         {{> addElement }}
          <p class='title'> {{informations.title}} </p>
-                                                {{> deleteSlide }}
-                                            </div>
-                                            {{/constant}}
+         
+     
+        {{#each elements}}
+            {{#constant}}
+            {{!#labelBranch _id}}
+                {{> element}}
+            {{!/labelBranch}}
+            {{/constant}}
+        {{/each}}
 
-    </template>    
-    <template name="deleteSlide"><span class="delete"> X </span></template>
+        
+      
+        
+    </div>
+    {{!/constant}}
+</template> 
+
+<template name="elementsArea">
+   {{#each elements}}
+        {{#constant}}
+        {{!#labelBranch _id}}
+            {{> element}}
+        {{!/labelBranch}}
+        {{/constant}}
+    {{/each}}
+</template>
+
+
+<template name="element">
+    <span class="element">
+        <p id="{{_id}}" class="{{type}}">{{content}}</p>
+       {{>deleteElement}}
+    </span>
+</template>
+
+
+<template name="deleteSlide"><span class="delete"> X </span></template>
+<template name="addElement"><span class="addElement"> add </span></template>
+<template name="deleteElement">
+     <p class="deleteElement"> X </p>
+</template>

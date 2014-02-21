@@ -3,7 +3,7 @@
 
 #slideArea >.slide{
     width: 90px;
-    height: 70px;
+    height: 150px;
     color: blue;
     border : dashed black 2px;
     position: absolute;
@@ -14,8 +14,8 @@
 }
 
 #slideArea >.slide span{
-    position: absolute;
-    left: 80%;
+    /*position: absolute;*/
+    /*left: 80%;*/
     color: red;
     border : dashed black 2px;
 }
@@ -40,4 +40,12 @@
 
 #slideArea >.active {
     border : dashed red 2px;
+}
+
+
+.element p {
+    display: inline-block;
+}
+.element{
+    border : dashed 1px blue;
 }

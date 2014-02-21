@@ -1,15 +1,24 @@
 
 /*
+après un move, il n'est plus possible de creer ou de supprimer des elements
+mais que fait le draggable ?
+*/
+
+
+
+/*
  * va disparaitre
  */
 Meteor.subscribe("slidesLock");
 
 subscriptionSlideshow = null;
 subscriptionSlides = null;
+subscriptionElements = null;
 subscriptionRemote = null;
 
 Slideshow = new Meteor.Collection("slideshow");
 Slides = new Meteor.Collection("slides");
+Elements = new Meteor.Collection("elements");
 SlidesLock = new Meteor.Collection("slidesLock");
 Remote = new Meteor.Collection("remoteSlides");
 
@@ -53,7 +62,7 @@ Meteor.startup(function() {
 
     console.log("init pres pour test");
     Session.set("clientMode", "editor");
-//        getSlideshow({title: 'test1'});
+    getSlideshowModel({title: 'testelement'});
 
 });
 /*
@@ -138,6 +147,15 @@ Template.loadJmpress.events({
     }
 });
 
+Template.addElement.events({
+    'click': function(event) {
+        event.stopPropagation();
+        var $element = $(event.target);
+        var slideId = $element.parent(".slide").attr("id");
+        createSlideElement({slideId: slideId});
+    }
+});
+
 
 /***
  * mouse action
@@ -167,6 +185,27 @@ Template.slide.events({
     }
 });
 
+/*
+ * TODO : recuperer l'id de la slide via autrement que par le DOM
+ */
+//update element
+Template.element.events({
+    'click': function(event) {
+        event.stopImmediatePropagation();
+        var $element = $(event.target);
+        updateSlideElement($element.parent().parent(".slide").attr("id"), this);
+    }
+});
+
+
+Template.deleteElement.events({
+    'click': function(event) {
+        event.stopImmediatePropagation();
+        var $element = $(event.target);
+        deleteSlideElement($element.parent().parent(".slide").attr("id"), this);
+    }
+});
+
 
 
 /*******
@@ -181,6 +220,10 @@ Template.slideArea.slides = function() {
     return Slides.find({});
 };
 
+Template.slide.elements = function(event) {
+    return Elements.find({slideReference: {$in: [this._id]}});
+};
+
 
 
 /*
@@ -188,6 +231,15 @@ Template.slideArea.slides = function() {
  * TODO : refactor all with the implement of elements
  */
 Template.slide.rendered = function() {
+    console.log("slide.rendered", this.data._id);
+    var self = this;
+    var $slide = $(self.find(".slide"));
+    var $slide = $("#" + this.data._id);
+    $slide.draggable();
+    return;
+
+
+
     //une bonne partie de cela devrait disparaitre lorsque le draggable de jquery sera enlevé  
     var self = this;
     var $slide = $(self.find(".slide"));
@@ -295,6 +347,27 @@ Template.slide.getPresentationData = function(axis, technoSlideshow) { //pas enc
     }
 };
 
+Template.slide.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
+    truc = this;
+    var ratio = 1;
+    switch (axis) {
+        case "x":
+            var coord = parseInt(this.displayOptions.jmpress.positions.x) * ratio;
+            break;
+        case "y":
+            var coord = parseInt(this.displayOptions.jmpress.positions.y) * ratio;
+            break;
+        case "z":
+            var coord = 0;
+            break;
+        default:
+            return "";
+
+    }
+    return coord;
+};
+
+
 
 /*********
  * client methods
@@ -316,7 +389,7 @@ initJmpress = function() {
 };
 
 createSlide = function(options) {
-    console.log("create ", options.type);
+    console.log("create slide", options.type);
     var top = 50;
     var left = 50;
     return  Slides.insert({
@@ -325,6 +398,7 @@ createSlide = function(options) {
             title: options.title
         },
         slideshowReference: [Slideshow.findOne({})._id],
+        elements: [],
         displayOptions: {
             jmpress: {
                 positions: {
@@ -339,6 +413,21 @@ createSlide = function(options) {
                 }
             }
         }
+    });
+};
+
+createSlideElement = function(options) {
+    console.log("create element");
+    var d = new Date;
+    var content = "ele:" + d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
+
+    return Elements.insert({
+        _id: Random.id(),
+        slideReference: [
+            options.slideId
+        ],
+        content: content,
+        type: "text"
     });
 };
 
@@ -445,6 +534,25 @@ updateSlidePosMove = function(slide, event) {
 
 };
 
+updateSlideElement = function(slideId, element) {
+    console.log("update element ", element._id, " of slide ", slideId);
+    var content = prompt("new title", element.content);
+
+    if (content != null) {
+        //cancel, pas d'update
+
+        Elements.update(element._id,
+                {$set:
+                            {content: content}
+                }
+        );
+    }
+};
+
+deleteSlideElement = function(slideId, element) {
+    console.log("delete element ", element._id, " of slide ", slideId);
+    Elements.remove(element._id);
+};
 
 
 
@@ -486,7 +594,7 @@ createSlideshowModel = function(options, callback) {
             callback(error);
         } else {
             console.log("createSlideshow ", result);
-            getSlideshow({title: options.title, presentationMode: "default"});
+            getSlideshowControler({title: options.title, presentationMode: "default"});
             callback(1);
         }
     });
@@ -519,7 +627,7 @@ deleteSlideshowControler = function() {
     var answ = confirm("Do you really want to delete all slideshow " + title + " ? It will affect all users, you should'nt do that...");
     if (answ) {
         deleteSlideshowModel();
-    } 
+    }
 };
 
 
@@ -580,12 +688,15 @@ getSlideshowModel = function(options) {
                 subscriptionSlideshow.stop();
             if (subscriptionSlides !== null)
                 subscriptionSlides.stop();
+            if (subscriptionElements !== null)
+                subscriptionElements.stop();
             if (subscriptionRemote !== null)
                 subscriptionRemote.stop();
 
             //nouvelles sub
             subscriptionSlideshow = Meteor.subscribe(options.title);
             subscriptionSlides = Meteor.subscribe("slides" + options.title);
+            subscriptionElements = Meteor.subscribe("elements" + options.title);
             subscriptionRemote = Meteor.subscribe("remote" + options.title);
 
             console.log("getSlideshow ", result, ": done with subscribes");
@@ -601,3 +712,13 @@ clearServerData = function(str) {
         console.log("clearServerData : server answered with ", result);
     });
 };
+
+/* Exception from Deps afterFlush function: Error: Can't create second landmark in same brancj*/
+/*https://github.com/meteor/meteor/issues/281#issuecomment-16191927*/
+/*https://github.com/meteor/meteor/issues/281#issuecomment-28704924*/
+Handlebars.registerHelper('labelBranch', function(label, options) {
+    var data = this;
+    return Spark.labelBranch(Spark.UNIQUE_LABEL, function() {
+        return options.fn(data);
+    });
+});

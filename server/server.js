@@ -13,6 +13,11 @@ presentationModeArray = ["default", "hybrid"];   //enum des types de pérsentati
 /*
  * see http://titanpad.com/expo
  */
+Elements = new Meteor.Collection("elements");
+
+/*
+ * see http://titanpad.com/expo
+ */
 Slides = new Meteor.Collection("slides");
 
 /*
@@ -42,7 +47,7 @@ Remotes = new Meteor.Collection("remoteSlides");
 /*
  * TODO : publish only lock for slides linked to slideshow
  */
-Meteor.publish('slidesLock',  function() {
+Meteor.publish('slidesLock', function() {
     return SlidesLock.find({}); //plus tard, ne pas envoyer l'id mais l'email, ou null si null
 });
 
@@ -174,6 +179,22 @@ Meteor.methods({
                 });
             });
 
+            //publish elements related to the slides
+            var slidesId = [];
+            var slides = Slides.find({
+                slideshowReference: {$in: [newCreatedSlideshow._id]}
+            }, {fields: {_id: 1}}).fetch();
+            for (var i in slides) {
+                slidesId.push(slides[i]._id);
+            }
+            var strElementsName = "elements" + options.title;
+            Meteor.publish(strElementsName, function() {
+                return Elements.find({
+                    slideReference: {$in: slidesId}//get all slides which are linked to the slideshow
+//                   , {slideshowReference: 0 } //TODO gerer le fait que le client ne recoive pas cette donnée
+                });
+            });
+
 
             //publish remote of slideshow
             var strRemoteName = "remote" + options.title;
@@ -210,6 +231,7 @@ Meteor.methods({
         console.log("dev : clear all db's data");
         Slideshow.remove({});
         Slides.remove({});
+        Elements.remove({});
         SlidesLock.remove({});
         Remotes.remove({});
     }
@@ -352,6 +374,23 @@ Slides.allow({
     }
 });
 
+Elements.allow({
+    /*
+     * TODO
+     * 
+     */
+    insert: function() {
+        return true;
+    },
+    update: function() {
+        return true;
+    },
+    remove: function() {
+        return true;
+    }
+
+});
+
 Remotes.allow({
     insert: function() {
         return false;
@@ -457,36 +496,36 @@ SlidesLock.allow({
  //            return false;
  
  //  ne pas superposer des slides
-  //je capte pas pourquoi le requete retourne toutes les slides en server, 
-        //alors que ca marche super en client
-        //impossible de superposer deux slides
-//            var closerSlides = getCloserSlide(slide._id, {x: slide.left, y:slide.top});
-//            console.log(closerSlides.length);
-
-//            console.log(slide._id, slide.left, slide.top);
-//            if( closerSlides.length != 0 ){
-//                console.log("Slides.allow.update : trop proche d'une slide");
-//                return false;
-//            }
-
-        //du coup le server recupere toutes les slides puis boucle pour determiner s'il doit traiter au non
-//            var allSlides = Slides.find({}).fetch();
-////            allSlides.forEach(function(slideBd) {
-//            for (var i in allSlides) {
-//                var slideBd = allSlides[i];
-//                if (isCloseTo(slide, slideBd)) {
-//                    console.log(slide._id, " close to ", slideBd._id);
-//////                    //on peut survoler une slide, mais pas droper dessus
-////                    //du coup on regarde si le lock sur la slide est encore là, sinon
-////                    //c'est que le client veut faire un drop
-////                    //je  ne sais pas si c'est top, si le client meure en cours de drag la slide pourrait
-//                    //etre posée sur une autre
-////
-//                    return false;
-//                }
-//                console.log("girafe");
-//            }
-//            });
+ //je capte pas pourquoi le requete retourne toutes les slides en server, 
+ //alors que ca marche super en client
+ //impossible de superposer deux slides
+ //            var closerSlides = getCloserSlide(slide._id, {x: slide.left, y:slide.top});
+ //            console.log(closerSlides.length);
+ 
+ //            console.log(slide._id, slide.left, slide.top);
+ //            if( closerSlides.length != 0 ){
+ //                console.log("Slides.allow.update : trop proche d'une slide");
+ //                return false;
+ //            }
+ 
+ //du coup le server recupere toutes les slides puis boucle pour determiner s'il doit traiter au non
+ //            var allSlides = Slides.find({}).fetch();
+ ////            allSlides.forEach(function(slideBd) {
+ //            for (var i in allSlides) {
+ //                var slideBd = allSlides[i];
+ //                if (isCloseTo(slide, slideBd)) {
+ //                    console.log(slide._id, " close to ", slideBd._id);
+ //////                    //on peut survoler une slide, mais pas droper dessus
+ ////                    //du coup on regarde si le lock sur la slide est encore là, sinon
+ ////                    //c'est que le client veut faire un drop
+ ////                    //je  ne sais pas si c'est top, si le client meure en cours de drag la slide pourrait
+ //                    //etre posée sur une autre
+ ////
+ //                    return false;
+ //                }
+ //                console.log("girafe");
+ //            }
+ //            });
  *****************************/
 
 

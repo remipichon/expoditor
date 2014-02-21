@@ -1,3 +1,4 @@
+en mode edition :
 
 slideshow
 {
@@ -8,7 +9,7 @@ slideshow
             "date": ""
     },
         "presentationMode": "default",
-        "slides": []
+        "slides": []   _id des slides
 }
 
 slides
@@ -20,7 +21,7 @@ slides
     "informations": {
                     "title": "title"
                 },
-    "elements": [],
+    "elements": [],     _id des elements
     "displayOptions": {
         "jmpress": {
             "positions": {
@@ -48,4 +49,15 @@ slides
         }
     }
 
+}
+
+
+elements
+{
+    "_id": "id",
+    "slideReference" : [
+        "slide's id"
+    ],
+    "content": "textTest",
+    "type": "text"
 }
