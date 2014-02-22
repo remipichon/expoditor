@@ -1,8 +1,4 @@
 
-/*
-après un move, il n'est plus possible de creer ou de supprimer des elements
-mais que fait le draggable ?
-*/
 
 
 
@@ -126,12 +122,16 @@ Template.createSlide.events({
     }
 });
 
-
+/*
+ * TODO 
+ * faire une fonction pour ne (re)charger que les slides
+ */
 Template.loadEditor.events({
     'click input': function() {
         Session.set("clientMode", "editor");
         $("#slideArea").jmpress("deinit");
-        getSlideshow({title: Slideshow.findOne().informations.title});
+//        $('#slideArea').empty();
+        getSlideshowModel({title: Slideshow.findOne().informations.title});
     }
 });
 
@@ -143,6 +143,15 @@ Template.loadJmpress.events({
         Session.set("clientMode", "jmpress");
         //magouille parce que le callback de subscribe n'est pas un callback de Template.render (lui meme étant un callback)
         setTimeout(initJmpress, 200);
+
+    }
+});
+
+Template.loadDeck.events({
+    'click input': function() {
+        Session.set("clientMode", "deck");
+        //magouille parce que le callback de subscribe n'est pas un callback de Template.render (lui meme étant un callback)
+        setTimeout(initDeck, 200);
 
     }
 });
@@ -213,14 +222,22 @@ Template.deleteElement.events({
  * render
  ******/
 Template.slideArea.slides = function() {
-    if (typeof Slides.findOne() === 'undefined') {
+    if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'editor') {
         console.log("slideArea empty");
         return [];
     }
     return Slides.find({});
 };
 
-Template.slide.elements = function(event) {
+Template.deckContainer.slides = function() {
+    if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'deck') {
+        console.log("deckContainer empty");
+        return [];
+    }
+    return Slides.find({});
+};
+
+Template.elementsArea.elements = function(event) {
     return Elements.find({slideReference: {$in: [this._id]}});
 };
 
@@ -235,39 +252,30 @@ Template.slide.rendered = function() {
     var self = this;
     var $slide = $(self.find(".slide"));
     var $slide = $("#" + this.data._id);
-    $slide.draggable();
-    return;
 
 
+    var posX = this.data.displayOptions.jmpress.positions.x;
+    var posY = this.data.displayOptions.jmpress.positions.y;
 
-    //une bonne partie de cela devrait disparaitre lorsque le draggable de jquery sera enlevé  
-    var self = this;
-    var $slide = $(self.find(".slide"));
-    var $slide = $("#" + this.data._id);
-    var left = self.data.displayOptions.jmpress.positions.x;
-    var top = self.data.displayOptions.jmpress.positions.y;
-    console.log("render new pos ", left, top);
+
     var ratio = 10;
 
-    //title
-    $slide.children('.title').html(self.data.informations.title);
 
     //pos CSS (mode draggable) et jmpress       
-    $slide.attr("data-x", parseInt(left) * ratio).attr("data-y", parseInt(top) * ratio);
 
     var type = Session.get("clientMode");
     if (type === "editor") {
-        //pour plane
         console.log("render for editor");
-        $slide.css("left", left).css("top", top);
         $slide.draggable();
     }
 
     if (type === "jmpress") {
-        //pour jmpress
         console.log("render jmpress");
         //pas top
         $slide.css("left", 0).css("top", 0);
+
+        $slide.attr("data-x", parseInt(posX) * ratio).attr("data-y", parseInt(posY) * ratio);
+
 
         //lors de l'abonnement, on crée toutes les slides d'un coup puis jmpress passe par là.
         //donc on ne reinit les slides qu'au rerender (je crois qu'il y a un astuce meteor pour m'eviter de faire ca)
@@ -373,7 +381,10 @@ Template.slide.getEditorData = function(axis) { //pas encore utilisé à cause d
  * client methods
  ********/
 
-
+initDeck = function(){
+    console.log("init deck");
+    $.deck('.slide');    
+};
 
 
 initJmpress = function() {
@@ -678,11 +689,17 @@ getSlideshowModel = function(options) {
         alert("you have to be connected as a user \nlogin : user1@yopmail.com \npswd : user1user1");
         return;
     }
+    
+    //clean de slideArea, au cas ou
+     $('#slideArea .slide').remove();
+    
     console.log("getSlideshow ", options);
     Meteor.call("getSlideshow", options, Meteor.userId(), function(error, result) {
         if (typeof error !== "undefined") {
             console.log("getSlideshow : get error ", error);
         } else {
+            
+             
             //arret des precedentes ubscriptions si existante
             if (subscriptionSlideshow !== null)
                 subscriptionSlideshow.stop();

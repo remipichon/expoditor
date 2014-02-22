@@ -1,5 +1,6 @@
 <head>
     <title>learning_editor</title>
+    
 </head>
 
 <body>
@@ -8,6 +9,12 @@
     <div id="slideArea">
         {{> slideArea}}
     </div>
+    
+    <div class="deck-container">
+        {{> deckContainer}}
+    </div>
+    
+    
 
 </body>
 
@@ -21,12 +28,14 @@
     <p>
         {{> createSlide}}
         {{> loadEditor}}
+        {{> loadDeck}}
         {{> loadJmpress}}
     </p>
 </template>
 <template name="createSlide"><input id="createSlide" class="button" type="button" value="createSlide"/></template>
 <template name="loadEditor"><input id="loadEditor" class="button" type="button" value="loadEditor" /></template>
 <template name="loadJmpress"><input id="loadJmpress" class="button" type="button" value="loadJmpress"/></template>
+<template name="loadDeck"><input id="loadDeck" class="button" type="button" value="loadDeck"/></template>
 
 <template name="createSlideshow"><input id="createSlideshow" class="button" type="button" value="createSlideshow"/></template>
 <template name="updateSlideshow"><input id="updateSlideshow" class="button" type="button" value="updateSlideshow"/></template>
@@ -36,41 +45,53 @@
 
 
 <template name="slideArea">
-
+    
+    
     {{!#each slideshow}}
     {{#each slides}}
          {{> slide}}
     {{/each}}
     {{!/each}}
 
-    {{! <div id="forbidenZone"></div> }}
+
+</template>
+
+<template name="deckContainer">
+    
+    
+    {{!#each slideshow}}
+    {{#each slides}}
+         {{> deckSlide}}
+    {{/each}}
+    {{!/each}}
+
 
 </template>
 
 <template name="slide">
 
-    {{!slide en constant pour le draggable de jquery}}
-    {{!#constant}}
     <div id="{{_id}}" class="step slide" style="top:{{getEditorData "y"}}px; left:{{getEditorData "x"}}px" 
          {{getPresentationData "x" "jmpress"}} {{getPresentationData "y" "jmpress"}} {{getPresentationData "z" "jmpress"}}>
          {{> deleteSlide }}
          {{> addElement }}
          <p class='title'> {{informations.title}} </p>
          
-     
-        {{#each elements}}
-            {{#constant}}
-            {{!#labelBranch _id}}
-                {{> element}}
-            {{!/labelBranch}}
-            {{/constant}}
-        {{/each}}
+      {{> elementsArea}}
+        
+    </div>  
+    
+</template> 
 
+<template name="deckSlide">
+
+    <section id="{{_id}}" class="slide">
         
-      
+         <h1> {{informations.title}} </h1>
+         
+      {{> elementsArea}}
         
-    </div>
-    {{!/constant}}
+    </section>  
+    
 </template> 
 
 <template name="elementsArea">

@@ -1,0 +1,77 @@
+
+.deck-container h1 {
+  font-size: 4.5em;
+}
+
+.deck-container h1, .vcenter {
+  font-weight: bold;
+  text-align: center;
+  padding-top: 1em;
+  max-height: 100%;
+}
+.csstransforms .deck-container h1, .csstransforms .vcenter {
+  padding: 0 48px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  -webkit-transform: translate(0, -50%);
+  -moz-transform: translate(0, -50%);
+  -ms-transform: translate(0, -50%);
+  -o-transform: translate(0, -50%);
+  transform: translate(0, -50%);
+}
+
+.vcenter .deck-container h1 {
+  position: relative;
+  top: auto;
+  padding: 0;
+  -webkit-transform: none;
+  -moz-transform: none;
+  -ms-transform: none;
+  -o-transform: none;
+  transform: none;
+}
+
+.deck-container h2 {
+  font-size: 2.25em;
+  font-weight: bold;
+  padding-top: .5em;
+  margin: 0 0 .66666em 0;
+  border-bottom: 3px solid #888;
+}
+
+
+.deck-container {
+  font-size: 16px;
+  line-height: 1.25;
+  color: #444;
+}
+
+.deck-container .slide {
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.deck-container h1, .deck-container h2, .deck-container h3, h4, h5, h6 {
+  font-family: "Hoefler Text", Constantia, Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+}
+
+.deck-container .deck-container h1 {
+  color: #08455f;
+}
+
+.deck-container h2 {
+  color: #0b7495;
+  border-bottom: 0;
+}
+.cssreflections .deck-container h2 {
+  line-height: 1;
+  -webkit-box-reflect: below -0.5555em -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.3, transparent), color-stop(0.7, rgba(255, 255, 255, 0.1)), to(transparent));
+  -moz-box-reflect: below -0.5555em -moz-linear-gradient(top, transparent 0%, transparent 30%, rgba(255, 255, 255, 0.3) 100%);
+}
+
+.deck-container h3 {
+  color: #000;
+}
