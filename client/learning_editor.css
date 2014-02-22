@@ -1,0 +1,55 @@
+/* CSS declarations go here */
+
+
+#editor-container >.slide{
+    width: 90px;
+    height: 150px;
+    color: blue;
+    border : dashed black 2px;
+    position: absolute;
+}
+
+#editor-container >.slide p{
+    margin: 0;
+}
+
+#editor-container >.slide span{
+    /*position: absolute;*/
+    /*left: 80%;*/
+    color: red;
+    border : dashed black 2px;
+}
+
+
+.dragged{
+    border: red;
+}
+
+#forbidenZone{
+    z-index: -1;
+    border: 3px black solid;
+    background:#e23e3e;
+    position: absolute;
+    top: 200px;
+    left: 200px;
+    width: 200px;
+    height: 200px;
+    
+}
+
+
+#editor-container >.active {
+    border : dashed red 2px;
+}
+
+
+.element p {
+    display: inline-block;
+}
+.element{
+    border : dashed 1px blue;
+}
+
+#buttons{
+    z-index: 2000;
+}

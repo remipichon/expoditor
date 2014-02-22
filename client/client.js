@@ -64,6 +64,7 @@ Meteor.startup(function() {
 /*
  * listen to change on remote
  * TODO : manage remoteMode
+ * TODO : deleguer la gestion de la class active à Handelbars via le helper isActive
  */
 Deps.autorun(function() {
     var remote = Remote.findOne({}); //le client n'a qu'une remote
@@ -71,7 +72,9 @@ Deps.autorun(function() {
         var type = Session.get("clientMode");
         if (type === "jmpress") {
             console.log("follow slide !");
-            $("#slideArea").jmpress("goTo", "#" + remote.activeSlideId)
+            $("#slideArea").jmpress("goTo", "#" + remote.activeSlideId);
+        } else if (type === "deck") {
+            $.deck("go", remote.activeSlideId);
         } else {
             console.log("remote slide active state changed to ", remote.activeSlideId);
             var $slide = $("#" + remote.activeSlideId);
@@ -129,9 +132,9 @@ Template.createSlide.events({
 Template.loadEditor.events({
     'click input': function() {
         Session.set("clientMode", "editor");
-        $("#slideArea").jmpress("deinit");
-//        $('#slideArea').empty();
-        getSlideshowModel({title: Slideshow.findOne().informations.title});
+        $("#jmpress-container").jmpress("deinit");
+        $('#jmpress-container').empty();
+//        getSlideshowModel({title: Slideshow.findOne().informations.title});
     }
 });
 
@@ -171,14 +174,14 @@ Template.addElement.events({
  ***/
 
 //update title
-Template.slide.events({
+Template.editorSlide.events({
     'dblclick': function() {
         updateSlideTitleControler(this);
     }
 });
 
 //update pos on move
-Template.slide.events({
+Template.editorSlide.events({
     'mousemove': function(event) {
         if (event.which == 1) {
             updateSlidePosMove(this, event);
@@ -188,7 +191,7 @@ Template.slide.events({
 });
 
 //update pos slide at the end of a move
-Template.slide.events({
+Template.editorSlide.events({
     'mouseup': function(event) {
         updateSlidePos(this, event);
     }
@@ -221,9 +224,17 @@ Template.deleteElement.events({
  * inject data into template
  * render
  ******/
-Template.slideArea.slides = function() {
+Template.editorContainer.slides = function() {
     if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'editor') {
-        console.log("slideArea empty");
+        console.log("editorContainer empty");
+        return [];
+    }
+    return Slides.find({});
+};
+
+Template.jmpressContainer.slides = function() {
+    if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'jmpress') {
+        console.log("jmpressContainer empty");
         return [];
     }
     return Slides.find({});
@@ -244,11 +255,22 @@ Template.elementsArea.elements = function(event) {
 
 
 /*
- * callback of render to add draggable and fadeInt when first render
- * TODO : refactor all with the implement of elements
+ * callback of render to add draggable when edit
  */
-Template.slide.rendered = function() {
-    console.log("slide.rendered", this.data._id);
+Template.editorSlide.rendered = function() {
+    console.log("slide.rendered for editor", this.data._id);
+    var self = this;
+    var $slide = $(self.find(".slide"));
+    var $slide = $("#" + this.data._id);
+
+    $slide.draggable();
+};
+
+/*
+ * callback of render to move jmpress slide
+ */
+Template.jmpressSlide.rendered = function() {
+    console.log("slide.rendered for jmpress", this.data._id);
     var self = this;
     var $slide = $(self.find(".slide"));
     var $slide = $("#" + this.data._id);
@@ -256,48 +278,32 @@ Template.slide.rendered = function() {
 
     var posX = this.data.displayOptions.jmpress.positions.x;
     var posY = this.data.displayOptions.jmpress.positions.y;
-
-
     var ratio = 10;
 
-
-    //pos CSS (mode draggable) et jmpress       
-
-    var type = Session.get("clientMode");
-    if (type === "editor") {
-        console.log("render for editor");
-        $slide.draggable();
-    }
-
-    if (type === "jmpress") {
-        console.log("render jmpress");
-        //pas top
-        $slide.css("left", 0).css("top", 0);
-
-        $slide.attr("data-x", parseInt(posX) * ratio).attr("data-y", parseInt(posY) * ratio);
+    $slide.attr("data-x", parseInt(posX) * ratio).attr("data-y", parseInt(posY) * ratio);
 
 
-        //lors de l'abonnement, on crée toutes les slides d'un coup puis jmpress passe par là.
-        //donc on ne reinit les slides qu'au rerender (je crois qu'il y a un astuce meteor pour m'eviter de faire ca)
-        if ($("#slideArea").jmpress('initialized')) {
+    //lors de l'abonnement, on crée toutes les slides d'un coup puis jmpress passe par là.
+    //donc on ne reinit les slides qu'au rerender (je crois qu'il y a un astuce meteor pour m'eviter de faire ca)
+    if ($("#slideArea").jmpress('initialized')) {
 
-            //encore une magouille. Si #slideArea a plus d'un fils c'est que $slide en est un, il faut donc la deplacer dans le div container de camera jmpress
-            if ($("#slideArea >").length != 1) {
-                $("#slideArea div:not(.slide)").append($slide);
-            }
-
-            console.log("init de la slide");
-            //deplacement de slide
-//            $("#slideArea >").append($slide);
-            $("#slideArea").jmpress('init', $slide);
+        //encore une magouille. Si #slideArea a plus d'un fils c'est que $slide en est un, il faut donc la deplacer dans le div container de camera jmpress
+        if ($("#slideArea >").length != 1) {
+            $("#slideArea div:not(.slide)").append($slide);
         }
+
+        console.log("init de la slide");
+        //deplacement de slide
+//            $("#slideArea >").append($slide);
+        $("#slideArea").jmpress('init', $slide);
     }
+
 
 
 };
 
 
-Template.slide.destroyed = function() {
+Template.editorSlide.destroyed = function() {
     console.log("slide destroyed", this.data._id);
     //si un detruit une slide de jmpress, il faut l'enlever du DOM
     if (Session.get("clientMode", "jmpress")) { //je comprend pas pourquoi c'est fire à chaque fois, mais ca pose pas de probleme alors je verra plus tard
@@ -311,13 +317,12 @@ Template.slide.destroyed = function() {
 /******
  * template method
  ******/
-Template.slide.isActive = function() {
-    if (Session.get("clientMode") === "jmpress")
-        return "";
-    var remote = Remotes.findOne({
+Template.editorSlide.isActive = function() {
+    
+    var remote = Remote.findOne({
         slideshowId: Slideshow.findOne({})._id //, activeSlideId: notnull
     });
-    if (typeof remote[0] !== "undefined") { //pour eviter une erreur la premeire fois
+    if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
         if (this._id === remote.activeSlideId) {
             return "active";
         } else {
@@ -333,8 +338,8 @@ Template.slide.isActive = function() {
  * @returns {String}
  * TODO : implements Deck.js 
  */
-Template.slide.getPresentationData = function(axis, technoSlideshow) { //pas encore utilisé à cause du draggable de jqueryreu
-    if (technoSlideshow === "jmpress") {
+Template.jmpressSlide.getJmpressData = function(axis) { 
+    
         var ratio = 10;
         switch (axis) {
             case "x":
@@ -352,11 +357,10 @@ Template.slide.getPresentationData = function(axis, technoSlideshow) { //pas enc
         }
 //            console.log(coord, parseInt(this.displayOptions.jmpress.positions.y));
         return 'data-' + axis + '=' + coord + '';
-    }
+    
 };
 
-Template.slide.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
-    truc = this;
+Template.editorSlide.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
     var ratio = 1;
     switch (axis) {
         case "x":
@@ -381,16 +385,16 @@ Template.slide.getEditorData = function(axis) { //pas encore utilisé à cause d
  * client methods
  ********/
 
-initDeck = function(){
+initDeck = function() {
     console.log("init deck");
-    $.deck('.slide');    
+    $.deck('.slide');
 };
 
 
 initJmpress = function() {
     console.log("init jmpress");
     //launch jmpress first time
-    $('#slideArea').jmpress({
+    $('#jmpress-container').jmpress({
         viewPort: {
             height: 400,
             width: 3200,
@@ -689,17 +693,17 @@ getSlideshowModel = function(options) {
         alert("you have to be connected as a user \nlogin : user1@yopmail.com \npswd : user1user1");
         return;
     }
-    
+
     //clean de slideArea, au cas ou
-     $('#slideArea .slide').remove();
-    
+    $('#slideArea .slide').remove();
+
     console.log("getSlideshow ", options);
     Meteor.call("getSlideshow", options, Meteor.userId(), function(error, result) {
         if (typeof error !== "undefined") {
             console.log("getSlideshow : get error ", error);
         } else {
-            
-             
+
+
             //arret des precedentes ubscriptions si existante
             if (subscriptionSlideshow !== null)
                 subscriptionSlideshow.stop();

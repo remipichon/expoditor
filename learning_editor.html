@@ -6,8 +6,12 @@
 <body>
     {{loginButtons}}
     {{> buttons}}
-    <div id="slideArea">
-        {{> slideArea}}
+    <div id="editor-container">
+        {{> editorContainer}}
+    </div>
+    
+    <div id="jmpress-container">
+        {{> jmpressContainer}}
     </div>
     
     <div class="deck-container">
@@ -19,18 +23,20 @@
 </body>
 
 <template name="buttons">
-    <p>
-        {{> createSlideshow}}
-        {{> updateSlideshow}}
-        {{> deleteSlideshow}}
-        {{> loadSlideshow}}
-    </p>    
-    <p>
-        {{> createSlide}}
-        {{> loadEditor}}
-        {{> loadDeck}}
-        {{> loadJmpress}}
-    </p>
+    <div id="buttons">
+        <p>
+            {{> createSlideshow}}
+            {{> updateSlideshow}}
+            {{> deleteSlideshow}}
+            {{> loadSlideshow}}
+        </p>    
+        <p>
+            {{> createSlide}}
+            {{> loadEditor}}
+            {{> loadDeck}}
+            {{> loadJmpress}}
+        </p>
+    </div>
 </template>
 <template name="createSlide"><input id="createSlide" class="button" type="button" value="createSlide"/></template>
 <template name="loadEditor"><input id="loadEditor" class="button" type="button" value="loadEditor" /></template>
@@ -44,34 +50,33 @@
 
 
 
-<template name="slideArea">
-    
-    
+<template name="editorContainer">  
     {{!#each slideshow}}
     {{#each slides}}
-         {{> slide}}
+         {{> editorSlide}}
     {{/each}}
     {{!/each}}
-
-
 </template>
 
-<template name="deckContainer">
-    
-    
+<template name="jmpressContainer">  
+    {{!#each slideshow}}
+    {{#each slides}}
+         {{> jmpressSlide}}
+    {{/each}}
+    {{!/each}}
+</template>
+
+<template name="deckContainer">   
     {{!#each slideshow}}
     {{#each slides}}
          {{> deckSlide}}
     {{/each}}
     {{!/each}}
-
-
 </template>
 
-<template name="slide">
+<template name="editorSlide">
 
-    <div id="{{_id}}" class="step slide" style="top:{{getEditorData "y"}}px; left:{{getEditorData "x"}}px" 
-         {{getPresentationData "x" "jmpress"}} {{getPresentationData "y" "jmpress"}} {{getPresentationData "z" "jmpress"}}>
+    <div id="{{_id}}" class="slide {{isActive}}" style="top:{{getEditorData "y"}}px; left:{{getEditorData "x"}}px"> 
          {{> deleteSlide }}
          {{> addElement }}
          <p class='title'> {{informations.title}} </p>
@@ -82,14 +87,24 @@
     
 </template> 
 
-<template name="deckSlide">
+<template name="jmpressSlide">
 
-    <section id="{{_id}}" class="slide">
+    <div id="{{_id}}" class="step slide" 
+         {{getJmpressData "x"}} {{getPresentationData "y"}} {{getPresentationData "z"}}>
         
-         <h1> {{informations.title}} </h1>
+         <p class='title'> {{informations.title}} </p>
          
       {{> elementsArea}}
         
+    </div>  
+    
+</template> 
+
+<template name="deckSlide">
+
+    <section id="{{_id}}" class="slide">        
+         <h1> {{informations.title}} </h1>         
+         {{> elementsArea}}
     </section>  
     
 </template> 
