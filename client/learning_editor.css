@@ -53,3 +53,15 @@
 #buttons{
     z-index: 2000;
 }
+
+
+#modalSelectSlideshow{
+    width : 50%;
+    height: 70%;
+    position : absolute;
+    top : 10%;
+    left: 20%;
+    background-color: #ff9999;
+    
+   
+}

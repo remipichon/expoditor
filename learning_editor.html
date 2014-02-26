@@ -19,6 +19,9 @@
     </div>
     
     
+    {{> modalTemplate}}
+    
+    
 
 </body>
 
@@ -80,15 +83,14 @@
          {{> deleteSlide }}
          {{> addElement }}
          <p class='title'> {{informations.title}} </p>
-         
+    
       {{> elementsArea}}
-        
     </div>  
     
 </template> 
 
 <template name="jmpressSlide">
-
+    {{!#constant}}
     <div id="{{_id}}" class="step slide" 
          {{getJmpressData "x"}} {{getPresentationData "y"}} {{getPresentationData "z"}}>
         
@@ -96,7 +98,8 @@
          
       {{> elementsArea}}
         
-    </div>  
+    </div>
+    {{!/constant}}
     
 </template> 
 
@@ -110,26 +113,100 @@
 </template> 
 
 <template name="elementsArea">
-   {{#each elements}}
-        {{#constant}}
-        {{!#labelBranch _id}}
-            {{> element}}
-        {{!/labelBranch}}
-        {{/constant}}
-    {{/each}}
+
+    <div class="elementsArea">
+        
+        {{#each elements}}  
+             {{!#labelBranch _id}}
+                 {{> element}}
+             {{!/labelBranch}}  
+         {{/each}}
+         
+        {{#isolate}}
+        {{#each elementsNotUpdated}} 
+            {{#constant}}
+             {{!#labelBranch _id}}
+                 *_{{> elementConstant}}_*
+             {{!/labelBranch}}  
+             {{/constant}}
+         {{/each}}
+         {{/isolate}}
+         
+    </div>
+   
 </template>
 
 
 <template name="element">
-    <span class="element">
-        <p id="{{_id}}" class="{{type}}">{{content}}</p>
+    <div class="element">
+        <p id="{{_id}}" contenteditable="true" class="{{type}}">
+            {{!#constant}}
+                {{content}}
+            {{!/constant}}
+        </p>
        {{>deleteElement}}
-    </span>
+    </div>
+</template>
+
+<template name="elementConstant">
+    <div class="element">
+        <p id="{{_id}}" contenteditable="true" class="{{type}}">
+            {{#constant}}
+                {{content}}
+            {{/constant}}
+        </p>
+       
+    </div>
+    {{>deleteElement}}
+</template>
+
+<template name="elementTextArea">
+    <div class="element">
+        <textarea row="30" cols="30" id="{{_id}}" class="{{type}}">
+            {{!#constant}}
+                {{content}}
+            {{!/constant}}
+        </textarea>
+       {{>deleteElement}}
+    </div>
 </template>
 
 
-<template name="deleteSlide"><span class="delete"> X </span></template>
-<template name="addElement"><span class="addElement"> add </span></template>
-<template name="deleteElement">
-     <p class="deleteElement"> X </p>
+<template name="deleteSlide"><input type="button" class="delete" value="X"></template>
+<template name="addElement"><input type="button" class="addElement" value="+"></template>
+<template name="deleteElement"><input type="button" class="delete" value="X"></template>
+
+
+
+<template name="modalTemplate">
+    {{#if isVisible}}
+        <div id="modalSelectSlideshow">
+
+            <div>
+                <p> Choose a slideshow to load </p>
+                
+                {{data}}
+                {{>listSlideshow}}
+                
+                
+            </div>
+
+           {{>cancel}}
+           {{>validate}}
+        </div>
+   {{/if}}
+</template>
+
+<template name="cancel">
+   <input class="cancel button" type="button" value="cancel"/> 
+</template>
+
+<template name="validate">
+   <input class="validate button" type="button" value="validate"/> 
+</template>
+
+<template name="listSlideshow">
+    {{#each slideshowList}}
+            <input type="button" value="{{this}}"/>
+    {{/each}}
 </template>

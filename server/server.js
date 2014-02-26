@@ -3,7 +3,7 @@
  * value : [userIds...]
  * TODO : change key to slideshow._id
  */
-slideshowPublished = {};
+slideshowPublished = {};  
 
 /*
  * TODO : manage group, play_mode, edit_mode, remote_mode
@@ -397,7 +397,7 @@ Remotes.allow({
     },
     /*
      * TODO : prendre en compte l'architecture (avec ca on peut avoir qu'une seule remote à la fois)
-     */
+     */ 
     update: function(userId, newActiveSlide, fields, modifier) {
         return true;
         //si le client veut ajouter une slide active, le server refuse s'il y deja une slide active

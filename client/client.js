@@ -1,6 +1,14 @@
 
 
+/*
+ * TODO : rendre generique le selecteur CSS pour les container
+ */
 
+/*
+ * utiliser les event de jquery à la place du maps event de Meteor :
+ * il est foireux et a un comportement que je capte pas
+ * 
+ */
 
 /*
  * va disparaitre
@@ -15,7 +23,7 @@ subscriptionRemote = null;
 Slideshow = new Meteor.Collection("slideshow");
 Slides = new Meteor.Collection("slides");
 Elements = new Meteor.Collection("elements");
-SlidesLock = new Meteor.Collection("slidesLock");
+Lock = new Meteor.Collection("slidesLock");
 Remote = new Meteor.Collection("remoteSlides");
 
 
@@ -27,7 +35,7 @@ Meteor.startup(function() {
     //keypress ne fire pas les arrow sont webkit et IE
     $(document).on("keypress", function(event) {
         if (Session.get("clientMode") === "jmpress") {
-            var activeSlide = $("#slideArea .active").attr("id");
+            var activeSlide = $("#jmpress-container .active").attr("id");
             switch (event.keyCode) {
                 case 37: // left
                     setActive(activeSlide);
@@ -72,15 +80,11 @@ Deps.autorun(function() {
         var type = Session.get("clientMode");
         if (type === "jmpress") {
             console.log("follow slide !");
-            $("#slideArea").jmpress("goTo", "#" + remote.activeSlideId);
+            $("#jmpress-container").jmpress("goTo", "#" + remote.activeSlideId);
         } else if (type === "deck") {
             $.deck("go", remote.activeSlideId);
         } else {
             console.log("remote slide active state changed to ", remote.activeSlideId);
-            var $slide = $("#" + remote.activeSlideId);
-
-            $(".slide.active").removeClass("active");
-            $slide.addClass("active");
         }
     }
 });
@@ -131,10 +135,12 @@ Template.createSlide.events({
  */
 Template.loadEditor.events({
     'click input': function() {
-        Session.set("clientMode", "editor");
+
         $("#jmpress-container").jmpress("deinit");
-        $('#jmpress-container').empty();
-//        getSlideshowModel({title: Slideshow.findOne().informations.title});
+        setTimeout(function() {
+            $('#jmpress-container').empty();
+            Session.set("clientMode", "editor");
+        }, 200); //pour attendre que jmpress est fini son boulot
     }
 });
 
@@ -176,13 +182,14 @@ Template.addElement.events({
 //update title
 Template.editorSlide.events({
     'dblclick': function() {
-        updateSlideTitleControler(this);
+        updateWithLockControler(this, updateSlideTitleModel);
     }
 });
 
 //update pos on move
 Template.editorSlide.events({
     'mousemove': function(event) {
+        return;
         if (event.which == 1) {
             updateSlidePosMove(this, event);
         }
@@ -193,7 +200,15 @@ Template.editorSlide.events({
 //update pos slide at the end of a move
 Template.editorSlide.events({
     'mouseup': function(event) {
+        console.log("updateSlidePos event call");
+//        return;
         updateSlidePos(this, event);
+    }
+});
+
+Template.deleteSlide.events({
+    "click": function() {
+        deleteSlide(this._id);
     }
 });
 
@@ -202,17 +217,82 @@ Template.editorSlide.events({
  */
 //update element
 Template.element.events({
-    'click': function(event) {
-        event.stopImmediatePropagation();
+    'dblclick': function(event) {
+        console.log("element : edit via prompt");
+//        event.stopImmediatePropagation();
         var $element = $(event.target);
-        updateSlideElement($element.parent().parent(".slide").attr("id"), this);
+        updateSlideElement(this);
+
+//        //TODO
+//        //l'injection des données dans élements contient
+//        //tout sauf les elements sur lequel le user a un lock
+//        $element.on("keyup.editElement", function() {
+//            console.log("keyup element");
+//           
+//            Elements.update($(this).attr("id"),
+//                    {$set:
+//                                {content: $(this).html()}
+//                    }
+//            );
+//
+//        });
+//        $element.on("mousemove", function() {
+//            $element.off("editElement");
+//        });
+    },
+    'mousedown': function(event) {
+        event.stopPropagation();
+        console.log("element mousedown");
+        updateWithLockControler(this);
+    },
+    'keyup': function(event) {
+        if (!userHasAccessToComponent(this)) {
+            console.log("element : keyup : user cannot edit texte");
+            return;
+        }
+//        event.stopImmediatePropagation();
+        console.log("element : keyup edit texte : ", $(event.target).html());
+//        event.stopImmediatePropagation();
+        var $element = $(event.target);
+
+        Elements.update($(event.target).attr("id"),
+                {$set:
+                            {content: $(event.target).html()}
+                }
+        );
+    },
+    'mouseleave': function(event) {
+        console.log("element : mouseleave : DESACTIVER WARNING");
+//        event.stopImmediatePropagation();
+        removeLockControler(this);
     }
 });
 
+//$('.element p').on('keypress', function(event) {
+////        if (!userHasAccessToComponent(this)) {
+////            console.log("element : keyup : user cannot edit texte");
+////            return;
+////        }
+//        event.stopImmediatePropagation();
+//        console.log("element : keyup edit texte : ", $(event.target).html());
+//        event.stopImmediatePropagation();
+//        var $element = $(event.target);
+//
+//        Elements.update($(event.target).attr("id"),
+//                {$set:
+//                            {content: $(event.target).html()}
+//                }
+//        );
+//    });
+
 
 Template.deleteElement.events({
+//    'mouseenter': function(event){
+//        console.log("mouseenter deleteelement");
+//    },
     'click': function(event) {
-        event.stopImmediatePropagation();
+        console.log("deleteElement ",this._id);
+//        event.stopImmediatePropagation();
         var $element = $(event.target);
         deleteSlideElement($element.parent().parent(".slide").attr("id"), this);
     }
@@ -229,6 +309,7 @@ Template.editorContainer.slides = function() {
         console.log("editorContainer empty");
         return [];
     }
+    console.log("editorContainer inject data");
     return Slides.find({});
 };
 
@@ -237,6 +318,7 @@ Template.jmpressContainer.slides = function() {
         console.log("jmpressContainer empty");
         return [];
     }
+    console.log("jmpressContainer inject data");
     return Slides.find({});
 };
 
@@ -245,11 +327,103 @@ Template.deckContainer.slides = function() {
         console.log("deckContainer empty");
         return [];
     }
+    console.log("deckContainer inject data");
     return Slides.find({});
 };
 
-Template.elementsArea.elements = function(event) {
-    return Elements.find({slideReference: {$in: [this._id]}});
+
+
+/*
+ * 
+ * tenttative pour preserver l'element texte en cours d'édition
+ *
+ * https://groups.google.com/forum/#!msg/meteor-talk/Qg-zfoTVwrg/bRTc1Tv7r1wJ
+ *
+ */
+
+Template.element.preserve({
+   'p': function(node){
+       return node.id;
+   } 
+});
+
+/*
+ * les elements en cours d'uptate chez un client sont en constant chez ce meme client
+ *
+ **/
+ //////NOT USED
+Template.elementsArea.elementsNotUpdated = function() {
+   return [];
+        var forbiddenElement = Lock.findOne(
+            {userId: {
+//                    $not: 
+//                            Meteor.userId()
+                            
+//                          {
+                        $in: [
+                            Meteor.userId()
+                        ]
+//                    }
+
+                }
+            });
+            
+            
+      if (typeof forbiddenElement !== "undefined") {
+//        console.log("elementsArea.elements : there is an element locked", forbiddenElement.componentId, this._id);
+        return Elements.find({$and: [{_id: {$in: [forbiddenElement.componentId]}}, {slideReference: {$in: [this._id]}}]}).fetch();
+    } else {
+//        console.log("elementsArea.elements : no element locked")
+        return [];//Elements.find({slideReference: {$in: [this._id]}});
+    }    
+};
+
+
+Template.elementsArea.elements = function() {
+//    var forbiddenElement = Lock.findOne({userId: Meteor.userId()}); //en admettant que le user n'ait qu'un seul lock à la fois
+//
+//get element lockedByuser in order to l'afficher en mode constant
+    var forbiddenElement = Lock.findOne(
+            {userId: {
+//                    $not: 
+//                            Meteor.userId()
+                            
+//                          {
+                        $in: [
+                            Meteor.userId()
+                        ]
+//                    }
+
+                }
+            });
+            
+            
+//    //get elementLocked si ce n'est pas le user qui l'a lock
+//    var forbiddenElement = Lock.findOne(
+//            {userId: {
+////                    $not: 
+////                            Meteor.userId()
+//                            
+////                          {
+//                        $nin: [
+//                            null, Meteor.userId()
+//                        ]
+////                    }
+//
+//                }
+//            });
+
+
+
+//             {$ne: {userId: {$or: [null]} }}); //en admettant que le user n'ait qu'un seul lock à la fois
+
+    if (false){//typeof forbiddenElement !== "undefined") {
+        console.log("elementsArea.elements : there is an element locked", forbiddenElement.componentId, this._id);
+        return Elements.find({$and: [{_id: {$nin: [forbiddenElement.componentId]}}, {slideReference: {$in: [this._id]}}]}).fetch();
+    } else {
+        console.log("elementsArea.elements : no element locked")
+        return Elements.find({slideReference: {$in: [this._id]}});
+    }
 };
 
 
@@ -285,17 +459,17 @@ Template.jmpressSlide.rendered = function() {
 
     //lors de l'abonnement, on crée toutes les slides d'un coup puis jmpress passe par là.
     //donc on ne reinit les slides qu'au rerender (je crois qu'il y a un astuce meteor pour m'eviter de faire ca)
-    if ($("#slideArea").jmpress('initialized')) {
+    if ($("#jmpress-container").jmpress('initialized')) {
 
         //encore une magouille. Si #slideArea a plus d'un fils c'est que $slide en est un, il faut donc la deplacer dans le div container de camera jmpress
-        if ($("#slideArea >").length != 1) {
-            $("#slideArea div:not(.slide)").append($slide);
+        if ($("#jmpress-container >").length != 1) {
+            $("#jmpress-container div:not(.slide)").append($slide);
         }
 
         console.log("init de la slide");
         //deplacement de slide
-//            $("#slideArea >").append($slide);
-        $("#slideArea").jmpress('init', $slide);
+//            $("#jmpress-container >").append($slide);
+        $("#jmpress-container").jmpress('init', $slide);
     }
 
 
@@ -303,13 +477,10 @@ Template.jmpressSlide.rendered = function() {
 };
 
 
-Template.editorSlide.destroyed = function() {
-    console.log("slide destroyed", this.data._id);
-    //si un detruit une slide de jmpress, il faut l'enlever du DOM
-    if (Session.get("clientMode", "jmpress")) { //je comprend pas pourquoi c'est fire à chaque fois, mais ca pose pas de probleme alors je verra plus tard
-        console.log("       slide jmpress removed");
-        $("#" + this.data._id).remove();
-    }
+Template.jmpressSlide.destroyed = function() {
+    console.log("slidejmpress destroyed", this.data._id);
+    $("#" + this.data._id).remove();
+
 };
 
 
@@ -318,7 +489,7 @@ Template.editorSlide.destroyed = function() {
  * template method
  ******/
 Template.editorSlide.isActive = function() {
-    
+
     var remote = Remote.findOne({
         slideshowId: Slideshow.findOne({})._id //, activeSlideId: notnull
     });
@@ -338,26 +509,26 @@ Template.editorSlide.isActive = function() {
  * @returns {String}
  * TODO : implements Deck.js 
  */
-Template.jmpressSlide.getJmpressData = function(axis) { 
-    
-        var ratio = 10;
-        switch (axis) {
-            case "x":
-                var coord = parseInt(this.displayOptions.jmpress.positions.x) * ratio;
-                break;
-            case "y":
-                var coord = parseInt(this.displayOptions.jmpress.positions.y) * ratio;
-                break;
-            case "z":
-                var coord = 0;
-                break;
-            default:
-                return "";
+Template.jmpressSlide.getJmpressData = function(axis) {
 
-        }
+    var ratio = 10;
+    switch (axis) {
+        case "x":
+            var coord = parseInt(this.displayOptions.jmpress.positions.x) * ratio;
+            break;
+        case "y":
+            var coord = parseInt(this.displayOptions.jmpress.positions.y) * ratio;
+            break;
+        case "z":
+            var coord = 0;
+            break;
+        default:
+            return "";
+
+    }
 //            console.log(coord, parseInt(this.displayOptions.jmpress.positions.y));
-        return 'data-' + axis + '=' + coord + '';
-    
+    return 'data-' + axis + '=' + coord + '';
+
 };
 
 Template.editorSlide.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
@@ -378,6 +549,40 @@ Template.editorSlide.getEditorData = function(axis) { //pas encore utilisé à c
     }
     return coord;
 };
+
+
+/**************
+ * modal 
+ *************/
+Template.modalTemplate.isVisible = function() {
+    if (Session.get("modalSelectSlideshow")) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
+//Template.modalTemplate.title = function(){
+//  return "Choose a slideshow to load";
+//};
+
+//Meteor.render(function() {
+//    return Template.modalTemplate(
+//            {data:
+//                        ["title1", "title2", "title3"]
+//            }
+//    );
+//});
+
+//Template.modalTemplate.data = function(){
+//  return "Choose a slideshow to load";
+//};
+
+Template.listSlideshow.slideshowList = function() {
+    return ["title1", "title2", "title3"];
+    return getSlideshowList();
+};
+
 
 
 
@@ -431,6 +636,11 @@ createSlide = function(options) {
     });
 };
 
+deleteSlide = function(slideId) {
+    console.log("delete slide : ", slideId);
+    Slides.remove(slideId);
+};
+
 createSlideElement = function(options) {
     console.log("create element");
     var d = new Date;
@@ -447,30 +657,53 @@ createSlideElement = function(options) {
 };
 
 /*
- * set lock is slide is free to edit
- * TODO : refactor with the implements of elements
+ * TODO
+ * bha, à faire en fait
  */
-updateSlideTitleControler = function(slide) {
+userHasAccessToComponent = function(component) {
+    console.log("userHasAccessToComponent : TODO !");
+    return true;
+};
+
+/*
+ * set lock if slide/element is free to edit
+ */
+updateWithLockControler = function(component, callback) {
     var userId = Meteor.userId();
-    var lock = SlidesLock.findOne({slideId: slide._id});
+    var lock = Lock.findOne({componentId: component._id});
     if (typeof lock == 'undefined' || lock.userId == null) {
         if (typeof lock == 'undefined') {
-            SlidesLock.insert({slideId: slide._id, userId: userId, type: 'title', slideTitle: slide.informations.title});
+            Lock.insert({componentId: component._id, userId: userId});
         } else {
-            SlidesLock.update(
-                    SlidesLock.findOne({slideId: slide._id})._id,
+            Lock.update(
+                    Lock.findOne({componentId: component._id})._id,
                     {$set: {
-                            userId: userId, type: 'title', slideTitle: slide.informations.title
+                            userId: userId, type: 'title'
                         }});
         }
-        console.log("update title, add lock to slide", slide._id);
-        updateSlideTitleModel(slide);
+        console.log("update component, add lock to component", component._id);
+        if (typeof callback !== "undefined")
+            callback(component);
+        return true;
     } else {
         alert("lock set by " + lock.userId);
+        return false;
     }
 
 };
 
+removeLockControler = function(component) {
+    var lock = Lock.findOne({componentId: component._id});
+    if (typeof lock === "undefined")
+        return;
+
+    //supression du lock
+    Lock.update(
+            lock._id,
+            {$set:
+                        {userId: null}
+            });
+};
 
 updateSlideTitleModel = function(slide) {
     console.log("update title, model");
@@ -483,13 +716,8 @@ updateSlideTitleModel = function(slide) {
     }
 
     console.log("update title : remove lock of slide", slide._id);
+    removeLockControler(slide);
 
-    //supression du lock
-    SlidesLock.update(
-            SlidesLock.findOne({slideId: slide._id})._id,
-            {$set:
-                        {userId: null}
-            });
 };
 
 /*
@@ -530,6 +758,7 @@ updateSlidePos = function(slide, event) {
  * TODO : remettre au gout du jour la gestion de la distance pour ne pas envoyer tout le temps l'update
  */
 updateSlidePosMove = function(slide, event) {
+    return;
     //histoire de pas trop surcharger le server, on update pas tout le temps
 //    var slideDb = slide;//Slides.findOne({_id: slide._id});
 //    var oldTop = parseInt(slideDb.top);
@@ -549,8 +778,8 @@ updateSlidePosMove = function(slide, event) {
 
 };
 
-updateSlideElement = function(slideId, element) {
-    console.log("update element ", element._id, " of slide ", slideId);
+updateSlideElement = function(element) {
+    console.log("update element ", element._id);
     var content = prompt("new title", element.content);
 
     if (content != null) {
@@ -573,6 +802,7 @@ deleteSlideElement = function(slideId, element) {
 
 
 setActive = function(activeSlide) {
+    console.log("setActive in remote", activeSlide);
     var remote = Remote.findOne();
 
     Remote.update(remote._id,
@@ -660,8 +890,15 @@ deleteSlideshowModel = function() {
     });
 };
 
+printResult = function(result) {
+    console.log(result);
+    return result;
+};
 
 getSlideshowList = function(callback) {
+    if (typeof callback === "undefined")
+        callback = printResult;
+
     Meteor.call('getSlideshowList', {}, Meteor.userId(), function(error, result) {
         if (typeof error !== "undefined") {
             console.log("getSlideshowList : ", error);
@@ -672,6 +909,22 @@ getSlideshowList = function(callback) {
         }
     });
 };
+
+getSlideshowList2 = function() {
+    var list;
+    Meteor.call('getSlideshowList', {}, Meteor.userId(), function(error, result) {
+        if (typeof error !== "undefined") {
+            console.log("getSlideshowList : ", error);
+            list = ["error"];
+        } else {
+            console.log("getSlideshowList : ", result);
+            list = result;
+        }
+    });
+    return list;
+};
+
+
 
 getSlideshowControler = function(callbackReturn) {
     if (typeof callbackReturn === "undefined") {
@@ -684,8 +937,9 @@ getSlideshowControler = function(callbackReturn) {
     } else {
         console.log("getSlideshowControler : error : ", callbackReturn);
     }
-
 };
+
+
 
 
 getSlideshowModel = function(options) {
