@@ -11,6 +11,10 @@
  */
 
 /*
+ * jmpress pose soucis, les données ne sont pas réinjecter dans le container une deuxieme fois  
+ */
+
+/*
  * va disparaitre
  */
 Meteor.subscribe("slidesLock");
@@ -74,20 +78,20 @@ Meteor.startup(function() {
  * TODO : manage remoteMode
  * TODO : deleguer la gestion de la class active à Handelbars via le helper isActive
  */
-Deps.autorun(function() {
-    var remote = Remote.findOne({}); //le client n'a qu'une remote
-    if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
-        var type = Session.get("clientMode");
-        if (type === "jmpress") {
-            console.log("follow slide !");
-            $("#jmpress-container").jmpress("goTo", "#" + remote.activeSlideId);
-        } else if (type === "deck") {
-            $.deck("go", remote.activeSlideId);
-        } else {
-            console.log("remote slide active state changed to ", remote.activeSlideId);
-        }
-    }
-});
+//Deps.autorun(function() {
+//    var remote = Remote.findOne({}); //le client n'a qu'une remote
+//    if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
+//        var type = Session.get("clientMode");
+//        if (type === "jmpress") {
+//            console.log("follow slide !");
+//            $("#jmpress-container").jmpress("goTo", "#" + remote.activeSlideId);
+//        } else if (type === "deck") {
+//            $.deck("go", remote.activeSlideId);
+//        } else {
+//            console.log("remote slide active state changed to ", remote.activeSlideId);
+//        }
+//    }
+//});
 
 
 
@@ -432,6 +436,7 @@ Template.elementsArea.elements = function() {
  * callback of render to add draggable when edit
  */
 Template.editorSlide.rendered = function() {
+//    return;
     console.log("slide.rendered for editor", this.data._id);
     var self = this;
     var $slide = $(self.find(".slide"));
@@ -444,6 +449,7 @@ Template.editorSlide.rendered = function() {
  * callback of render to move jmpress slide
  */
 Template.jmpressSlide.rendered = function() {
+//    return;
     console.log("slide.rendered for jmpress", this.data._id);
     var self = this;
     var $slide = $(self.find(".slide"));
@@ -478,6 +484,7 @@ Template.jmpressSlide.rendered = function() {
 
 
 Template.jmpressSlide.destroyed = function() {
+//    return;                                                     //DEBUG BUG LOAD JMPRESS
     console.log("slidejmpress destroyed", this.data._id);
     $("#" + this.data._id).remove();
 
