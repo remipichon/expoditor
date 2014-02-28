@@ -7,15 +7,14 @@
 /*
  * utiliser les event de jquery à la place du maps event de Meteor :
  * il est foireux et a un comportement que je capte pas
- * 
  */
 
 /*
- * jmpress pose soucis, les données ne sont pas réinjecter dans le container une deuxieme fois  
+ * jmpress pose soucis, les données ne sont pas réinjecter dans le container la deuxieme fois  
  */
 
 /*
- * va disparaitre
+ * va disparaitre 
  */
 Meteor.subscribe("slidesLock");
 

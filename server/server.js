@@ -227,6 +227,8 @@ Meteor.methods({
 
         Slideshow.remove({_id: slideshowId});
     },
+            
+            
     clearServerData: function() {
         console.log("dev : clear all db's data");
         Slideshow.remove({});
@@ -241,7 +243,7 @@ Meteor.methods({
  * verifier dans slideshowPublished si userId est dans l'array des user allowed de slideshowId
  * @param {type} slideshowId
  * @param {type} userId
- * @returns {Array}
+ * @returns {Array} 
  * TODO : manage group, play_mode, edit_mode, remote_mode
  * 
  */
