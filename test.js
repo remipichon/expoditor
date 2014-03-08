@@ -186,6 +186,20 @@ clearServerData();
 /*
  * do : previous test several time                                              //DEAD : jmpress load fine juste once
  *                                                                              //data are not injected in template after the first time
+ *                                                                              //L'injection des données n'est pas recompute, dans la mesure 
+ *                                                                              //ou la méthode est la même que pour Deck (qui fonctionne)
+ *                                                                              //il semblerait que jmpress fasse perdre le caractère de Template
+ *                                                                              //à #jmpress-container lors de son init/deinit
+ *                                                                              //===> FAUX, l'injection est reconpute lors d'un passage à l'éditor
+ *                                                                              //le cheminement Editor => Deck => jmpress => deck => jmpress fonctionne mais
+ *                                                                              //le retour à l'éditor non
+ *                                                                              //====> SOLVED
+ *                                                                          
+ *                                                                              
+ *                                                                              //IMPROVEMENT
+ *                                                                              //losqu'on change la variable de session "clientMode" le
+ *                                                                              //Deps.autorum est recompute ce qui provoque des erreurs à l'init.
+ *                                                                              //Il faudrait pouvoir faire en sorte que l'autorum ne reagisse qu'au Remote.find
  *                                                                              
  */
 

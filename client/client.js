@@ -81,21 +81,22 @@ Meteor.startup(function() {
  * listen to change on remote
  * TODO : manage remoteMode
  * TODO : deleguer la gestion de la class active à Handelbars via le helper isActive
+ * TODO : l'autorun ne doit recompure qu'au changement de Remote.findOne
  */
-Deps.autorun(function() {
-    var remote = Remote.findOne({}); //le client n'a qu'une remote
-    if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
-        var type = Session.get("clientMode");
-        if (type === "jmpress") {
-            console.log("follow slide !");
-            $("#jmpress-container").jmpress("goTo", "#" + remote.activeSlideId);
-        } else if (type === "deck") {
-            $.deck("go", remote.activeSlideId);
-        } else {
-            console.log("remote slide active state changed to ", remote.activeSlideId);
-        }
-    }
-});
+//Deps.autorun(function() {
+//    var remote = Remote.findOne({}); //le client n'a qu'une remote
+//    if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
+//        var type = Session.get("clientMode");
+//        if (type === "jmpress") {
+//            console.log("follow slide !");
+//            $("#jmpress-container").jmpress("goTo", "#" + remote.activeSlideId);
+//        } else if (type === "deck") {
+//            $.deck("go", remote.activeSlideId);
+//        } else {
+//            console.log("remote slide active state changed to ", remote.activeSlideId);
+//        }
+//    }
+//});
 
 
 
@@ -143,12 +144,21 @@ Template.createSlide.events({
  */
 Template.loadEditor.events({
     'click input': function() {
+        Session.set("clientMode", "editor");
 
-        $("#jmpress-container").jmpress("deinit");
-        setTimeout(function() {
-            $('#jmpress-container').empty();
-            Session.set("clientMode", "editor");
-        }, 200); //pour attendre que jmpress est fini son boulot
+//        $("#jmpress-container").jmpress("deinit");
+//$("#jmpress-container").jmpress("deinit");
+//        setTimeout(function() {
+            //les nodes de slides ne sont apparement plus pris en charge
+            //par handelbars, donc on vide à la main
+//            $("#jmpress-container").jmpress("deinit");
+            
+//            Session.set("clientMode", "editor");
+//        }, 200); //pour attendre que jmpress est fini son boulot
+        
+//        setTimeout(function(){
+//            $("#jmpress-container").jmpress("deinit"); 
+//        },200);
     }
 });
 
@@ -267,7 +277,7 @@ Template.editorContainer.slides = function() {
 
 Template.jmpressContainer.slides = function() {
     if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'jmpress') {
-        console.log("jmpressContainer empty");
+        console.log("jmpressContainer empty");       
         return [];
     }
     console.log("jmpressContainer inject data");
@@ -310,23 +320,13 @@ Template.editorSlide.rendered = function() {
  * callback of render to move jmpress slide
  */
 Template.jmpressSlide.rendered = function() {
-//    return;
+    
     console.log("slide.rendered for jmpress", this.data._id);
-    var self = this;
-    var $slide = $(self.find(".slide"));
-    var $slide = $("#" + this.data._id);
-
-
+   
     var posX = this.data.displayOptions.jmpress.positions.x;
     var posY = this.data.displayOptions.jmpress.positions.y;
     var ratio = 10;
 
-//    $slide.attr("data-x", parseInt(posX) * ratio).attr("data-y", parseInt(posY) * ratio);
-
-
-    //lors de l'abonnement, on crée toutes les slides d'un coup puis jmpress passe par là.
-    //donc on ne reinit les slides qu'au rerender (je crois qu'il y a un astuce meteor pour m'eviter de faire ca)
-    
     
     /*
      * Si jmpress est init
@@ -355,7 +355,15 @@ Template.jmpressSlide.rendered = function() {
 Template.jmpressSlide.destroyed = function() {
 //    return;                                                     //DEBUG BUG LOAD JMPRESS
     console.log("slidejmpress destroyed", this.data._id);
-    $("#" + this.data._id).remove();
+    var slideToRemove =  $("#jmpress-container >div #" + this.data._id);
+//    $("#jmpress-container").jmpress("deinit",slideToRemove);
+    $("#jmpress-container #" + this.data._id).remove();
+    
+//    s'il n'y a plus de slide et que le client mode n'est plus jmpress, il faut deinit jmpress
+    if( $("#jmpress-container >div").children().length === 0 && Session.get("clientMode") !== "jmpress" ){
+//        $("#jmpress-container").jmpress("deinit");
+        $("#jmpress-container >div").remove();
+    }
 
 };
 
