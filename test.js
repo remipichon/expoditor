@@ -51,7 +51,9 @@ clearServerData();
  * click : createSlideshow
  * expected : 
  *  - prompt : type a title $TTTLE
- *  - loadslideshow loaded (but is empty)
+ *  - loadslideshow loaded (but is empty)                                       //DEAD : 
+ *                                                                              //need to restart Meteor pour avoir le nouveau slideshow prit en compte
+ *                                                                              //===> impossible de le reproduire
  */
 
 /*
@@ -133,6 +135,7 @@ clearServerData();
 /*
  * click : on a slide, on deleteElement button ("X")
  * expected : the element disaperas on each client                              //prompt to type a new title before deleting element
+ *                                                                              // ====> SOLVED
  */
 
 /*

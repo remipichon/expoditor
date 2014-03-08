@@ -145,20 +145,6 @@ Template.createSlide.events({
 Template.loadEditor.events({
     'click input': function() {
         Session.set("clientMode", "editor");
-
-//        $("#jmpress-container").jmpress("deinit");
-//$("#jmpress-container").jmpress("deinit");
-//        setTimeout(function() {
-            //les nodes de slides ne sont apparement plus pris en charge
-            //par handelbars, donc on vide à la main
-//            $("#jmpress-container").jmpress("deinit");
-            
-//            Session.set("clientMode", "editor");
-//        }, 200); //pour attendre que jmpress est fini son boulot
-        
-//        setTimeout(function(){
-//            $("#jmpress-container").jmpress("deinit"); 
-//        },200);
     }
 });
 
@@ -233,30 +219,31 @@ Template.deleteSlide.events({
     }
 });
 
-/*
- * TODO : recuperer l'id de la slide via autrement que par le DOM
- */
+
 //update element
 Template.element.events({
     'click': function(event) {
         console.log("element : edit via prompt");
 //        event.stopImmediatePropagation();
-        var $element = $(event.target);
+//        var $element = $(event.target);
         updateSlideElement(this);
     }
 });
 
 
 
+
 Template.deleteElement.events({
-//    'mouseenter': function(event){
-//        console.log("mouseenter deleteelement");
-//    },
+    'mouseup': function(event) {
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+    },
     'click': function(event) {
         console.log("deleteElement ", this._id);
-//        event.stopImmediatePropagation();
+        event.stopImmediatePropagation();
+        event.stopPropagation();
         var $element = $(event.target);
-        deleteSlideElement($element.parent().parent(".slide").attr("id"), this);
+        deleteSlideElement(this);
     }
 });
 
@@ -277,7 +264,7 @@ Template.editorContainer.slides = function() {
 
 Template.jmpressContainer.slides = function() {
     if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'jmpress') {
-        console.log("jmpressContainer empty");       
+        console.log("jmpressContainer empty");
         return [];
     }
     console.log("jmpressContainer inject data");
@@ -320,14 +307,14 @@ Template.editorSlide.rendered = function() {
  * callback of render to move jmpress slide
  */
 Template.jmpressSlide.rendered = function() {
-    
+
     console.log("slide.rendered for jmpress", this.data._id);
-   
+
     var posX = this.data.displayOptions.jmpress.positions.x;
     var posY = this.data.displayOptions.jmpress.positions.y;
     var ratio = 10;
 
-    
+
     /*
      * Si jmpress est init
      * il faut mettre à jour les jmpress data de la slide jmpress (celle contenue
@@ -335,15 +322,15 @@ Template.jmpressSlide.rendered = function() {
      * ajoutée par Handelbars puis supprimer le DOM de cette slide là
      */
     if ($("#jmpress-container").jmpress('initialized')) {
-         console.log("update de la slide ",this.data._id," jmpress to ",posX*ratio,posY*ratio);
-        
-         //maj de la slide jmpress
-         var slideToMaj = $("#jmpress-container >div #" + this.data._id);
-         slideToMaj.attr("data-x", parseInt(posX) * ratio).attr("data-y", parseInt(posY) * ratio);
-         $("#jmpress-container").jmpress('init', slideToMaj);
-         
-         //suppression de la slide crée par Handelbars
-         $("#"+this.data._id).remove();
+        console.log("update de la slide ", this.data._id, " jmpress to ", posX * ratio, posY * ratio);
+
+        //maj de la slide jmpress
+        var slideToMaj = $("#jmpress-container >div #" + this.data._id);
+        slideToMaj.attr("data-x", parseInt(posX) * ratio).attr("data-y", parseInt(posY) * ratio);
+        $("#jmpress-container").jmpress('init', slideToMaj);
+
+        //suppression de la slide crée par Handelbars
+        $("#" + this.data._id).remove();
 
     }
 
@@ -351,16 +338,18 @@ Template.jmpressSlide.rendered = function() {
 
 };
 
-
+/*
+ * TODO BUG : .jmpress("deinit") ne fonctionne pas et provoque une erreur d'un rerun de jmpress
+ */
 Template.jmpressSlide.destroyed = function() {
 //    return;                                                     //DEBUG BUG LOAD JMPRESS
     console.log("slidejmpress destroyed", this.data._id);
-    var slideToRemove =  $("#jmpress-container >div #" + this.data._id);
+    var slideToRemove = $("#jmpress-container >div #" + this.data._id);
 //    $("#jmpress-container").jmpress("deinit",slideToRemove);
     $("#jmpress-container #" + this.data._id).remove();
-    
+
 //    s'il n'y a plus de slide et que le client mode n'est plus jmpress, il faut deinit jmpress
-    if( $("#jmpress-container >div").children().length === 0 && Session.get("clientMode") !== "jmpress" ){
+    if ($("#jmpress-container >div").children().length === 0 && Session.get("clientMode") !== "jmpress") {
 //        $("#jmpress-container").jmpress("deinit");
         $("#jmpress-container >div").remove();
     }
@@ -677,8 +666,8 @@ updateSlideElement = function(element) {
     }
 };
 
-deleteSlideElement = function(slideId, element) {
-    console.log("delete element ", element._id, " of slide ", slideId);
+deleteSlideElement = function(element) {
+    console.log("delete element ", element._id);
     Elements.remove(element._id);
 };
 
