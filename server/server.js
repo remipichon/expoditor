@@ -3,7 +3,7 @@
  * value : [userIds...]
  * TODO : change key to slideshow._id
  */
-slideshowPublished = {};  
+slideshowPublished = {};
 
 /*
  * TODO : manage group, play_mode, edit_mode, remote_mode
@@ -97,7 +97,7 @@ Meteor.methods({
         if (typeof remote == 'undefined') {
             throw new Meteor.Error(24, "error creating a slideshow's remote");
         }
-
+        console.log("info : createSlideshow : created id :",slideShow);
         return slideShow;
     },
     /*
@@ -137,6 +137,7 @@ Meteor.methods({
      * TODO : purge slideshowPublished si jamais un user avait précedement les accès à un slideshow
      * (très utile pour la creation des slides notamment)
      * TODO : les clients ne recoivent pas la liste des slideshows dont la slide fait partie ?
+     * TODO : traitement correctement les fin des handlers sur les observeChanges (tableau de handleElement et les handleSlides
      */
     getSlideshow: function(options, userId) {
         //is the slideshow already publish ?
@@ -179,20 +180,53 @@ Meteor.methods({
                 });
             });
 
-            //publish elements related to the slides
-            var slidesId = [];
-            var slides = Slides.find({
-                slideshowReference: {$in: [newCreatedSlideshow._id]}
-            }, {fields: {_id: 1}}).fetch();
-            for (var i in slides) {
-                slidesId.push(slides[i]._id);
-            }
+            //publish elements related to all slides of the slideshow           
             var strElementsName = "elements" + options.title;
+            var newCreatedSlideshowId = newCreatedSlideshow._id; //pour ne pas passer un gros objet à la closure
             Meteor.publish(strElementsName, function() {
-                return Elements.find({
-                    slideReference: {$in: slidesId}//get all slides which are linked to the slideshow
-//                   , {slideshowReference: 0 } //TODO gerer le fait que le client ne recoive pas cette donnée
+                var self = this;
+
+                var handleSlides = Slides.find({
+                    slideshowReference: {$in: [newCreatedSlideshowId]}
+                }).observeChanges({
+                    added: function(slideId, slide) {
+                        //slide ajouté, il faut ajouter ses elements à la publication
+                        console.log("element pusblish : added slide ", slideId);
+                        var handleElement = Elements.find({
+                            slideReference: {$in: [slideId]}//get all slides which are linked to the slideshow
+                        }).observeChanges({
+                            added: function(eleId, ele) {
+                                self.added("elements", eleId, ele);
+                            },
+                            changed: function(eleId, fields) {
+                                self.changed("elements", eleId, fields);
+                            },
+                            removed: function(eleId, ele) {
+                                self.removed("elements", eleId, ele);
+                            }
+                        });
+                    },
+                    changed: function(slideId, fields) {
+                        //nothing to do
+                    },
+                    removed: function(slideId, slide) {
+                        //TODO
+                        //arreter tous les handleElement créer dans les added
+                    }
                 });
+
+//                //DEPRECATED : publication des elements
+//                var slidesId = [];
+//                var slides = Slides.find({
+//                    slideshowReference: {$in: [newCreatedSlideshowId]}
+//                }, {fields: {_id: 1}}).fetch();
+//                for (var i in slides) {
+//                    slidesId.push(slides[i]._id);
+//                }
+//                return Elements.find({
+//                    slideReference: {$in: slidesId}//get all slides which are linked to the slideshow
+////                   , {slideshowReference: 0 } //TODO gerer le fait que le client ne recoive pas cette donnée
+//                });
             });
 
 
@@ -227,8 +261,6 @@ Meteor.methods({
 
         Slideshow.remove({_id: slideshowId});
     },
-            
-            
     clearServerData: function() {
         console.log("dev : clear all db's data");
         Slideshow.remove({});
@@ -316,6 +348,7 @@ Slideshow.allow({
 
 /*
  * TODO : each action doit verifier que le user hasAccessSlideshow
+ * TODO : when removing, delete related Elements
  */
 Slides.allow({
     /*
@@ -323,6 +356,7 @@ Slides.allow({
      * TODO : verifier que la reference de slideshow est bonne (via userallowed)
      * TODO : add slideId dans array slide du slideshow (get id from slideshowPublished)
      * (en s'assurant qu'on ajoute la slide qu'à un seul slideshow)
+     * TODO : verifier que la slideshowReference est bon
      */
     insert: function(userId, slide, fields, modifier) {
         console.log("info : slides.allow.insert : true ", slide);
@@ -399,7 +433,7 @@ Remotes.allow({
     },
     /*
      * TODO : prendre en compte l'architecture (avec ca on peut avoir qu'une seule remote à la fois)
-     */ 
+     */
     update: function(userId, newActiveSlide, fields, modifier) {
         return true;
         //si le client veut ajouter une slide active, le server refuse s'il y deja une slide active
