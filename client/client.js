@@ -16,17 +16,19 @@
 /*
  * va disparaitre 
  */
-Meteor.subscribe("slidesLock");
+//Meteor.subscribe("slidesLocks");
+//Meteor.subscribe("lock");
 
 subscriptionSlideshow = null;
 subscriptionSlides = null;
 subscriptionElements = null;
 subscriptionRemote = null;
+subscriptionLocks = null;
 
 Slideshow = new Meteor.Collection("slideshow");
 Slides = new Meteor.Collection("slides");
 Elements = new Meteor.Collection("elements");
-Lock = new Meteor.Collection("slidesLock");
+Locks = new Meteor.Collection("lock");
 Remote = new Meteor.Collection("remoteSlides");
 
 
@@ -138,23 +140,15 @@ Template.createSlide.events({
     }
 });
 
-/*
- * TODO 
- * faire une fonction pour ne (re)charger que les slides
- */
 Template.loadEditor.events({
     'click input': function() {
         Session.set("clientMode", "editor");
     }
 });
 
-/*
- * TODO : est que le setTimeout est toujours necessaire ?
- */
 Template.loadJmpress.events({
     'click input': function() {
         Session.set("clientMode", "jmpress");
-        //magouille parce que le callback de subscribe n'est pas un callback de Template.render (lui meme étant un callback)
         setTimeout(initJmpress, 200);
 
     }
@@ -163,7 +157,6 @@ Template.loadJmpress.events({
 Template.loadDeck.events({
     'click input': function() {
         Session.set("clientMode", "deck");
-        //magouille parce que le callback de subscribe n'est pas un callback de Template.render (lui meme étant un callback)
         setTimeout(initDeck, 200);
 
     }
@@ -186,7 +179,7 @@ Template.addElement.events({
 //update title
 Template.editorSlide.events({
     'dblclick': function() {
-        updateWithLockControler(this, updateSlideTitleModel);
+        updateSlideTitleControler(this);
     }
 });
 
@@ -224,9 +217,9 @@ Template.deleteSlide.events({
 Template.element.events({
     'click': function(event) {
         console.log("element : edit via prompt");
-//        event.stopImmediatePropagation();
-//        var $element = $(event.target);
-        updateSlideElement(this);
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+        updateSlideElementControler(this);
     }
 });
 
@@ -342,10 +335,8 @@ Template.jmpressSlide.rendered = function() {
  * TODO BUG : .jmpress("deinit") ne fonctionne pas et provoque une erreur d'un rerun de jmpress
  */
 Template.jmpressSlide.destroyed = function() {
-//    return;                                                     //DEBUG BUG LOAD JMPRESS
     console.log("slidejmpress destroyed", this.data._id);
-    var slideToRemove = $("#jmpress-container >div #" + this.data._id);
-//    $("#jmpress-container").jmpress("deinit",slideToRemove);
+//    var slideToRemove = $("#jmpress-container >div #" + this.data._id);
     $("#jmpress-container #" + this.data._id).remove();
 
 //    s'il n'y a plus de slide et que le client mode n'est plus jmpress, il faut deinit jmpress
@@ -375,13 +366,7 @@ Template.editorSlide.isActive = function() {
     }
 };
 
-/*
- * return position according to technoSlideshow
- * @param {type} axis
- * @param {type} technoSlideshow
- * @returns {String}
- * TODO : implements Deck.js 
- */
+
 Template.jmpressSlide.getJmpressData = function(axis) {
 
     var ratio = 10;
@@ -529,53 +514,66 @@ createSlideElement = function(options) {
     });
 };
 
-/*
- * TODO
- * bha, à faire en fait
- */
+
 userHasAccessToComponent = function(component) {
-    console.log("userHasAccessToComponent : TODO !");
-    return true;
+    var userId = Meteor.userId();
+    var lock = Locks.findOne({componentId: component._id});
+    if (typeof lock == 'undefined' || lock.userId == null)
+        return true;
+    else
+        return false;
 };
 
 /*
- * set lock if slide/element is free to edit
+ * set lock if component is free to edit
  */
-updateWithLockControler = function(component, callback) {
-    var userId = Meteor.userId();
-    var lock = Lock.findOne({componentId: component._id});
-    if (typeof lock == 'undefined' || lock.userId == null) {
+updateWithLocksControler = function(component, callback) {
+    console.log("updateWithLocksControler");
+
+    var lock = Locks.findOne({componentId: component._id});
+    var slideshowId = Slideshow.findOne({})._id;
+
+    if (userHasAccessToComponent(component)) {
+        var userId = Meteor.userId();
+
         if (typeof lock == 'undefined') {
-            Lock.insert({componentId: component._id, userId: userId});
+            Locks.insert({slideshowId: slideshowId, componentId: component._id, userId: userId});
         } else {
-            Lock.update(
-                    Lock.findOne({componentId: component._id})._id,
+            Locks.update(
+                    lock._id,
                     {$set: {
                             userId: userId, type: 'title'
                         }});
         }
         console.log("update component, add lock to component", component._id);
-        if (typeof callback !== "undefined")
+        if (typeof callback === "function")
             callback(component);
         return true;
     } else {
-        alert("lock set by " + lock.userId);
+        if (typeof lock !== "undefined")
+            alert("lock set by " + lock.userId);
+        else
+            alert("you cannot edit this component");
         return false;
     }
 
 };
 
-removeLockControler = function(component) {
-    var lock = Lock.findOne({componentId: component._id});
+removeLocksControler = function(component) {
+    var lock = Locks.findOne({componentId: component._id});
     if (typeof lock === "undefined")
         return;
 
     //supression du lock
-    Lock.update(
+    Locks.update(
             lock._id,
             {$set:
                         {userId: null}
             });
+};
+
+updateSlideTitleControler = function(slide) {
+    updateWithLocksControler(slide, updateSlideTitleModel);
 };
 
 updateSlideTitleModel = function(slide) {
@@ -589,7 +587,7 @@ updateSlideTitleModel = function(slide) {
     }
 
     console.log("update title : remove lock of slide", slide._id);
-    removeLockControler(slide);
+    removeLocksControler(slide);
 
 };
 
@@ -651,7 +649,12 @@ updateSlidePosMove = function(slide, event) {
 
 };
 
-updateSlideElement = function(element) {
+updateSlideElementControler = function(element){
+     updateWithLocksControler(element, updateSlideElementModel);
+};
+
+
+updateSlideElementModel = function(element) {
     console.log("update element ", element._id);
     var content = prompt("new title", element.content);
 
@@ -664,6 +667,8 @@ updateSlideElement = function(element) {
                 }
         );
     }
+    
+    removeLocksControler(element);
 };
 
 deleteSlideElement = function(element) {
@@ -844,12 +849,15 @@ getSlideshowModel = function(options) {
                 subscriptionElements.stop();
             if (subscriptionRemote !== null)
                 subscriptionRemote.stop();
+            if (subscriptionLocks !== null)
+                subscriptionLocks.stop();
 
             //nouvelles sub
             subscriptionSlideshow = Meteor.subscribe(options.title);
             subscriptionSlides = Meteor.subscribe("slides" + options.title);
             subscriptionElements = Meteor.subscribe("elements" + options.title);
             subscriptionRemote = Meteor.subscribe("remote" + options.title);
+            subscriptionRemote = Meteor.subscribe("locks" + options.title);
 
             console.log("getSlideshow ", result, ": done with subscribes");
         }

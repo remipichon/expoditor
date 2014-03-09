@@ -26,13 +26,13 @@ Slides = new Meteor.Collection("slides");
 Slideshow = new Meteor.Collection("slideshow");
 
 /*
- * SlidesLock :
+ * Locks :
  *  - slideId : slide._id
  *  - userId : user._id, null if slide is free to edit 
  *  Document add the first time the slide is edited
  *  All users have all collection
  */
-SlidesLock = new Meteor.Collection("slidesLock");
+Locks = new Meteor.Collection("lock");
 
 /*
  * RemoteSlides :
@@ -47,9 +47,9 @@ Remotes = new Meteor.Collection("remoteSlides");
 /*
  * TODO : publish only lock for slides linked to slideshow
  */
-Meteor.publish('slidesLock', function() {
-    return SlidesLock.find({}); //plus tard, ne pas envoyer l'id mais l'email, ou null si null
-});
+//Meteor.publish('lock', function() {
+//    return Locks.find({}); //plus tard, ne pas envoyer l'id mais l'email, ou null si null
+//});
 
 
 
@@ -97,7 +97,7 @@ Meteor.methods({
         if (typeof remote == 'undefined') {
             throw new Meteor.Error(24, "error creating a slideshow's remote");
         }
-        console.log("info : createSlideshow : created id :",slideShow);
+        console.log("info : createSlideshow : created id :", slideShow);
         return slideShow;
     },
     /*
@@ -214,19 +214,6 @@ Meteor.methods({
                         //arreter tous les handleElement créer dans les added
                     }
                 });
-
-//                //DEPRECATED : publication des elements
-//                var slidesId = [];
-//                var slides = Slides.find({
-//                    slideshowReference: {$in: [newCreatedSlideshowId]}
-//                }, {fields: {_id: 1}}).fetch();
-//                for (var i in slides) {
-//                    slidesId.push(slides[i]._id);
-//                }
-//                return Elements.find({
-//                    slideReference: {$in: slidesId}//get all slides which are linked to the slideshow
-////                   , {slideshowReference: 0 } //TODO gerer le fait que le client ne recoive pas cette donnée
-//                });
             });
 
 
@@ -237,6 +224,18 @@ Meteor.methods({
                     'slideshowId': newCreatedSlideshow._id
                 });
             });
+            
+            
+            //publish components locks
+            var strLocksName = "locks" + options.title;
+            Meteor.publish(strLocksName, function() {
+                return Locks
+                        .find({
+                    'slideshowId': newCreatedSlideshow._id
+                });
+            });
+            
+        
         }
 
         //add user to the list of current editors
@@ -247,11 +246,13 @@ Meteor.methods({
     },
     /*
      * also remove slides
-     * TODO : remove only slides linker only to the slideshow
+     * TODO : remove only slides linked only to the slideshow (if a slide is in different slideshow...)
+     * NOT TODO : remove elements linkend to the slideshow => sera fait lorsque sera implementé
+     * le liveLoadToEdit 
      */
     removeSlideshow: function(slideshowId, userId) {
         if (!hasAccessSlideshow(slideshowId, userId)) {
-            throw new Meteor.Error("24300", "removeSlideshow, you are not allowed to perform this action");
+            throw new Meteor.Error(24300, "removeSlideshow, you are not allowed to perform this action");
         }
 
         //delete all slides linked to the slideshow
@@ -266,7 +267,7 @@ Meteor.methods({
         Slideshow.remove({});
         Slides.remove({});
         Elements.remove({});
-        SlidesLock.remove({});
+        Locks.remove({});
         Remotes.remove({});
     }
 });
@@ -280,8 +281,11 @@ Meteor.methods({
  * 
  */
 hasAccessSlideshow = function(slideshowId, userId) {
-
-    var slideshowTitle = Slideshow.findOne({_id: slideshowId}).informations.title;
+    var slideshow = Slideshow.findOne({_id: slideshowId});
+    if( typeof slideshow === "undefined") 
+        throw new Meteor.Error("24","slideshow does not exist " + slideshowId);
+    
+    var slideshowTitle = slideshow.informations.title;
 
 
     if (typeof slideshowPublished[slideshowTitle] === "undefined") {
@@ -318,7 +322,7 @@ Slideshow.allow({
 
         if (!hasAccessSlideshow(slideshow._id, userId)) {
             console.log("info : slideshow.update : user not allowed to update slideshow slidehow : ", slideshow._id, " userid :", userId);
-            throw new Meteor.Error("Slideshow.allow.update : you are not allowed to update this slideshow");
+            throw new Meteor.Error("24","Slideshow.allow.update : you are not allowed to update this slideshow");
             return false;
         }
 
@@ -387,7 +391,7 @@ Slides.allow({
         if (_.contains(fields, 'informations')) {
             if (modifier.toString().indexOf("title") !== -1) { //pas funky ca
 
-                var lock = SlidesLock.findOne({$and: [
+                var lock = Locks.findOne({$and: [
                         {slideId: slide._id}, {userId: userId}
                     ]});
 
@@ -448,18 +452,38 @@ Remotes.allow({
     }
 });
 
-SlidesLock.allow({
+Locks.allow({
     insert: function(userId, lock, fields, modifier) {
+        //check slideshow
+        if (typeof lock.slideshowId === "undefined")
+            throw new Meteor.Error("24","lock.insert : lock does not contain a slideshowId");
+        if (!hasAccessSlideshow(lock.slideshowId, userId))
+            throw new Meteor.Error("24","lock.insert : user has not access to slideshow ", lock.slideshowId);
+        
+        
+        //check component
+        if (typeof lock.componentId === "undefined")
+            throw new Meteor.Error("24","lock.insert : lock does not contain a componentId");
+        if (Locks.findOne({componentId: lock.componentId}))
+            throw new Meteor.Error("24","lock.insert : a lock already exists for the component ", lock.componentId);
+       
+        //check userId
+        if (typeof lock.userId === "undefined")
+            throw new Meteor.Error("24","lock.insert : lock does not contain a userId");
+        if(userId !== lock.userId)
+            throw new Meteor.Error("24","lock.insert : lock's userId ",lock.userId," does not correspond to client's userId ",userId);
+        
+        console.log("infos : Locks.allow : insert : true");
         return true;
     },
     update: function(userId, newLock, fields, modifier) {
-        console.log("debug : slidesLock.update ", modifier);
+        console.log("infos : slidesLock.update ", modifier);
 
         //verifie si le lock existe bel et bien
-        var lock = SlidesLock.findOne({_id: newLock._id});
+        var lock = Locks.findOne({_id: newLock._id});
         if (typeof lock == 'undefined') {
-            console.log("info : slideslock.update : lock doesn't exist ", newLock._id);
-            throw new Meteor.Error("slideslock.update : lock doesn't exist ", newLock._id);
+            console.log("info : lock.update : lock doesn't exist ", newLock._id);
+            throw new Meteor.Error("24","lock.update : lock doesn't exist ", newLock._id);
             return false;
         }
 
@@ -467,10 +491,10 @@ SlidesLock.allow({
         if (modifier.$set.userId != null) {
             //verification que le lock n'écrase pas un lock
             if (lock.userId != null) {
-                console.log("info : slidesLock.update : a lock is already set : db : ", lock._id, "new : ", newLock._id);
+                console.log("info : lock.update : a lock is already set : db : ", lock._id, "new : ", newLock._id);
                 return false;
             }
-            console.log("info : slidesLock.update : add lock OK");
+            console.log("info : lock.update : add lock OK");
             return true;
         }
 
@@ -488,7 +512,7 @@ SlidesLock.allow({
         return false;
     },
     remove: function() {
-        //uniquement coté server si besoin
+        //uniquement coté server lors du unload
         return false;
     }
 });
