@@ -26,11 +26,7 @@ Slides = new Meteor.Collection("slides");
 Slideshow = new Meteor.Collection("slideshow");
 
 /*
- * Locks :
- *  - slideId : slide._id
- *  - userId : user._id, null if slide is free to edit 
- *  Document add the first time the slide is edited
- *  All users have all collection
+ * see http://titanpad.com/expo
  */
 Locks = new Meteor.Collection("lock");
 
@@ -44,17 +40,8 @@ Locks = new Meteor.Collection("lock");
 Remotes = new Meteor.Collection("remoteSlides");
 
 
-/*
- * TODO : publish only lock for slides linked to slideshow
- */
-//Meteor.publish('lock', function() {
-//    return Locks.find({}); //plus tard, ne pas envoyer l'id mais l'email, ou null si null
-//});
-
-
-
-
 Meteor.methods({
+    
     /*
      * args :
      * - options : object
@@ -352,15 +339,12 @@ Slideshow.allow({
 
 /*
  * TODO : each action doit verifier que le user hasAccessSlideshow
- * TODO : when removing, delete related Elements
+ * TODO : traitement factorisé pour la gestion du lock à l'image du coté client
  */
 Slides.allow({
     /*
-     * TODO : verifier que le user a l'accès au slideshow
-     * TODO : verifier que la reference de slideshow est bonne (via userallowed)
      * TODO : add slideId dans array slide du slideshow (get id from slideshowPublished)
      * (en s'assurant qu'on ajoute la slide qu'à un seul slideshow)
-     * TODO : verifier que la slideshowReference est bon
      */
     insert: function(userId, slide, fields, modifier) {
         console.log("info : slides.allow.insert : true ", slide);
@@ -373,6 +357,12 @@ Slides.allow({
      */
     update: function(userId, slide, fields, modifier) {
         console.log("slides.allow.update : ", slide._id);
+        
+        //lock control
+        if( !userHasAccessToComponent(slide, fields)){
+            console.log("slides.allow.update : user does not have access to update fiels "+fields);
+            throw new Meteor.Error("slides.allow.update : user does not have access to update fiels "+fields);
+        }
 
         //display options
         if (_.contains(fields, 'displayOptions')) {
@@ -392,7 +382,7 @@ Slides.allow({
             if (modifier.toString().indexOf("title") !== -1) { //pas funky ca
 
                 var lock = Locks.findOne({$and: [
-                        {slideId: slide._id}, {userId: userId}
+                        {componentId: slide._id}, {userId: userId}
                     ]});
 
                 if (typeof lock == 'undefined') {
@@ -409,6 +399,9 @@ Slides.allow({
         return false;
 
     },
+   /*
+    * delete relating elements
+    */
     remove: function() {
         return true;
     }
@@ -472,6 +465,11 @@ Locks.allow({
             throw new Meteor.Error("24","lock.insert : lock does not contain a userId");
         if(userId !== lock.userId)
             throw new Meteor.Error("24","lock.insert : lock's userId ",lock.userId," does not correspond to client's userId ",userId);
+        
+         //check userId
+        if (typeof lock.properties === "undefined" || !Array.isArray(lock.properties) )
+            throw new Meteor.Error("24","lock.insert : lock does not contain a properties array");
+       
         
         console.log("infos : Locks.allow : insert : true");
         return true;

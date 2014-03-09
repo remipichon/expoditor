@@ -121,7 +121,7 @@ clearServerData();
 /*
  * do on user1 : click on a element
  * do on user2: double click on the same element
- * expected : alert showing the id of the first user                            //NOT IMPLEMENTED YET
+ * expected : alert showing the id of the first user                            //server side not implemted
  */
 
 /*

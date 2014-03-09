@@ -4,20 +4,6 @@
  * TODO : rendre generique le selecteur CSS pour les container
  */
 
-/*
- * utiliser les event de jquery à la place du maps event de Meteor :
- * il est foireux et a un comportement que je capte pas
- */
-
-/*
- * jmpress pose soucis, les données ne sont pas réinjecter dans le container la deuxieme fois  
- */
-
-/*
- * va disparaitre 
- */
-//Meteor.subscribe("slidesLocks");
-//Meteor.subscribe("lock");
 
 subscriptionSlideshow = null;
 subscriptionSlides = null;
@@ -85,20 +71,20 @@ Meteor.startup(function() {
  * TODO : deleguer la gestion de la class active à Handelbars via le helper isActive
  * TODO : l'autorun ne doit recompure qu'au changement de Remote.findOne
  */
-//Deps.autorun(function() {
-//    var remote = Remote.findOne({}); //le client n'a qu'une remote
-//    if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
-//        var type = Session.get("clientMode");
-//        if (type === "jmpress") {
-//            console.log("follow slide !");
-//            $("#jmpress-container").jmpress("goTo", "#" + remote.activeSlideId);
-//        } else if (type === "deck") {
-//            $.deck("go", remote.activeSlideId);
-//        } else {
-//            console.log("remote slide active state changed to ", remote.activeSlideId);
-//        }
-//    }
-//});
+Deps.autorun(function() {
+    var remote = Remote.findOne({}); //le client n'a qu'une remote
+    if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
+        var type = Session.get("clientMode");
+        if (type === "jmpress") {
+            console.log("follow slide !");
+            $("#jmpress-container").jmpress("goTo", "#" + remote.activeSlideId);
+        } else if (type === "deck") {
+            $.deck("go", remote.activeSlideId);
+        } else {
+            console.log("remote slide active state changed to ", remote.activeSlideId);
+        }
+    }
+});
 
 
 
@@ -515,19 +501,15 @@ createSlideElement = function(options) {
 };
 
 
-userHasAccessToComponent = function(component) {
-    var userId = Meteor.userId();
-    var lock = Locks.findOne({componentId: component._id});
-    if (typeof lock == 'undefined' || lock.userId == null)
-        return true;
-    else
-        return false;
-};
 
 /*
  * set lock if component is free to edit
  */
-updateWithLocksControler = function(component, callback) {
+updateWithLocksControler = function(component, field, callback) {
+    if(typeof field !== "undefined" && typeof callback !== "function"){
+        callback = field;
+        field = null;
+    }
     console.log("updateWithLocksControler");
 
     var lock = Locks.findOne({componentId: component._id});
@@ -537,7 +519,7 @@ updateWithLocksControler = function(component, callback) {
         var userId = Meteor.userId();
 
         if (typeof lock == 'undefined') {
-            Locks.insert({slideshowId: slideshowId, componentId: component._id, userId: userId});
+            Locks.insert({slideshowId: slideshowId, componentId: component._id, userId: userId, properties: []});
         } else {
             Locks.update(
                     lock._id,
@@ -573,7 +555,7 @@ removeLocksControler = function(component) {
 };
 
 updateSlideTitleControler = function(slide) {
-    updateWithLocksControler(slide, updateSlideTitleModel);
+    updateWithLocksControler(slide,"title", updateSlideTitleModel);
 };
 
 updateSlideTitleModel = function(slide) {
@@ -649,8 +631,8 @@ updateSlidePosMove = function(slide, event) {
 
 };
 
-updateSlideElementControler = function(element){
-     updateWithLocksControler(element, updateSlideElementModel);
+updateSlideElementControler = function(element) {
+    updateWithLocksControler(element, updateSlideElementModel);
 };
 
 
@@ -667,7 +649,7 @@ updateSlideElementModel = function(element) {
                 }
         );
     }
-    
+
     removeLocksControler(element);
 };
 

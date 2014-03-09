@@ -26,4 +26,34 @@ isCloseTo = function(self, slide) {
             (Math.pow(W, 2) + Math.pow(H, 2) > 
             Math.pow(parseInt(slide.left) - parseInt(self.left), 2) + Math.pow(parseInt(slide.top) - parseInt(self.top), 2));
 };
+
+
+
+/*
+ * S'il y a un lock pas mit par le user, on regarde si la property à modifier
+ * fait parti des properties lockées (un array vide signifie que toutes les
+ * properties du component sont lockées)
+ * 
+ * @param {document mongoDB} component
+ * @param {string} property : si non renseigné, on veut les accès à toutes les 
+ * properties du component
+ * @returns {Boolean}
+ */
+userHasAccessToComponent = function(component, property) {
+    var userId = Meteor.userId();
+    var lock = Locks.findOne({componentId: component._id});
+    if (typeof lock == 'undefined' || lock.userId == Meteor.userId() || lock.userId === null)
+        return true;
+    
+     //lock are not be set by user
+    if ( typeof property === "undefined")//on veut tout
+        return false;
+    else {
+        if (lock.properties.toString().indexOf(property) === -1)
+            return true;
+        else
+            return false;
+    }
+
+};
         
