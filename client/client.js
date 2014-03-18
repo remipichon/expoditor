@@ -65,11 +65,11 @@ Meteor.startup(function() {
     getSlideshowModel({title: 'test1'});
 
 });
+
 /*
  * listen to change on remote
  * TODO : manage remoteMode
- * TODO : deleguer la gestion de la class active à Handelbars via le helper isActive
- * TODO : l'autorun ne doit recompure qu'au changement de Remote.findOne
+ * TODO : l'autorun ne doit recompute qu'au changement de Remote.findOne
  */
 Deps.autorun(function() {
     var remote = Remote.findOne({}); //le client n'a qu'une remote
@@ -301,15 +301,27 @@ Template.jmpressSlide.rendered = function() {
      * ajoutée par Handelbars puis supprimer le DOM de cette slide là
      */
     if ($("#jmpress-container").jmpress('initialized')) {
-        console.log("update de la slide ", this.data._id, " jmpress to ", posX * ratio, posY * ratio);
 
-        //maj de la slide jmpress
-        var slideToMaj = $("#jmpress-container >div #" + this.data._id);
-        slideToMaj.attr("data-x", parseInt(posX) * ratio).attr("data-y", parseInt(posY) * ratio);
-        $("#jmpress-container").jmpress('init', slideToMaj);
 
+
+        var $slideToMaj = $("#jmpress-container >div #" + this.data._id);
+
+        if ( $slideToMaj.length === 0) {
+            console.log("create slide ", this.data._id, " jmpress to ", posX * ratio, posY * ratio);
+            var $newSlide = $("#jmpress-container > #" + this.data._id);
+            $("#jmpress-container > div").append($newSlide);
+            $("#jmpress-container").jmpress('init', $newSlide);
+            setTimeout(function(){ ///WOUW SUCH MAGIC ! 
+                //je ne comprends vraiment pas pourquoi il faut un timeout qui reappend la slide...
+                 $("#jmpress-container > div").append($newSlide);
+            },500);
+        } else {
+            console.log("update de la slide ", this.data._id, " jmpress to ", posX * ratio, posY * ratio);
+            $slideToMaj.attr("data-x", parseInt(posX) * ratio).attr("data-y", parseInt(posY) * ratio);
+            $("#jmpress-container").jmpress('init', $slideToMaj);
+        }
         //suppression de la slide crée par Handelbars
-        $("#" + this.data._id).remove();
+        $("#jmpress-container >#" + this.data._id).remove();
 
     }
 
@@ -506,7 +518,7 @@ createSlideElement = function(options) {
  * set lock if component is free to edit
  */
 updateWithLocksControler = function(component, field, callback) {
-    if(typeof field !== "undefined" && typeof callback !== "function"){
+    if (typeof field !== "undefined" && typeof callback !== "function") {
         callback = field;
         field = null;
     }
@@ -555,7 +567,7 @@ removeLocksControler = function(component) {
 };
 
 updateSlideTitleControler = function(slide) {
-    updateWithLocksControler(slide,"title", updateSlideTitleModel);
+    updateWithLocksControler(slide, "title", updateSlideTitleModel);
 };
 
 updateSlideTitleModel = function(slide) {
