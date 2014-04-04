@@ -1,7 +1,8 @@
 
 
 /*
- * TODO : rendre generique le selecteur CSS pour les container
+ * TODO : rendre generique les selecteurs CSS pour les container
+ * How to do it properly ?
  */
 
 
@@ -71,20 +72,42 @@ Meteor.startup(function() {
  * TODO : manage remoteMode
  * TODO : l'autorun ne doit recompute qu'au changement de Remote.findOne
  */
-Deps.autorun(function() {
-    var remote = Remote.findOne({}); //le client n'a qu'une remote
-    if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
-        var type = Session.get("clientMode");
-        if (type === "jmpress") {
-            console.log("follow slide !");
-            $("#jmpress-container").jmpress("goTo", "#" + remote.activeSlideId);
-        } else if (type === "deck") {
-            $.deck("go", remote.activeSlideId);
-        } else {
-            console.log("remote slide active state changed to ", remote.activeSlideId);
+Remote.find({}).observeChanges({
+    changed: function(id, fields) {
+        console.log("remote changed !!")
+        var remote = Remote.findOne({_id:id});
+        
+        if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
+            var type = Session.get("clientMode");
+            if (type === "jmpress") {
+                console.log("follow slide !");
+                $("#jmpress-container").jmpress("goTo", "#" + remote.activeSlideId);
+            } else if (type === "deck") {
+                $.deck("go", remote.activeSlideId);
+            } else {
+                console.log("remote slide active state changed to ", remote.activeSlideId);
+            }
         }
     }
 });
+
+//Deps.autorun(function() {
+//    var remote = Remote.findOne({}); //le client n'a qu'une remote
+//    if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
+//        var type = Session.get("clientMode");
+//        if (type === "jmpress") {
+//            console.log("follow slide !");
+//            $("#jmpress-container").jmpress("goTo", "#" + remote.activeSlideId);
+//        } else if (type === "deck") {
+//            $.deck("go", remote.activeSlideId);
+//        } else {
+//            console.log("remote slide active state changed to ", remote.activeSlideId);
+//        }
+//    }
+//});
+
+
+
 
 
 
@@ -269,13 +292,15 @@ Template.elementsArea.elements = function() {
 
 
 
+
 /*
  * callback of render to add draggable when edit
  */
 Template.editorSlide.rendered = function() {
+
 //    return;
     console.log("slide.rendered for editor", this.data._id);
-    var self = this;
+    self = this;
     var $slide = $(self.find(".slide"));
     var $slide = $("#" + this.data._id);
 
@@ -350,7 +375,7 @@ Template.jmpressSlide.destroyed = function() {
 
     var self = this;
     setTimeout(function() {
-        $("#jmpress-container #" + self.data._id).addClass("lymbe").css("display", "none"); 
+        $("#jmpress-container #" + self.data._id).addClass("lymbe").css("display", "none");
 
 //       s'il n'y a plus de slide et que le client mode n'est plus jmpress, il faut deinit jmpress
         if ($("#jmpress-container >div >:not(.lymbe)").length === 0 && Session.get("clientMode") !== "jmpress") {
@@ -361,7 +386,7 @@ Template.jmpressSlide.destroyed = function() {
                 $("#jmpress-container").children().remove();
             }, 500);
         }
-    }, 500); 
+    }, 500);
 
 };
 

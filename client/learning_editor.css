@@ -3,9 +3,9 @@
 
 #editor-container >.slide{
     width: 90px;
-    height: 150px;
+    height: 70px;
     color: blue; 
-    border : dashed black 2px;
+    border : dashed black 1px;
     position: absolute;
 }
 

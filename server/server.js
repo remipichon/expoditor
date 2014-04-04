@@ -119,12 +119,11 @@ Meteor.methods({
      * - slideshow : "{title}" 
      * - all slides link to slideshow : "{slidestitle}" 
      * - remote of the slideshow : "{remotetitle}" 
-     * TODO : slidesLock of slides linked to the slideshow
      * TODO : verifier que le user connecté existe dans la db (accessoirement, qu'il soit connecté)
      * TODO : purge slideshowPublished si jamais un user avait précedement les accès à un slideshow
      * (très utile pour la creation des slides notamment)
      * TODO : les clients ne recoivent pas la liste des slideshows dont la slide fait partie ?
-     * TODO : traitement correctement les fin des handlers sur les observeChanges (tableau de handleElement et les handleSlides
+     * TODO : traiter correctement les fin des handlers sur les observeChanges (tableau de handleElement et les handleSlides)
      */
     getSlideshow: function(options, userId) {
         //is the slideshow already publish ?
@@ -249,6 +248,7 @@ Meteor.methods({
 
         Slideshow.remove({_id: slideshowId});
     },
+            
     clearServerData: function() {
         console.log("dev : clear all db's data");
         Slideshow.remove({});

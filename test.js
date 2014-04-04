@@ -203,7 +203,7 @@ clearServerData();
  *                                                                              //losqu'on change la variable de session "clientMode" le
  *                                                                              //Deps.autorum est recompute ce qui provoque des erreurs à l'init.
  *                                                                              //Il faudrait pouvoir faire en sorte que l'autorum ne reagisse qu'au Remote.find
- *                                                                              
+ *                                                                              //====> DONE
  */
 
 
