@@ -1,0 +1,26 @@
+
+@import url(../../css/common.css);
+
+#toolbar {
+	width: 600px;
+}
+
+.wrapper-element{
+	position: absolute;
+	height: 50px;
+}
+
+
+
+#toolbar > > {
+	display: inline-block;
+}
+
+iframe {
+	bordel: 2px red dashed;
+}
+
+.buttonQuitEdit {
+	position: absolute;
+	top: -30px;
+}

@@ -23,14 +23,18 @@ Remote = new Meteor.Collection("remoteSlides");
  * manage live Remote
  ****/
 Meteor.startup(function() {
+    //init toolbar
+    toolbar = setToolbar();
+
+
     //listener jquery pour la remote
     //keypress ne fire pas les arrow sont webkit et IE
-    $(document).on("keypress", function(event) {
+   $(document).on("keypress", function(event) {
         var activeSlide = null;
         if (Session.get("clientMode") === "jmpress") {
-            activeSlide = $("#jmpress-container .active").attr("id");
+            activeSlide = goog.dom.query("#jmpress-container .active").attr("id");
         } else if (Session.get("clientMode") === "deck") {
-            activeSlide = $(".deck-container .deck-current").attr("id");
+            activeSlide = goog.dom.query(".deck-container .deck-current").attr("id");
         }
         console.log("active slide : ", activeSlide);
         if (activeSlide === null)
@@ -66,6 +70,112 @@ Meteor.startup(function() {
     getSlideshowModel({title: 'test1'});
 
 });
+
+///// pooltest for editordragger
+function setToolbar(){
+    var quitEditButton = goog.ui.editor.ToolbarFactory
+    .makeButton('quitEdit', 'Quit edit texte', 'Quit Edit', goog.getCssName('expo-toolbar-quitEdit'));
+
+    // Specify the buttons to add to the toolbar, using built in default buttons.
+  var buttons = [
+    goog.editor.Command.BOLD,
+    goog.editor.Command.ITALIC,
+    goog.editor.Command.UNDERLINE,
+    goog.editor.Command.FONT_COLOR,
+    goog.editor.Command.BACKGROUND_COLOR,
+    goog.editor.Command.FONT_FACE,
+    goog.editor.Command.FONT_SIZE,
+    goog.editor.Command.LINK,
+    goog.editor.Command.UNDO,
+    goog.editor.Command.REDO,
+    goog.editor.Command.UNORDERED_LIST,
+    goog.editor.Command.ORDERED_LIST,
+    goog.editor.Command.INDENT,
+    goog.editor.Command.OUTDENT,
+    goog.editor.Command.JUSTIFY_LEFT,
+    goog.editor.Command.JUSTIFY_CENTER,
+    goog.editor.Command.JUSTIFY_RIGHT,
+    goog.editor.Command.SUBSCRIPT,
+    goog.editor.Command.SUPERSCRIPT,
+    goog.editor.Command.STRIKE_THROUGH,
+    goog.editor.Command.REMOVE_FORMAT,
+
+    quitEditButton
+  ];
+  var myToolbar = goog.ui.editor.DefaultToolbar.makeToolbar(buttons,
+      goog.dom.getElement('toolbar'));
+
+  return myToolbar;
+
+
+
+}
+
+
+//editor
+function makeEditableCallback(e){   
+    //cancel all other editor (if exists)
+    $(".expo-toolbar-quitEdit").trigger("click");
+    console.log("makeEditableCallback", this.id);
+    this.makeEditable();
+
+    var button = goog.dom.query('.expo-toolbar-quitEdit')[0];
+   goog.style.setStyle(button,'display','block');        
+}
+
+function makeUneditableCallback(e){
+    if( this.isUneditable() ) return;
+     console.log("makeUneditableCallback", this.id);
+    this.makeUneditable();
+
+    var button = goog.dom.query('.expo-toolbar-quitEdit')[0];
+    goog.style.setStyle(button,'display','none');     
+}
+
+function updateFieldContents(e) {
+    console.log('content chanded : ',this.getCleanContents());
+  }
+
+function setEditor(idElement){
+    console.log("setEditor ",idElement);
+    var  myField = new goog.editor.Field(idElement);
+    myField.id = idElement;
+    
+    // Create and register all of the editing plugins you want to use.
+    myField.registerPlugin(new goog.editor.plugins.BasicTextFormatter());
+    myField.registerPlugin(new goog.editor.plugins.RemoveFormatting());
+    myField.registerPlugin(new goog.editor.plugins.UndoRedo());
+    myField.registerPlugin(new goog.editor.plugins.ListTabHandler());
+    myField.registerPlugin(new goog.editor.plugins.SpacesTabHandler());
+    myField.registerPlugin(new goog.editor.plugins.EnterHandler());
+    myField.registerPlugin(new goog.editor.plugins.HeaderFormatter());
+    myField.registerPlugin(
+        new goog.editor.plugins.LoremIpsum('Click here to edit'));
+    myField.registerPlugin(
+        new goog.editor.plugins.LinkDialogPlugin());
+    myField.registerPlugin(new goog.editor.plugins.LinkBubble());
+
+    // Hook the toolbar into the field.
+   var myToolbarController =
+      new goog.ui.editor.ToolbarController(myField, toolbar);
+
+    //send data
+    goog.events.listen(myField, goog.editor.Field.EventType.DELAYEDCHANGE,
+        updateFieldContents,myField);
+
+    //manage event
+    //double click pour activer l'édition de texte
+    goog.events.listen(goog.dom.getElement(myField.id),goog.events.EventType.CLICK,makeEditableCallback,'false',  myField);
+   
+    // click on button to disable editor
+    var button = goog.dom.query('.expo-toolbar-quitEdit')[0];
+    goog.style.setStyle(button,'display','none');  
+    goog.events.listen(goog.dom.getElement(button), goog.events.EventType.CLICK, makeUneditableCallback, 'false', myField);
+
+    return myField;
+}
+
+
 
 /*
  * listen to change on remote
@@ -186,17 +296,17 @@ Template.addElement.events({
  ***/
 
 //update title
-Template.editorSlide.events({
+/*Template.editorSlide.events({
     'dblclick': function() {
         updateSlideTitleControler(this);
     }
-});
+});*/
 
 //update pos on move
 /*
  * TODO : reparer le mousemove
  */
-Template.editorSlide.events({
+/*Template.editorSlide.events({
     'mousemove': function(event) {
         return;
         if (event.which == 1) {
@@ -204,38 +314,41 @@ Template.editorSlide.events({
         }
 
     }
-});
+});*/
 
 //update pos slide at the end of a move
-Template.editorSlide.events({
+/*Template.editorSlide.events({
     'mouseup': function(event) {
         console.log("updateSlidePos event call");
-//        return;
+       return;
         updateSlidePos(this, event);
     }
-});
+});*/
 
-Template.deleteSlide.events({
+/*Template.deleteSlide.events({
     "click": function() {
         deleteSlide(this._id);
     }
-});
+});*/
 
 
 //update element
-Template.element.events({
+/*Template.element.events({
     'click': function(event) {
-        console.log("element : edit via prompt");
-        event.stopImmediatePropagation();
-        event.stopPropagation();
-        updateSlideElementControler(this);
+        // console.log("element : edit via prompt");
+        // event.stopImmediatePropagation();
+        // event.stopPropagation();
+        // updateSlideElementControler(this);
+        console.log("element : edit");
+        // pe.DBLCLICK,makeEditableCallback,'false',  myField);
+
     }
-});
+});*/
 
 
 
 
-Template.deleteElement.events({
+/*Template.deleteElement.events({
     'mouseup': function(event) {
         event.stopImmediatePropagation();
         event.stopPropagation();
@@ -247,7 +360,7 @@ Template.deleteElement.events({
         var $element = $(event.target);
         deleteSlideElement(this);
     }
-});
+});*/
 
 
 
@@ -291,7 +404,9 @@ Template.elementsArea.elements = function() {
 };
 
 
-
+Template.element.rendered = function(){
+    setEditor(this.data._id);
+}
 
 /*
  * callback of render to add draggable when edit

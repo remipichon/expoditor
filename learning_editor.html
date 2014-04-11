@@ -1,10 +1,68 @@
 <head>
     <title>learning_editor</title>
+     <script src="http://192.168.1.9:2438/closure-library/closure/goog/base.js"></script> 
+    
+
+     
+
+
+  <script>   
+
+    //dragger
+    goog.require('goog.fx.Dragger');
+    goog.require('goog.dom');
+    goog.require('goog.style');
+
+
+    //add goog.dom.query (jQuery like)
+    s = document.createElement("script");
+    s.type = "text/javascript";
+    s.src = "http://192.168.1.9:2438/query.js";
+    $("head").append(s);
+
+    //editor  
+    goog.require('goog.dom');
+    goog.require('goog.editor.Command');
+    goog.require('goog.editor.Field');
+    goog.require('goog.editor.plugins.BasicTextFormatter');
+    goog.require('goog.editor.plugins.EnterHandler');
+    goog.require('goog.editor.plugins.HeaderFormatter');
+    goog.require('goog.editor.plugins.LinkBubble');
+    goog.require('goog.editor.plugins.LinkDialogPlugin');
+    goog.require('goog.editor.plugins.ListTabHandler');
+    goog.require('goog.editor.plugins.LoremIpsum');
+    goog.require('goog.editor.plugins.RemoveFormatting');
+    goog.require('goog.editor.plugins.SpacesTabHandler');
+    goog.require('goog.editor.plugins.UndoRedo');
+    goog.require('goog.ui.editor.DefaultToolbar');
+    goog.require('goog.ui.editor.ToolbarController');
+  </script>
+
+   <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/common.css">
+  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/button.css" />
+  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/dialog.css" />
+  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/linkbutton.css" />
+  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/menu.css">
+  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/menuitem.css">
+  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/menuseparator.css">
+  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/tab.css" />
+  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/tabbar.css" />
+  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/toolbar.css" />
+  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/colormenubutton.css" />
+  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/palette.css" />
+  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/colorpalette.css" />
+  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/editor/bubble.css" />
+  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/editor/dialog.css" />
+  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/editor/linkdialog.css" />
+  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/editortoolbar.css" />
+
+
     
 </head>
 
 <body>
     {{loginButtons}}
+    {{>toolbar}}
     {{> buttons}}
     <div id="editor-container">
         {{> editorContainer}}
@@ -21,9 +79,13 @@
     
     {{> modalTemplate}}
     
-    
+      
 
 </body>
+
+<template name="toolbar">
+    <div id="toolbar"></div>
+</template>  
 
 <template name="buttons">
     <div id="buttons">
@@ -138,13 +200,13 @@
 
 
 <template name="element">
-    <div class="element">
-        <p id="{{_id}}" contenteditable="true" class="{{type}}">
+    <div id="{{_id}}-wrapper" class="wrapper-element element">
+      {{>deleteElement}}
+        <div id="{{_id}}" class="editor {{type}}">
             {{!#constant}}
                 {{content}}
             {{!/constant}}
-        </p>
-       {{>deleteElement}}
+        </div>       
     </div>
 </template> 
 
@@ -171,7 +233,7 @@
     </div>
 </template>
 
-
+<template name="quitEdit"><input type="button" class="buttonQuitEdit" value="qui edit"></template>
 <template name="deleteSlide"><input type="button" class="deleteSlide" value="X"></template>
 <template name="addElement"><input type="button" class="addElement" value="+"></template>
 <template name="deleteElement"><input type="button" class="deleteElement" value="X"></template>
