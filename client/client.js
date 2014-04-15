@@ -113,7 +113,7 @@ function setToolbar() {
 
 
 //editor
-makeEditableCallback = function (e) {
+makeEditableCallback = function(e) {
     if (updateWithLocksControler(Elements.findOne({
         _id: this.id
     }))) {
@@ -129,7 +129,7 @@ makeEditableCallback = function (e) {
 
 }
 
-makeUneditableCallback = function (e) {
+makeUneditableCallback = function(e) {
     if (this.isUneditable()) return;
 
     removeLocksControler(Elements.findOne({
@@ -139,7 +139,7 @@ makeUneditableCallback = function (e) {
     this.makeUneditable();
 
     var content = this.getCleanContents();
-    updateSlideElementModel.apply(this,[content]);
+    updateSlideElementModel.apply(this, [content]);
 
     var button = goog.dom.query('.expo-toolbar-quitEdit')[0];
     goog.style.setStyle(button, 'display', 'none');
@@ -147,12 +147,12 @@ makeUneditableCallback = function (e) {
 
 updateFieldContents = function(e) {
     var content = this.getCleanContents();
-    console.log('content chanded : ',content);
+    console.log('content chanded : ', content);
     // updateSlideElementModel.apply(this,[content]);
 }
 
 setEditor = function(idElement) {
-    if(typeof idElement === "undefined") return;
+    if (typeof idElement === "undefined") return;
     console.log("setEditor ", idElement);
     var myField = new goog.editor.Field(idElement);
     myField.id = idElement;
@@ -427,23 +427,53 @@ Template.elementsArea.elements = function() {
 
 
 Template.element.rendered = function() {
-   setEditor(this.data._id);
+    console.log("render elemen",this);
+    setEditor(this.data._id);
+
+
+console.log("render elemen : set dragg");
+    
+    var caca = {};
+    caca.id = this.data._id;
+    var dragger = new goog.fx.Dragger(goog.dom.getElement(this.data._id+'-wrapper'));
+    goog.events.listen(dragger, 'start', startDrag);
+    goog.events.listen(dragger, 'drag', preventDrag);
+    goog.events.listen(dragger, 'end', updateElementPos, 'false', caca);
+
+}
+
+preventDrag = function(e){
+    console.log('preventDrag',e);
+    e.stopPropagation();
 }
 
 /*
  * callback of render to add draggable when edit
  */
+
 Template.editorSlide.rendered = function() {
 
     //    return;
     console.log("slide.rendered for editor", this.data._id);
     self = this;
-    var $slide = $(self.find(".slide"));
-    var $slide = $("#" + this.data._id);
+     $slide = $(self.find(".slide"));
+     $slide = $("#" + this.data._id);
 
     $slide.draggable();
+    var caca = {};
+    caca.id = this.data._id;
+    var dragger = new goog.fx.Dragger(goog.dom.getElement(this.data._id));
+    goog.events.listen(dragger, 'start', startDragSlide);
+    goog.events.listen(dragger, 'end', updateSlidePos, 'false', caca);
+
 };
 
+startDragSlide = function() {
+    console.log("slide drag")
+}
+startDrag = function() {
+    console.log("elmentstart drag")
+}
 /*
  * callback of render to move jmpress slide
  */
@@ -568,14 +598,17 @@ Template.jmpressSlide.getJmpressData = function(axis) {
 
 };
 
-Template.editorSlide.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
+Template.editorSlide.getEditorData = 
+
+function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
     var ratio = 1;
+    // console.log('editorSlide',this);
     switch (axis) {
         case "x":
-            var coord = parseInt(this.displayOptions.jmpress.positions.x) * ratio;
+            var coord = parseInt(this.displayOptions.editor.positions.x) * ratio;
             break;
         case "y":
-            var coord = parseInt(this.displayOptions.jmpress.positions.y) * ratio;
+            var coord = parseInt(this.displayOptions.editor.positions.y) * ratio;
             break;
         case "z":
             var coord = 0;
@@ -586,6 +619,27 @@ Template.editorSlide.getEditorData = function(axis) { //pas encore utilisé à c
     }
     return coord;
 };
+
+Template.element.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
+    var ratio = 1;
+    console.log('editorSlide',this);
+    switch (axis) {
+        case "x":
+            var coord = parseInt(this.displayOptions.editor.positions.x) * ratio;
+            break;
+        case "y":
+            var coord = parseInt(this.displayOptions.editor.positions.y) * ratio;
+            break;
+        case "z":
+            var coord = 0;
+            break;
+        default:
+            return "";
+
+    }
+    return coord;
+};
+
 
 
 /**************
@@ -656,6 +710,13 @@ createSlide = function(options) {
         slideshowReference: [Slideshow.findOne({})._id],
         elements: [],
         displayOptions: {
+            editor: {
+                positions: {
+                    x: left,
+                    y: top,
+                    z: 0
+                }
+            },
             jmpress: {
                 positions: {
                     x: left,
@@ -688,7 +749,21 @@ createSlideElement = function(options) {
             options.slideId
         ],
         content: content,
-        type: "text"
+        type: "text",
+        displayOptions: {
+            editor: {
+                positions: {
+                    x: 0,
+                    y: 0
+                }
+            },
+            jmpress: {
+                positions: {
+                    x: 0,
+                    y: 0
+                }
+            }
+        }
     });
 };
 
@@ -782,8 +857,11 @@ updateSlideTitleModel = function(slide) {
 /*
  * TODO : remettre au gout du jour le getCloserSlide
  */
-updateSlidePos = function(slide, event) {
-    var $slide = $("#" + slide._id);
+updateSlidePos = function(slide) {
+    truc = this;
+    slide.id = this.id;
+
+    var $slide = $("#" + this.id);
     var top = parseInt($slide.css('top'));
     var left = parseInt($slide.css('left'));
     var pos = {
@@ -792,8 +870,12 @@ updateSlidePos = function(slide, event) {
         z: 0
     };
 
+    slide = Slides.findOne({
+        _id: this.id
+    });
+
     //petite verif que la slide a effectivement bougée
-    if (slide.displayOptions.jmpress.positions.x == left && slide.displayOptions.jmpress.positions.y == top) {
+    if (slide.displayOptions.editor.positions.x == left && slide.displayOptions.editor.positions.y == top) {
         console.log("updateSlidePosMove : slide didn't really move");
         return;
     }
@@ -810,7 +892,41 @@ updateSlidePos = function(slide, event) {
 
     return Slides.update(slide._id, {
         $set: {
+            "displayOptions.editor.positions": pos,
             "displayOptions.jmpress.positions": pos
+        }
+    });
+};
+
+updateElementPos = function(slide) {
+    truc = this;
+    slide.id = this.id;
+
+    var $slide = $("#" + this.id+'-wrapper')
+    var top = parseInt($slide.css('top'));
+    var left = parseInt($slide.css('left'));
+    var pos = {
+        x: left,
+        y: top,
+        z: 0
+    };
+
+    elements = Elements.findOne({
+        _id: this.id
+    });
+    console.log("updateelementPos",elements, pos,$slide,this.id);
+
+    //petite verif que la slide a effectivement bougée
+    if (elements.displayOptions.editor.positions.x == left && elements.displayOptions.editor.positions.y == top) {
+        console.log("updaterlrmnntePosMove : element didn't really move");
+        return;
+    }
+
+
+    return Elements.update(slide.id, {
+        $set: {
+            "displayOptions.editor.positions": pos,
+             "displayOptions.jmpress.positions": pos
         }
     });
 };

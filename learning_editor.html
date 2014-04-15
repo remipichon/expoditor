@@ -1,6 +1,6 @@
 <head>
     <title>learning_editor</title>
-     <script src="http://192.168.1.9:2438/closure-library/closure/goog/base.js"></script> 
+     <script src='http://192.168.1.9:2438/closure-library/closure/goog/base.js'></script> 
     
 
      
@@ -15,10 +15,10 @@
 
 
     //add goog.dom.query (jQuery like)
-    s = document.createElement("script");
-    s.type = "text/javascript";
-    s.src = "http://192.168.1.9:2438/query.js";
-    $("head").append(s);
+    s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.src = 'http://192.168.1.9:2438/query.js';
+    $('head').append(s);
 
     //editor  
     goog.require('goog.dom');
@@ -38,23 +38,23 @@
     goog.require('goog.ui.editor.ToolbarController');
   </script>
 
-   <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/common.css">
-  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/button.css" />
-  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/dialog.css" />
-  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/linkbutton.css" />
-  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/menu.css">
-  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/menuitem.css">
-  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/menuseparator.css">
-  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/tab.css" />
-  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/tabbar.css" />
-  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/toolbar.css" />
-  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/colormenubutton.css" />
-  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/palette.css" />
-  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/colorpalette.css" />
-  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/editor/bubble.css" />
-  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/editor/dialog.css" />
-  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/editor/linkdialog.css" />
-  <link rel="stylesheet" href="http://192.168.1.9:2438/closure-library/closure/goog/css/editortoolbar.css" />
+   <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/common.css'>
+  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/button.css' />
+  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/dialog.css' />
+  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/linkbutton.css' />
+  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/menu.css'>
+  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/menuitem.css'>
+  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/menuseparator.css'>
+  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/tab.css' />
+  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/tabbar.css' />
+  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/toolbar.css' />
+  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/colormenubutton.css' />
+  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/palette.css' />
+  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/colorpalette.css' />
+  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/editor/bubble.css' />
+  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/editor/dialog.css' />
+  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/editor/linkdialog.css' />
+  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/editortoolbar.css' />
 
 
     
@@ -64,15 +64,15 @@
     {{loginButtons}}
     {{>toolbar}}
     {{> buttons}}
-    <div id="editor-container">
+    <div id='editor-container'>
         {{> editorContainer}}
     </div>
     
-    <div id="jmpress-container">
+    <div id='jmpress-container'>
         {{> jmpressContainer}}
     </div>
     
-    <div class="deck-container">
+    <div class='deck-container'>
         {{> deckContainer}}
     </div>
     
@@ -83,12 +83,12 @@
 
 </body>
 
-<template name="toolbar">
-    <div id="toolbar"></div>
+<template name='toolbar'>
+    <div id='toolbar'></div>
 </template>  
 
-<template name="buttons">
-    <div id="buttons">
+<template name='buttons'>
+    <div id='buttons'>
         <p>
             {{> createSlideshow}}
             {{> updateSlideshow}}
@@ -103,19 +103,19 @@
         </p>
     </div>
 </template>
-<template name="createSlide"><input id="createSlide" class="button" type="button" value="createSlide"/></template>
-<template name="loadEditor"><input id="loadEditor" class="button" type="button" value="loadEditor" /></template>
-<template name="loadJmpress"><input id="loadJmpress" class="button" type="button" value="loadJmpress"/></template>
-<template name="loadDeck"><input id="loadDeck" class="button" type="button" value="loadDeck"/></template>
+<template name='createSlide'><input id='createSlide' class='button' type='button' value='createSlide'/></template>
+<template name='loadEditor'><input id='loadEditor' class='button' type='button' value='loadEditor' /></template>
+<template name='loadJmpress'><input id='loadJmpress' class='button' type='button' value='loadJmpress'/></template>
+<template name='loadDeck'><input id='loadDeck' class='button' type='button' value='loadDeck'/></template>
 
-<template name="createSlideshow"><input id="createSlideshow" class="button" type="button" value="createSlideshow"/></template>
-<template name="updateSlideshow"><input id="updateSlideshow" class="button" type="button" value="updateSlideshow"/></template>
-<template name="deleteSlideshow"><input id="deleteSlideshow" class="button" type="button" value="deleteSlideshow"/></template>
-<template name="loadSlideshow"><input id="loadSlideshow" class="button" type="button" value="loadSlideshow"/></template>
+<template name='createSlideshow'><input id='createSlideshow' class='button' type='button' value='createSlideshow'/></template>
+<template name='updateSlideshow'><input id='updateSlideshow' class='button' type='button' value='updateSlideshow'/></template>
+<template name='deleteSlideshow'><input id='deleteSlideshow' class='button' type='button' value='deleteSlideshow'/></template>
+<template name='loadSlideshow'><input id='loadSlideshow' class='button' type='button' value='loadSlideshow'/></template>
 
 
 
-<template name="editorContainer">  
+<template name='editorContainer'>  
     {{!#each slideshow}}
     {{#each slides}}
          {{> editorSlide}}
@@ -123,7 +123,7 @@
     {{!/each}}
 </template>
 
-<template name="jmpressContainer">  
+<template name='jmpressContainer'>  
     {{!#each slideshow}}
     {{#each slides}}
          {{> jmpressSlide}}
@@ -131,7 +131,7 @@
     {{!/each}}
 </template>
 
-<template name="deckContainer">   
+<template name='deckContainer'>   
     {{!#each slideshow}}
     {{#each slides}}
          {{> deckSlide}}
@@ -139,9 +139,9 @@
     {{!/each}}
 </template>
 
-<template name="editorSlide">
+<template name='editorSlide'>
 
-    <div id="{{_id}}" class="slide {{isActive}}" style="top:{{getEditorData "y"}}px; left:{{getEditorData "x"}}px"> 
+    <div id='{{_id}}' class='slide {{isActive}}' style='top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px'> 
          {{> deleteSlide }}
          {{> addElement }}
          <p class='title'> {{informations.title}} </p>
@@ -151,10 +151,10 @@
     
 </template> 
 
-<template name="jmpressSlide">
+<template name='jmpressSlide'>
     {{!#constant}}
-    <div id="{{_id}}" class="step slide" 
-         {{getJmpressData "x"}} {{getJmpressData "y"}} {{getJmpressData "z"}}>
+    <div id='{{_id}}' class='step slide' 
+         {{getJmpressData 'x'}} {{getJmpressData 'y'}} {{getJmpressData 'z'}}>
         
          <p class='title'> {{informations.title}} </p>
          
@@ -165,23 +165,23 @@
     
 </template> 
 
-<template name="deckSlide">
+<template name='deckSlide'>
 
-    <section id="{{_id}}" class="slide">        
+    <section id='{{_id}}' class='slide'>        
          <h1> {{informations.title}} </h1>         
          {{> elementsArea}}
     </section>  
     
 </template> 
 
-<template name="elementsArea">
+<template name='elementsArea'>
 
-    <div class="elementsArea">
+    <div class='elementsArea'>
         
         {{#each elements}}  
-             {{!#labelBranch _id}}
+            
                  {{> element}}
-             {{!/labelBranch}}  
+
          {{/each}}
          
         {{#isolate}}
@@ -199,10 +199,10 @@
 </template>
 
 
-<template name="element">
-    <div id="{{_id}}-wrapper" class="wrapper-element element">
+<template name='element'>
+    <div id='{{_id}}-wrapper' class='wrapper-element element' style='top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px' >
       {{>deleteElement}}
-        <div id="{{_id}}" class="editor {{type}}">
+        <div id='{{_id}}' class='editor {{type}}'>
             {{!#constant}}
                 {{content}}
             {{!/constant}}
@@ -210,9 +210,9 @@
     </div>
 </template> 
 
-<template name="elementConstant">
-    <div class="element">
-        <p id="{{_id}}" contenteditable="true" class="{{type}}">
+<template name='elementConstant'>
+    <div class='element'>
+        <p id='{{_id}}' contenteditable='true' class='{{type}}'>
             {{#constant}}
                 {{content}}
             {{/constant}}
@@ -222,9 +222,9 @@
     {{>deleteElement}}
 </template>
 
-<template name="elementTextArea">
-    <div class="element">
-        <textarea row="30" cols="30" id="{{_id}}" class="{{type}}">
+<template name='elementTextArea'>
+    <div class='element'>
+        <textarea row='30' cols='30' id='{{_id}}' class='{{type}}'>
             {{!#constant}}
                 {{content}}
             {{!/constant}}
@@ -233,16 +233,16 @@
     </div>
 </template>
 
-<template name="quitEdit"><input type="button" class="buttonQuitEdit" value="qui edit"></template>
-<template name="deleteSlide"><input type="button" class="deleteSlide" value="X"></template>
-<template name="addElement"><input type="button" class="addElement" value="+"></template>
-<template name="deleteElement"><input type="button" class="deleteElement" value="X"></template>
+<template name='quitEdit'><input type='button' class='buttonQuitEdit' value='qui edit'></template>
+<template name='deleteSlide'><input type='button' class='deleteSlide' value='X'></template>
+<template name='addElement'><input type='button' class='addElement' value='+'></template>
+<template name='deleteElement'><input type='button' class='deleteElement' value='X'></template>
 
 
 
-<template name="modalTemplate">
+<template name='modalTemplate'>
     {{#if isVisible}}
-        <div id="modalSelectSlideshow">
+        <div id='modalSelectSlideshow'>
 
             <div>
                 <p> Choose a slideshow to load </p>
@@ -259,16 +259,16 @@
    {{/if}}
 </template>
 
-<template name="cancel">
-   <input class="cancel button" type="button" value="cancel"/> 
+<template name='cancel'>
+   <input class='cancel button' type='button' value='cancel'/> 
 </template>
 
-<template name="validate">
-   <input class="validate button" type="button" value="validate"/> 
+<template name='validate'>
+   <input class='validate button' type='button' value='validate'/> 
 </template>
 
-<template name="listSlideshow">
+<template name='listSlideshow'>
     {{#each slideshowList}}
-            <input type="button" value="{{this}}"/>
+            <input type='button' value='{{this}}'/>
     {{/each}}
 </template>
