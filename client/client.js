@@ -1,5 +1,3 @@
-
-
 /*
  * TODO : rendre generique les selecteurs CSS pour les container
  * How to do it properly ?
@@ -29,7 +27,7 @@ Meteor.startup(function() {
 
     //listener jquery pour la remote
     //keypress ne fire pas les arrow sont webkit et IE
-   $(document).on("keypress", function(event) {
+    $(document).on("keypress", function(event) {
         var activeSlide = null;
         if (Session.get("clientMode") === "jmpress") {
             activeSlide = goog.dom.query("#jmpress-container .active").attr("id");
@@ -53,7 +51,7 @@ Meteor.startup(function() {
             case 8: // space
                 setActive(activeSlide);
                 break;
-            case 32 : // space
+            case 32: // space
                 setActive(activeSlide);
                 break;
             case 40: // down
@@ -67,45 +65,47 @@ Meteor.startup(function() {
 
     console.log("init pres pour test");
     Session.set("clientMode", "editor");
-    getSlideshowModel({title: 'test1'});
+    getSlideshowModel({
+        title: 'test1'
+    });
 
 });
 
 ///// pooltest for editordragger
-function setToolbar(){
+function setToolbar() {
     var quitEditButton = goog.ui.editor.ToolbarFactory
-    .makeButton('quitEdit', 'Quit edit texte', 'Quit Edit', goog.getCssName('expo-toolbar-quitEdit'));
+        .makeButton('quitEdit', 'Quit edit texte', 'Quit Edit', goog.getCssName('expo-toolbar-quitEdit'));
 
     // Specify the buttons to add to the toolbar, using built in default buttons.
-  var buttons = [
-    goog.editor.Command.BOLD,
-    goog.editor.Command.ITALIC,
-    goog.editor.Command.UNDERLINE,
-    goog.editor.Command.FONT_COLOR,
-    goog.editor.Command.BACKGROUND_COLOR,
-    goog.editor.Command.FONT_FACE,
-    goog.editor.Command.FONT_SIZE,
-    goog.editor.Command.LINK,
-    goog.editor.Command.UNDO,
-    goog.editor.Command.REDO,
-    goog.editor.Command.UNORDERED_LIST,
-    goog.editor.Command.ORDERED_LIST,
-    goog.editor.Command.INDENT,
-    goog.editor.Command.OUTDENT,
-    goog.editor.Command.JUSTIFY_LEFT,
-    goog.editor.Command.JUSTIFY_CENTER,
-    goog.editor.Command.JUSTIFY_RIGHT,
-    goog.editor.Command.SUBSCRIPT,
-    goog.editor.Command.SUPERSCRIPT,
-    goog.editor.Command.STRIKE_THROUGH,
-    goog.editor.Command.REMOVE_FORMAT,
+    var buttons = [
+        goog.editor.Command.BOLD,
+        goog.editor.Command.ITALIC,
+        goog.editor.Command.UNDERLINE,
+        goog.editor.Command.FONT_COLOR,
+        goog.editor.Command.BACKGROUND_COLOR,
+        goog.editor.Command.FONT_FACE,
+        goog.editor.Command.FONT_SIZE,
+        goog.editor.Command.LINK,
+        goog.editor.Command.UNDO,
+        goog.editor.Command.REDO,
+        goog.editor.Command.UNORDERED_LIST,
+        goog.editor.Command.ORDERED_LIST,
+        goog.editor.Command.INDENT,
+        goog.editor.Command.OUTDENT,
+        goog.editor.Command.JUSTIFY_LEFT,
+        goog.editor.Command.JUSTIFY_CENTER,
+        goog.editor.Command.JUSTIFY_RIGHT,
+        goog.editor.Command.SUBSCRIPT,
+        goog.editor.Command.SUPERSCRIPT,
+        goog.editor.Command.STRIKE_THROUGH,
+        goog.editor.Command.REMOVE_FORMAT,
 
-    quitEditButton
-  ];
-  var myToolbar = goog.ui.editor.DefaultToolbar.makeToolbar(buttons,
-      goog.dom.getElement('toolbar'));
+        quitEditButton
+    ];
+    var myToolbar = goog.ui.editor.DefaultToolbar.makeToolbar(buttons,
+        goog.dom.getElement('toolbar'));
 
-  return myToolbar;
+    return myToolbar;
 
 
 
@@ -113,34 +113,51 @@ function setToolbar(){
 
 
 //editor
-function makeEditableCallback(e){   
-    //cancel all other editor (if exists)
-    $(".expo-toolbar-quitEdit").trigger("click");
-    console.log("makeEditableCallback", this.id);
-    this.makeEditable();
+makeEditableCallback = function (e) {
+    if (updateWithLocksControler(Elements.findOne({
+        _id: this.id
+    }))) {
+        //cancel all other editor (if exists)
+        $(".expo-toolbar-quitEdit").trigger("click");
+        console.log("makeEditableCallback", this.id);
+        this.makeEditable();
 
-    var button = goog.dom.query('.expo-toolbar-quitEdit')[0];
-   goog.style.setStyle(button,'display','block');        
+        var button = goog.dom.query('.expo-toolbar-quitEdit')[0];
+        goog.style.setStyle(button, 'display', 'block');
+    }
+
+
 }
 
-function makeUneditableCallback(e){
-    if( this.isUneditable() ) return;
-     console.log("makeUneditableCallback", this.id);
+makeUneditableCallback = function (e) {
+    if (this.isUneditable()) return;
+
+    removeLocksControler(Elements.findOne({
+        _id: this.id
+    }));
+    console.log("makeUneditableCallback", this.id);
     this.makeUneditable();
 
+    var content = this.getCleanContents();
+    updateSlideElementModel.apply(this,[content]);
+
     var button = goog.dom.query('.expo-toolbar-quitEdit')[0];
-    goog.style.setStyle(button,'display','none');     
+    goog.style.setStyle(button, 'display', 'none');
 }
 
-function updateFieldContents(e) {
-    console.log('content chanded : ',this.getCleanContents());
-  }
+updateFieldContents = function(e) {
+    var content = this.getCleanContents();
+    console.log('content chanded : ',content);
+    // updateSlideElementModel.apply(this,[content]);
+}
 
-function setEditor(idElement){
-    console.log("setEditor ",idElement);
-    var  myField = new goog.editor.Field(idElement);
+setEditor = function(idElement) {
+    if(typeof idElement === "undefined") return;
+    console.log("setEditor ", idElement);
+    var myField = new goog.editor.Field(idElement);
     myField.id = idElement;
-    
+    myField._id = idElement; //pour coller à miniMongo
+
     // Create and register all of the editing plugins you want to use.
     myField.registerPlugin(new goog.editor.plugins.BasicTextFormatter());
     myField.registerPlugin(new goog.editor.plugins.RemoveFormatting());
@@ -156,25 +173,24 @@ function setEditor(idElement){
     myField.registerPlugin(new goog.editor.plugins.LinkBubble());
 
     // Hook the toolbar into the field.
-   var myToolbarController =
-      new goog.ui.editor.ToolbarController(myField, toolbar);
+    var myToolbarController =
+        new goog.ui.editor.ToolbarController(myField, toolbar);
 
     //send data
     goog.events.listen(myField, goog.editor.Field.EventType.DELAYEDCHANGE,
-        updateFieldContents,myField);
+        updateFieldContents, myField);
 
     //manage event
     //double click pour activer l'édition de texte
-    goog.events.listen(goog.dom.getElement(myField.id),goog.events.EventType.CLICK,makeEditableCallback,'false',  myField);
-   
+    goog.events.listen(goog.dom.getElement(myField.id), goog.events.EventType.CLICK, makeEditableCallback, 'false', myField);
+
     // click on button to disable editor
     var button = goog.dom.query('.expo-toolbar-quitEdit')[0];
-    goog.style.setStyle(button,'display','none');  
+    goog.style.setStyle(button, 'display', 'none');
     goog.events.listen(goog.dom.getElement(button), goog.events.EventType.CLICK, makeUneditableCallback, 'false', myField);
 
     return myField;
 }
-
 
 
 /*
@@ -185,8 +201,10 @@ function setEditor(idElement){
 Remote.find({}).observeChanges({
     changed: function(id, fields) {
         console.log("remote changed !!")
-        var remote = Remote.findOne({_id:id});
-        
+        var remote = Remote.findOne({
+            _id: id
+        });
+
         if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
             var type = Session.get("clientMode");
             if (type === "jmpress") {
@@ -218,11 +236,8 @@ Remote.find({}).observeChanges({
 
 
 
-
-
-
 /******
- * events sur les templates * 
+ * events sur les templates *
  ******/
 /***
  * buttons
@@ -255,7 +270,10 @@ Template.createSlide.events({
     'click input': function() {
         var d = new Date;
         var title = d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
-        createSlide({title: title, type: 'default'});
+        createSlide({
+            title: title,
+            type: 'default'
+        });
     }
 });
 
@@ -286,7 +304,9 @@ Template.addElement.events({
         event.stopPropagation();
         var $element = $(event.target);
         var slideId = $element.parent(".slide").attr("id");
-        createSlideElement({slideId: slideId});
+        createSlideElement({
+            slideId: slideId
+        });
     }
 });
 
@@ -347,7 +367,6 @@ Template.addElement.events({
 
 
 
-
 /*Template.deleteElement.events({
     'mouseup': function(event) {
         event.stopImmediatePropagation();
@@ -397,15 +416,18 @@ Template.deckContainer.slides = function() {
 
 
 
-
 Template.elementsArea.elements = function() {
-    return Elements.find({slideReference: {$in: [this._id]}});
+    return Elements.find({
+        slideReference: {
+            $in: [this._id]
+        }
+    });
 
 };
 
 
-Template.element.rendered = function(){
-    setEditor(this.data._id);
+Template.element.rendered = function() {
+   setEditor(this.data._id);
 }
 
 /*
@@ -413,7 +435,7 @@ Template.element.rendered = function(){
  */
 Template.editorSlide.rendered = function() {
 
-//    return;
+    //    return;
     console.log("slide.rendered for editor", this.data._id);
     self = this;
     var $slide = $(self.find(".slide"));
@@ -473,13 +495,13 @@ Template.jmpressSlide.rendered = function() {
  * A la suppression de la slide, jmpress doit deinit la slide mais il laisse
  * le dom dans le jmpress-container>div, on ajoute la classe "lymbe" pour signifier
  * que c'est une slide morte. Il faut laisser le DOM pour que le deinit du container jmpress
- * puisque fonctionner. 
- * 
- * Lorsqu'il ne reste plus que des slides "lymbe" et que le client n'est pas (plus) en 
+ * puisque fonctionner.
+ *
+ * Lorsqu'il ne reste plus que des slides "lymbe" et que le client n'est pas (plus) en
  * jmpress mode, il faut deinit l'ensemble du container et procéder à la suppression
  * des slides que jmpress déplace dans jmpress-container. On n'en a plus besoin ici.
- * 
- * Le traitement n'est pas propre mais Jmpress fait sa petite tambouille qu'on ne peut 
+ *
+ * Le traitement n'est pas propre mais Jmpress fait sa petite tambouille qu'on ne peut
  * pas altérer.
  */
 Template.jmpressSlide.destroyed = function() {
@@ -492,7 +514,7 @@ Template.jmpressSlide.destroyed = function() {
     setTimeout(function() {
         $("#jmpress-container #" + self.data._id).addClass("lymbe").css("display", "none");
 
-//       s'il n'y a plus de slide et que le client mode n'est plus jmpress, il faut deinit jmpress
+        //       s'il n'y a plus de slide et que le client mode n'est plus jmpress, il faut deinit jmpress
         if ($("#jmpress-container >div >:not(.lymbe)").length === 0 && Session.get("clientMode") !== "jmpress") {
             console.log("jmpress-container.jmpress.deinit");
             $("#jmpress-container").jmpress("deinit"); //la slide n'existe déja plus dans le DOM, il faut un before destroyed !!!
@@ -506,9 +528,8 @@ Template.jmpressSlide.destroyed = function() {
 };
 
 
-
 /******
- * template method
+ *  method
  ******/
 Template.editorSlide.isActive = function() {
 
@@ -542,7 +563,7 @@ Template.jmpressSlide.getJmpressData = function(axis) {
             return "";
 
     }
-//            console.log(coord, parseInt(this.displayOptions.jmpress.positions.y));
+    //            console.log(coord, parseInt(this.displayOptions.jmpress.positions.y));
     return 'data-' + axis + '=' + coord + '';
 
 };
@@ -568,7 +589,7 @@ Template.editorSlide.getEditorData = function(axis) { //pas encore utilisé à c
 
 
 /**************
- * modal 
+ * modal
  *************/
 Template.modalTemplate.isVisible = function() {
     if (Session.get("modalSelectSlideshow")) {
@@ -601,7 +622,6 @@ Template.listSlideshow.slideshowList = function() {
 
 
 
-
 /*********
  * client methods
  ********/
@@ -628,7 +648,7 @@ createSlide = function(options) {
     console.log("create slide", options.type);
     var top = 50;
     var left = 50;
-    return  Slides.insert({
+    return Slides.insert({
         _id: Random.id(),
         informations: {
             title: options.title
@@ -684,20 +704,29 @@ updateWithLocksControler = function(component, field, callback) {
     }
     console.log("updateWithLocksControler");
 
-    var lock = Locks.findOne({componentId: component._id});
+    var lock = Locks.findOne({
+        componentId: component._id
+    });
     var slideshowId = Slideshow.findOne({})._id;
 
     if (userHasAccessToComponent(component)) {
         var userId = Meteor.userId();
 
         if (typeof lock == 'undefined') {
-            Locks.insert({slideshowId: slideshowId, componentId: component._id, userId: userId, properties: []});
+            Locks.insert({
+                slideshowId: slideshowId,
+                componentId: component._id,
+                userId: userId,
+                properties: []
+            });
         } else {
             Locks.update(
-                    lock._id,
-                    {$set: {
-                            userId: userId, type: 'title'
-                        }});
+                lock._id, {
+                    $set: {
+                        userId: userId,
+                        type: 'title'
+                    }
+                });
         }
         console.log("update component, add lock to component", component._id);
         if (typeof callback === "function")
@@ -714,16 +743,19 @@ updateWithLocksControler = function(component, field, callback) {
 };
 
 removeLocksControler = function(component) {
-    var lock = Locks.findOne({componentId: component._id});
+    var lock = Locks.findOne({
+        componentId: component._id
+    });
     if (typeof lock === "undefined")
         return;
 
     //supression du lock
     Locks.update(
-            lock._id,
-            {$set:
-                        {userId: null}
-            });
+        lock._id, {
+            $set: {
+                userId: null
+            }
+        });
 };
 
 updateSlideTitleControler = function(slide) {
@@ -735,8 +767,10 @@ updateSlideTitleModel = function(slide) {
     var title = prompt("new title", slide.informations.title);
 
     if (title != null) {
-        Slides.update(slide._id, {$set:
-                    {"informations.title": title}
+        Slides.update(slide._id, {
+            $set: {
+                "informations.title": title
+            }
         });
     }
 
@@ -765,17 +799,19 @@ updateSlidePos = function(slide, event) {
     }
 
     //petite verif qu'on se superpose pas avec une slide
-//    var closer = getCloserSlide(slide._id, {x: left + "px", y: top});
-//    console.log(closer.length);
-//    console.log(slide._id,  newTop, newLeft, closer);
-//    console.log(getCloserSlide(slide._id, {x: newTop, y: newLeft}));
-//    if (closer.length != 0) {
-//        console.log("updateSlidePosMove : trop proche d'une slide")
-//        return;
-//    }
+    //    var closer = getCloserSlide(slide._id, {x: left + "px", y: top});
+    //    console.log(closer.length);
+    //    console.log(slide._id,  newTop, newLeft, closer);
+    //    console.log(getCloserSlide(slide._id, {x: newTop, y: newLeft}));
+    //    if (closer.length != 0) {
+    //        console.log("updateSlidePosMove : trop proche d'une slide")
+    //        return;
+    //    }
 
-    return Slides.update(slide._id, {$set:
-                {"displayOptions.jmpress.positions": pos}
+    return Slides.update(slide._id, {
+        $set: {
+            "displayOptions.jmpress.positions": pos
+        }
     });
 };
 
@@ -785,20 +821,20 @@ updateSlidePos = function(slide, event) {
 updateSlidePosMove = function(slide, event) {
     return;
     //histoire de pas trop surcharger le server, on update pas tout le temps
-//    var slideDb = slide;//Slides.findOne({_id: slide._id});
-//    var oldTop = parseInt(slideDb.top);
-//    var oldLeft = parseInt(slideDb.left);
-//    //console.log("newTop",newTop,"oldTop",oldTop);
-//
-//    var distance = Math.sqrt(
-//            Math.pow(newTop - oldTop, 2) + Math.pow(newLeft - oldLeft, 2)
-//            );
-//
-//    //trop courte
-//    if (distance < 5) {
-//        console.log("skip update",distance);
-//        return;
-//    }
+    //    var slideDb = slide;//Slides.findOne({_id: slide._id});
+    //    var oldTop = parseInt(slideDb.top);
+    //    var oldLeft = parseInt(slideDb.left);
+    //    //console.log("newTop",newTop,"oldTop",oldTop);
+    //
+    //    var distance = Math.sqrt(
+    //            Math.pow(newTop - oldTop, 2) + Math.pow(newLeft - oldLeft, 2)
+    //            );
+    //
+    //    //trop courte
+    //    if (distance < 5) {
+    //        console.log("skip update",distance);
+    //        return;
+    //    }
     updateSlidePos(slide, event);
 
 };
@@ -808,21 +844,17 @@ updateSlideElementControler = function(element) {
 };
 
 
-updateSlideElementModel = function(element) {
-    console.log("update element ", element._id);
-    var content = prompt("new title", element.content);
+updateSlideElementModel = function(content) {
+    console.log("update element model");
 
-    if (content != null) {
-        //cancel, pas d'update
+    Elements.update(this._id, {
+        $set: {
+            content: content
+        }
+    });
 
-        Elements.update(element._id,
-                {$set:
-                            {content: content}
-                }
-        );
-    }
 
-    removeLocksControler(element);
+    removeLocksControler(this);
 };
 
 deleteSlideElement = function(element) {
@@ -832,22 +864,22 @@ deleteSlideElement = function(element) {
 
 
 
-
 setActive = function(activeSlide) {
     console.log("setActive in remote", activeSlide);
     var remote = Remote.findOne();
 
-    Remote.update(remote._id,
-            {$set:
-                        {activeSlideId: activeSlide}
-            });
+    Remote.update(remote._id, {
+        $set: {
+            activeSlideId: activeSlide
+        }
+    });
 
 };
 
 
 createSlideshowControler = function(callbackReturn) {
     if (typeof callbackReturn !== "undefined") { //is it the callback ?
-        if (callbackReturn !== 1) {//there was an error
+        if (callbackReturn !== 1) { //there was an error
             alert("an error occured when creating slideshow : " + callbackReturn.reason);
         } else {
             alert("slideshow successfully created");
@@ -857,7 +889,9 @@ createSlideshowControler = function(callbackReturn) {
 
     var title = prompt("Type a title for the new slideshow");
     if (title !== null) {
-        createSlideshowModel({title: title}, createSlideshowControler);
+        createSlideshowModel({
+            title: title
+        }, createSlideshowControler);
     }
 
 
@@ -871,7 +905,10 @@ createSlideshowModel = function(options, callback) {
             callback(error);
         } else {
             console.log("createSlideshow ", result);
-            getSlideshowModel({title: options.title, presentationMode: "default"});
+            getSlideshowModel({
+                title: options.title,
+                presentationMode: "default"
+            });
             callback(1);
         }
     });
@@ -882,7 +919,9 @@ createSlideshowModel = function(options, callback) {
 updateSlideshowControler = function() {
     var presentationMode = Slideshow.findOne({}).presentationMode;
     presentationMode = prompt("Enter a new presentationMode for slideshow (default,hybrid) ", presentationMode);
-    updateSlideshowModel({presentationMode: presentationMode});
+    updateSlideshowModel({
+        presentationMode: presentationMode
+    });
 };
 
 
@@ -892,11 +931,11 @@ updateSlideshowModel = function(options) {
         return;
     }
 
-    Slideshow.update(Slideshow.findOne({})._id,
-            {$set: {
-                    'presentationMode': options.presentationMode
-                }
-            });
+    Slideshow.update(Slideshow.findOne({})._id, {
+        $set: {
+            'presentationMode': options.presentationMode
+        }
+    });
 };
 
 deleteSlideshowControler = function() {
@@ -969,12 +1008,13 @@ getSlideshowControler = function(callbackReturn) {
             return;
         }
         var title = prompt("which slideshow to load ? " + callbackReturn.titlesArray);
-        getSlideshowModel({title: title});
+        getSlideshowModel({
+            title: title
+        });
     } else {
         console.log("getSlideshowControler : error : ", callbackReturn);
     }
 };
-
 
 
 
@@ -985,7 +1025,7 @@ getSlideshowModel = function(options) {
     }
 
     //clean de slideArea, au cas ou
-//    $('#slideArea .slide').remove();
+    //    $('#slideArea .slide').remove();
 
     console.log("getSlideshow ", options);
     Meteor.call("getSlideshow", options, Meteor.userId(), function(error, result) {
