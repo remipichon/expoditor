@@ -1,6 +1,6 @@
 <head>
     <title>learning_editor</title>
-     <script src='http://192.168.1.9:2438/closure-library/closure/goog/base.js'></script> 
+     <script src='http://192.168.1.2:2438/closure-library/closure/goog/base.js'></script> 
     
 
      
@@ -17,7 +17,7 @@
     //add goog.dom.query (jQuery like)
     s = document.createElement('script');
     s.type = 'text/javascript';
-    s.src = 'http://192.168.1.9:2438/query.js';
+    s.src = 'http://192.168.1.2:2438/query.js';
     $('head').append(s);
 
     //editor  
@@ -38,23 +38,23 @@
     goog.require('goog.ui.editor.ToolbarController');
   </script>
 
-   <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/common.css'>
-  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/button.css' />
-  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/dialog.css' />
-  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/linkbutton.css' />
-  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/menu.css'>
-  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/menuitem.css'>
-  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/menuseparator.css'>
-  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/tab.css' />
-  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/tabbar.css' />
-  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/toolbar.css' />
-  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/colormenubutton.css' />
-  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/palette.css' />
-  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/colorpalette.css' />
-  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/editor/bubble.css' />
-  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/editor/dialog.css' />
-  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/editor/linkdialog.css' />
-  <link rel='stylesheet' href='http://192.168.1.9:2438/closure-library/closure/goog/css/editortoolbar.css' />
+   <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/common.css'>
+  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/button.css' />
+  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/dialog.css' />
+  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/linkbutton.css' />
+  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/menu.css'>
+  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/menuitem.css'>
+  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/menuseparator.css'>
+  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/tab.css' />
+  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/tabbar.css' />
+  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/toolbar.css' />
+  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/colormenubutton.css' />
+  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/palette.css' />
+  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/colorpalette.css' />
+  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/editor/bubble.css' />
+  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/editor/dialog.css' />
+  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/editor/linkdialog.css' />
+  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/editortoolbar.css' />
 
 
     
@@ -143,7 +143,7 @@
 
     <div id='{{_id}}' class='slide {{isActive}}' style='top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px'> 
          {{> deleteSlide }}
-         {{> addElement }}
+         {{> createElementTexte }}
          <p class='title'> {{informations.title}} </p>
     
       {{> elementsArea}}
@@ -152,17 +152,13 @@
 </template> 
 
 <template name='jmpressSlide'>
-    {{!#constant}}
+
     <div id='{{_id}}' class='step slide' 
-         {{getJmpressData 'x'}} {{getJmpressData 'y'}} {{getJmpressData 'z'}}>
-        
-         <p class='title'> {{informations.title}} </p>
-         
-      {{> elementsArea}}
-        
-    </div>
-    {{!/constant}}
-    
+         {{getJmpressData 'x'}} {{getJmpressData 'y'}} {{getJmpressData 'z'}}>        
+         <p class='title'> {{informations.title}} </p>         
+      {{> elementsArea}}        
+    </div>    
+
 </template> 
 
 <template name='deckSlide'>
@@ -176,66 +172,29 @@
 
 <template name='elementsArea'>
 
-    <div class='elementsArea'>
-        
-        {{#each elements}}  
-            
-                 {{> element}}
-
-         {{/each}}
-         
-        {{#isolate}}
-        {{#each elementsNotUpdated}} 
-            {{#constant}}
-             {{!#labelBranch _id}}
-                 *_{{> elementConstant}}_*
-             {{!/labelBranch}}  
-             {{/constant}}
-         {{/each}}
-         {{/isolate}}
-         
+    <div class='elementsArea'>        
+        {{#each elements}}              
+          {{> element}}
+        {{/each}}         
     </div>
    
 </template>
 
 
 <template name='element'>
+
     <div id='{{_id}}-wrapper' class='wrapper-element element' style='top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px' >
       {{>deleteElement}}
         <div id='{{_id}}' class='editor {{type}}'>
-            {{!#constant}}
-                {{content}}
-            {{!/constant}}
+            {{content}}
         </div>       
     </div>
+
 </template> 
-
-<template name='elementConstant'>
-    <div class='element'>
-        <p id='{{_id}}' contenteditable='true' class='{{type}}'>
-            {{#constant}}
-                {{content}}
-            {{/constant}}
-        </p>
-       
-    </div>
-    {{>deleteElement}}
-</template>
-
-<template name='elementTextArea'>
-    <div class='element'>
-        <textarea row='30' cols='30' id='{{_id}}' class='{{type}}'>
-            {{!#constant}}
-                {{content}}
-            {{!/constant}}
-        </textarea>
-       {{>deleteElement}}
-    </div>
-</template>
 
 <template name='quitEdit'><input type='button' class='buttonQuitEdit' value='qui edit'></template>
 <template name='deleteSlide'><input type='button' class='deleteSlide' value='X'></template>
-<template name='addElement'><input type='button' class='addElement' value='+'></template>
+<template name='createElementTexte'><input type='button' class='addElement' value='+'></template>
 <template name='deleteElement'><input type='button' class='deleteElement' value='X'></template>
 
 

@@ -16,13 +16,17 @@ Elements = new Meteor.Collection("elements");
 Locks = new Meteor.Collection("lock");
 Remote = new Meteor.Collection("remoteSlides");
 
+//pour conversion editor vers jmpress
+ratio = 5;
+
 
 /*****
  * manage live Remote
  ****/
 Meteor.startup(function() {
-    //init toolbar
+    //init toolbar, global pour l'init des editeurs de textes
     toolbar = setToolbar();
+    
 
 
     //listener jquery pour la remote
@@ -30,9 +34,9 @@ Meteor.startup(function() {
     $(document).on("keypress", function(event) {
         var activeSlide = null;
         if (Session.get("clientMode") === "jmpress") {
-            activeSlide = goog.dom.query("#jmpress-container .active").attr("id");
+            activeSlide = $("#jmpress-container .active").attr("id");
         } else if (Session.get("clientMode") === "deck") {
-            activeSlide = goog.dom.query(".deck-container .deck-current").attr("id");
+            activeSlide = $(".deck-container .deck-current").attr("id");
         }
         console.log("active slide : ", activeSlide);
         if (activeSlide === null)
@@ -68,11 +72,10 @@ Meteor.startup(function() {
     getSlideshowModel({
         title: 'test1'
     });
-
 });
 
-///// pooltest for editordragger
-function setToolbar() {
+
+setToolbar = function() {
     var quitEditButton = goog.ui.editor.ToolbarFactory
         .makeButton('quitEdit', 'Quit edit texte', 'Quit Edit', goog.getCssName('expo-toolbar-quitEdit'));
 
@@ -106,36 +109,31 @@ function setToolbar() {
         goog.dom.getElement('toolbar'));
 
     return myToolbar;
-
-
-
 }
 
 
-//editor
+
 makeEditableCallback = function(e) {
-    if (updateWithLocksControler(Elements.findOne({
-        _id: this.id
+    if (updateWithLocksControler.apply(Elements.findOne({
+        _id: this._id
     }))) {
         //cancel all other editor (if exists)
         $(".expo-toolbar-quitEdit").trigger("click");
-        console.log("makeEditableCallback", this.id);
+        console.log("makeEditableCallback", this._id);
         this.makeEditable();
 
         var button = goog.dom.query('.expo-toolbar-quitEdit')[0];
         goog.style.setStyle(button, 'display', 'block');
     }
-
-
 }
 
 makeUneditableCallback = function(e) {
     if (this.isUneditable()) return;
 
-    removeLocksControler(Elements.findOne({
-        _id: this.id
+    removeLocksControler.call(Elements.findOne({
+        _id: this._id
     }));
-    console.log("makeUneditableCallback", this.id);
+    console.log("makeUneditableCallback", this._id);
     this.makeUneditable();
 
     var content = this.getCleanContents();
@@ -148,12 +146,13 @@ makeUneditableCallback = function(e) {
 updateFieldContents = function(e) {
     var content = this.getCleanContents();
     console.log('content chanded : ', content);
-    // updateSlideElementModel.apply(this,[content]);
+    //updateSlideElementModel.apply(this,[content]);
 }
 
 setEditor = function(idElement) {
     if (typeof idElement === "undefined") return;
     console.log("setEditor ", idElement);
+
     var myField = new goog.editor.Field(idElement);
     myField.id = idElement;
     myField._id = idElement; //pour coller à miniMongo
@@ -201,9 +200,7 @@ setEditor = function(idElement) {
 Remote.find({}).observeChanges({
     changed: function(id, fields) {
         console.log("remote changed !!")
-        var remote = Remote.findOne({
-            _id: id
-        });
+        var remote = Remote.findOne({});
 
         if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
             var type = Session.get("clientMode");
@@ -219,20 +216,7 @@ Remote.find({}).observeChanges({
     }
 });
 
-//Deps.autorun(function() {
-//    var remote = Remote.findOne({}); //le client n'a qu'une remote
-//    if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
-//        var type = Session.get("clientMode");
-//        if (type === "jmpress") {
-//            console.log("follow slide !");
-//            $("#jmpress-container").jmpress("goTo", "#" + remote.activeSlideId);
-//        } else if (type === "deck") {
-//            $.deck("go", remote.activeSlideId);
-//        } else {
-//            console.log("remote slide active state changed to ", remote.activeSlideId);
-//        }
-//    }
-//});
+
 
 
 
@@ -299,13 +283,11 @@ Template.loadDeck.events({
     }
 });
 
-Template.addElement.events({
+Template.createElementTexte.events({
     'click': function(event) {
         event.stopPropagation();
-        var $element = $(event.target);
-        var slideId = $element.parent(".slide").attr("id");
-        createSlideElement({
-            slideId: slideId
+        createElementTexte({
+            slideId: this._id
         });
     }
 });
@@ -316,70 +298,23 @@ Template.addElement.events({
  ***/
 
 //update title
-/*Template.editorSlide.events({
+Template.editorSlide.events({
     'dblclick': function() {
-        updateSlideTitleControler(this);
+        updateSlideTitleControler.call(this);
     }
-});*/
+});
 
-//update pos on move
-/*
- * TODO : reparer le mousemove
- */
-/*Template.editorSlide.events({
-    'mousemove': function(event) {
-        return;
-        if (event.which == 1) {
-            updateSlidePosMove(this, event);
-        }
-
-    }
-});*/
-
-//update pos slide at the end of a move
-/*Template.editorSlide.events({
-    'mouseup': function(event) {
-        console.log("updateSlidePos event call");
-       return;
-        updateSlidePos(this, event);
-    }
-});*/
-
-/*Template.deleteSlide.events({
+Template.deleteSlide.events({
     "click": function() {
-        deleteSlide(this._id);
+        deleteSlide.call(this);
     }
-});*/
+});
 
-
-//update element
-/*Template.element.events({
+Template.deleteElement.events({
     'click': function(event) {
-        // console.log("element : edit via prompt");
-        // event.stopImmediatePropagation();
-        // event.stopPropagation();
-        // updateSlideElementControler(this);
-        console.log("element : edit");
-        // pe.DBLCLICK,makeEditableCallback,'false',  myField);
-
+        deleteSlideElement.call(this);
     }
-});*/
-
-
-
-/*Template.deleteElement.events({
-    'mouseup': function(event) {
-        event.stopImmediatePropagation();
-        event.stopPropagation();
-    },
-    'click': function(event) {
-        console.log("deleteElement ", this._id);
-        event.stopImmediatePropagation();
-        event.stopPropagation();
-        var $element = $(event.target);
-        deleteSlideElement(this);
-    }
-});*/
+});
 
 
 
@@ -414,7 +349,10 @@ Template.deckContainer.slides = function() {
     return Slides.find({});
 };
 
-
+//test
+Template.editorSlide.destroyed = function(){
+    console.log("test editor slide destroyed");
+}
 
 Template.elementsArea.elements = function() {
     return Elements.find({
@@ -422,57 +360,49 @@ Template.elementsArea.elements = function() {
             $in: [this._id]
         }
     });
-
 };
 
 
 Template.element.rendered = function() {
-    console.log("render elemen",this);
+    console.log("render element",this.data._id);
     setEditor(this.data._id);
-
-
-console.log("render elemen : set dragg");
-    
-    var caca = {};
-    caca.id = this.data._id;
+  
+    this.data.id = this.data._id;
     var dragger = new goog.fx.Dragger(goog.dom.getElement(this.data._id+'-wrapper'));
-    goog.events.listen(dragger, 'start', startDrag);
-    goog.events.listen(dragger, 'drag', preventDrag);
-    goog.events.listen(dragger, 'end', updateElementPos, 'false', caca);
-
-}
-
-preventDrag = function(e){
-    console.log('preventDrag',e);
-    e.stopPropagation();
+    goog.events.listen(dragger, 'start', startDragElement,'false',this.data);
+    goog.events.listen(dragger, 'end', endDragElement, 'false', this.data);
 }
 
 /*
  * callback of render to add draggable when edit
  */
-
 Template.editorSlide.rendered = function() {
-
-    //    return;
     console.log("slide.rendered for editor", this.data._id);
-    self = this;
-     $slide = $(self.find(".slide"));
-     $slide = $("#" + this.data._id);
 
-    $slide.draggable();
-    var caca = {};
-    caca.id = this.data._id;
+    this.data.id = this.data._id;
     var dragger = new goog.fx.Dragger(goog.dom.getElement(this.data._id));
-    goog.events.listen(dragger, 'start', startDragSlide);
-    goog.events.listen(dragger, 'end', updateSlidePos, 'false', caca);
-
+    goog.events.listen(dragger, 'start',startDragSlide,'false',this.data);
+    goog.events.listen(dragger, 'end',endSlideElement, 'false', this.data);
 };
 
-startDragSlide = function() {
-    console.log("slide drag")
+startDragSlide = function(e) {
+    e.stopPropagation();
+    $("#"+this._id).toggleClass('dragged');
+    console.log("slide start drag");
 }
-startDrag = function() {
-    console.log("elmentstart drag")
+startDragElement = function(e) {    
+    e.stopPropagation();
+    $("#"+this._id).toggleClass('dragged');
+    e.stopPropagation();
+    console.log("elment start drag")
+}
+endSlideElement = function(e){
+    $("#"+this._id).toggleClass('dragged');
+    updateSlidePos.call(this);
+}
+endDragElement = function(e){
+    $("#"+this._id).toggleClass('dragged');
+    updateElementPos.call(this);
 }
 /*
  * callback of render to move jmpress slide
@@ -483,7 +413,7 @@ Template.jmpressSlide.rendered = function() {
 
     var posX = this.data.displayOptions.jmpress.positions.x;
     var posY = this.data.displayOptions.jmpress.positions.y;
-    var ratio = 10;
+    
 
 
     /*
@@ -514,12 +444,13 @@ Template.jmpressSlide.rendered = function() {
         }
         //suppression de la slide crée par Handelbars
         $("#jmpress-container >#" + this.data._id).remove();
-
     }
-
-
-
 };
+
+//test
+Template.jmpressSlide.created = function(){
+    console.log("jmpress slide created");
+}
 
 /*
  * A la suppression de la slide, jmpress doit deinit la slide mais il laisse
@@ -575,10 +506,8 @@ Template.editorSlide.isActive = function() {
     }
 };
 
-
 Template.jmpressSlide.getJmpressData = function(axis) {
 
-    var ratio = 10;
     switch (axis) {
         case "x":
             var coord = parseInt(this.displayOptions.jmpress.positions.x) * ratio;
@@ -595,12 +524,9 @@ Template.jmpressSlide.getJmpressData = function(axis) {
     }
     //            console.log(coord, parseInt(this.displayOptions.jmpress.positions.y));
     return 'data-' + axis + '=' + coord + '';
-
 };
 
-Template.editorSlide.getEditorData = 
-
-function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
+Template.editorSlide.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
     var ratio = 1;
     // console.log('editorSlide',this);
     switch (axis) {
@@ -622,7 +548,6 @@ function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
 
 Template.element.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
     var ratio = 1;
-    console.log('editorSlide',this);
     switch (axis) {
         case "x":
             var coord = parseInt(this.displayOptions.editor.positions.x) * ratio;
@@ -687,6 +612,8 @@ initDeck = function() {
 
 
 initJmpress = function() {
+    console.log("init jmpress desactivé");
+    return;
     console.log("init jmpress");
     //launch jmpress first time
     $('#jmpress-container').jmpress({
@@ -733,13 +660,13 @@ createSlide = function(options) {
     });
 };
 
-deleteSlide = function(slideId) {
-    console.log("delete slide : ", slideId);
-    Slides.remove(slideId);
+deleteSlide = function() {
+    console.log("delete slide : ", this._id);
+    Slides.remove(this._id);
 };
 
-createSlideElement = function(options) {
-    console.log("create element");
+createElementTexte = function(options) {
+    console.log("create element texte");
     var d = new Date;
     var content = "ele:" + d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
 
@@ -772,7 +699,7 @@ createSlideElement = function(options) {
 /*
  * set lock if component is free to edit
  */
-updateWithLocksControler = function(component, field, callback) {
+updateWithLocksControler = function(field, callback) {
     if (typeof field !== "undefined" && typeof callback !== "function") {
         callback = field;
         field = null;
@@ -780,17 +707,17 @@ updateWithLocksControler = function(component, field, callback) {
     console.log("updateWithLocksControler");
 
     var lock = Locks.findOne({
-        componentId: component._id
+        componentId: this._id
     });
     var slideshowId = Slideshow.findOne({})._id;
 
-    if (userHasAccessToComponent(component)) {
+    if (userHasAccessToComponent.call(this)) {
         var userId = Meteor.userId();
 
         if (typeof lock == 'undefined') {
             Locks.insert({
                 slideshowId: slideshowId,
-                componentId: component._id,
+                componentId: this._id,
                 userId: userId,
                 properties: []
             });
@@ -803,9 +730,9 @@ updateWithLocksControler = function(component, field, callback) {
                     }
                 });
         }
-        console.log("update component, add lock to component", component._id);
+        console.log("update component, add lock to component", this._id);
         if (typeof callback === "function")
-            callback(component);
+            callback(this);
         return true;
     } else {
         if (typeof lock !== "undefined")
@@ -817,9 +744,9 @@ updateWithLocksControler = function(component, field, callback) {
 
 };
 
-removeLocksControler = function(component) {
+removeLocksControler = function() {
     var lock = Locks.findOne({
-        componentId: component._id
+        componentId: this._id
     });
     if (typeof lock === "undefined")
         return;
@@ -833,8 +760,8 @@ removeLocksControler = function(component) {
         });
 };
 
-updateSlideTitleControler = function(slide) {
-    updateWithLocksControler(slide, "title", updateSlideTitleModel);
+updateSlideTitleControler = function() {
+    updateWithLocksControler.apply(this, "title", updateSlideTitleModel);
 };
 
 updateSlideTitleModel = function(slide) {
@@ -850,18 +777,17 @@ updateSlideTitleModel = function(slide) {
     }
 
     console.log("update title : remove lock of slide", slide._id);
-    removeLocksControler(slide);
+    removeLocksControler.call(slide);
 
 };
 
 /*
  * TODO : remettre au gout du jour le getCloserSlide
  */
-updateSlidePos = function(slide) {
-    truc = this;
-    slide.id = this.id;
+updateSlidePos = function() {
+     console.log("updateSlidePos",this._id);
 
-    var $slide = $("#" + this.id);
+    var $slide = $("#" + this._id);
     var top = parseInt($slide.css('top'));
     var left = parseInt($slide.css('left'));
     var pos = {
@@ -870,8 +796,8 @@ updateSlidePos = function(slide) {
         z: 0
     };
 
-    slide = Slides.findOne({
-        _id: this.id
+    var slide = Slides.findOne({
+        _id: this._id
     });
 
     //petite verif que la slide a effectivement bougée
@@ -898,65 +824,40 @@ updateSlidePos = function(slide) {
     });
 };
 
-updateElementPos = function(slide) {
-    truc = this;
-    slide.id = this.id;
+updateElementPos = function() {
+    console.log("updateElementPos",this._id);
 
-    var $slide = $("#" + this.id+'-wrapper')
-    var top = parseInt($slide.css('top'));
-    var left = parseInt($slide.css('left'));
+    var $element = $("#" + this._id+'-wrapper')
+    var top = parseInt($element.css('top'));
+    var left = parseInt($element.css('left'));
     var pos = {
         x: left,
         y: top,
         z: 0
     };
 
-    elements = Elements.findOne({
-        _id: this.id
+    var element = Elements.findOne({
+        _id: this._id
     });
-    console.log("updateelementPos",elements, pos,$slide,this.id);
-
-    //petite verif que la slide a effectivement bougée
-    if (elements.displayOptions.editor.positions.x == left && elements.displayOptions.editor.positions.y == top) {
-        console.log("updaterlrmnntePosMove : element didn't really move");
+    
+    //petite verif que l'element ait effectivement été bougé
+    if (element.displayOptions.editor.positions.x == left && element.displayOptions.editor.positions.y == top) {
+        console.log("updateElementPos : element didn't really move");
         return;
     }
 
-
-    return Elements.update(slide.id, {
+    return Elements.update(this._id, {
         $set: {
             "displayOptions.editor.positions": pos,
-             "displayOptions.jmpress.positions": pos
+            "displayOptions.jmpress.positions": pos
         }
     });
 };
 
-/*
- * TODO : remettre au gout du jour la gestion de la distance pour ne pas envoyer tout le temps l'update
- */
-updateSlidePosMove = function(slide, event) {
-    return;
-    //histoire de pas trop surcharger le server, on update pas tout le temps
-    //    var slideDb = slide;//Slides.findOne({_id: slide._id});
-    //    var oldTop = parseInt(slideDb.top);
-    //    var oldLeft = parseInt(slideDb.left);
-    //    //console.log("newTop",newTop,"oldTop",oldTop);
-    //
-    //    var distance = Math.sqrt(
-    //            Math.pow(newTop - oldTop, 2) + Math.pow(newLeft - oldLeft, 2)
-    //            );
-    //
-    //    //trop courte
-    //    if (distance < 5) {
-    //        console.log("skip update",distance);
-    //        return;
-    //    }
-    updateSlidePos(slide, event);
 
-};
 
-updateSlideElementControler = function(element) {
-    updateWithLocksControler(element, updateSlideElementModel);
+updateSlideElementControler = function() {
+    updateWithLocksControler.apply(this, updateSlideElementModel);
 };
 
 
@@ -968,14 +869,15 @@ updateSlideElementModel = function(content) {
             content: content
         }
     });
-
-
-    removeLocksControler(this);
 };
 
-deleteSlideElement = function(element) {
-    console.log("delete element ", element._id);
-    Elements.remove(element._id);
+
+deleteSlideElement = function() {
+    console.log("delete element ", this._id);
+    if( !userHasAccessToComponent.call(this) ){
+        throw new Meteor.Error('500','deleteSlideElement : cannot remove an element locked');
+    }
+    Elements.remove(this._id);
 };
 
 
@@ -1077,10 +979,6 @@ deleteSlideshowModel = function() {
     });
 };
 
-printResult = function(result) {
-    console.log(result);
-    return result;
-};
 
 getSlideshowList = function(callback) {
     if (typeof callback === "undefined")
@@ -1096,21 +994,6 @@ getSlideshowList = function(callback) {
         }
     });
 };
-
-getSlideshowList2 = function() {
-    var list;
-    Meteor.call('getSlideshowList', {}, Meteor.userId(), function(error, result) {
-        if (typeof error !== "undefined") {
-            console.log("getSlideshowList : ", error);
-            list = ["error"];
-        } else {
-            console.log("getSlideshowList : ", result);
-            list = result;
-        }
-    });
-    return list;
-};
-
 
 
 getSlideshowControler = function(callbackReturn) {
@@ -1139,9 +1022,6 @@ getSlideshowModel = function(options) {
         alert("you have to be connected as a user \nlogin : user1@yopmail.com \npswd : user1user1");
         return;
     }
-
-    //clean de slideArea, au cas ou
-    //    $('#slideArea .slide').remove();
 
     console.log("getSlideshow ", options);
     Meteor.call("getSlideshow", options, Meteor.userId(), function(error, result) {

@@ -49,7 +49,7 @@ root {
 
 
 
-#jmpress-container div .slide .title
+#jmpress-container .slide .title
 {
 
     text-align:center;
@@ -62,7 +62,7 @@ root {
 
 }
 
-.H2Text
+#jmpress-container .slide .title2
 {
     /*border : dashed black 10px;*/
     padding-top: 20px;
@@ -75,7 +75,7 @@ root {
     border-bottom: 10px dotted white;
 }   
 
-.H3Text
+#jmpress-container .slide .title3
 {
     /*border : dashed black 10px;*/
     padding-top: 20px;
@@ -87,29 +87,4 @@ root {
     font-weight: bold;
     border-bottom: 10px dotted white;
 }   
-
-.bodyText
-{
-    font-size:2em;
-}
-
-
-/* ======================================================================================
- * DISPLAY JMPRESS OUTPUT
- * css s'appliquant à displaymode.html (à mettre ds fichier à part ?)
- * ====================================================================================== */
-
-
-.jmpressBody
-{
-    /*background: #EEE;*/
-    /*background: rgb(255, 255, 255);*/
-    background: -webkit-gradient(radial, 50% 50%, 0, 50% 50%, 500, from(rgb(255, 255, 255)), to(rgb(230, 230, 230)));
-    background: -webkit-radial-gradient(rgb(255, 255, 255), rgb(230, 230, 230));
-    background: -moz-radial-gradient(rgb(255, 255, 255), rgb(230, 230, 230));
-    background: -ms-radial-gradient(rgb(255, 255, 255), rgb(230, 230, 230));
-    background: -o-radial-gradient(rgb(255, 255, 255), rgb(230, 230, 230));
-    background: radial-gradient(rgb(255, 255, 255), rgb(230, 230, 230));
-    z-index: 100;
-}
 

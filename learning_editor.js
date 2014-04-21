@@ -34,14 +34,14 @@ isCloseTo = function(self, slide) {
  * fait parti des properties lockées (un array vide signifie que toutes les
  * properties du component sont lockées)
  * 
- * @param {document mongoDB} component
+ * @param {document mongoDB} this
  * @param {string} property : si non renseigné, on veut les accès à toutes les 
  * properties du component
  * @returns {Boolean}
  */
-userHasAccessToComponent = function(component, property) {
+userHasAccessToComponent = function(property) {
     var userId = Meteor.userId();
-    var lock = Locks.findOne({componentId: component._id});
+    var lock = Locks.findOne({componentId: this._id});
     if (typeof lock == 'undefined' || lock.userId == Meteor.userId() || lock.userId === null)
         return true;
     

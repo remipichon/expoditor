@@ -1,41 +1,33 @@
-/* CSS declarations go here */
 
+
+
+
+#toolbar {
+    width: 90%;
+}
+
+
+
+#toolbar > > {
+    display: inline-block;
+}
 
 #editor-container >.slide{
-    width: 90px;
-    height: 70px;
-    color: blue; 
+    width: 180px;
+    height: 140px;
     border : dashed black 1px;
     position: absolute;
 }
 
-#editor-container >.slide p{
-    margin: 0;
+
+#editor-container .slide.dragged{
+    border: dashed red;
 }
 
-#editor-container >.slide span{
-    /*position: absolute;*/
-    /*left: 80%;*/
-    color: red;
-    border : dashed black 2px;
-}
-
-
-.dragged{
-    border: red;
-}
-
-#forbidenZone{
-    z-index: -1;
-    border: 3px black solid;
-    background:#e23e3e;
+#editor-container .slide .wrapper-element{
     position: absolute;
-    top: 200px;
-    left: 200px;
-    width: 200px;
-    height: 200px;
-    
 }
+
 
 
 #editor-container >.active {
@@ -46,6 +38,7 @@
 .element p {
     display: inline-block;
 }
+
 .element{
     border : dashed 1px blue;
 }
