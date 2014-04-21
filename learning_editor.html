@@ -62,7 +62,7 @@
 
 <body>
     {{loginButtons}}
-    {{>toolbar}}
+    {{> toolbar}}
     {{> buttons}}
     <div id='editor-container'>
         {{> editorContainer}}
@@ -76,7 +76,7 @@
         {{> deckContainer}}
     </div>
     
-    
+    {{> modalCurrentEditing}}
     {{> modalTemplate}}
     
       
@@ -89,18 +89,18 @@
 
 <template name='buttons'>
     <div id='buttons'>
-        <p>
+        <!-- <p> -->
             {{> createSlideshow}}
             {{> updateSlideshow}}
             {{> deleteSlideshow}}
             {{> loadSlideshow}}
-        </p>    
-        <p>
+        <!-- </p>     -->
+        <!-- <p> -->
             {{> createSlide}}
             {{> loadEditor}}
             {{> loadDeck}}
             {{> loadJmpress}}
-        </p>
+        <!-- </p> -->
     </div>
 </template>
 <template name='createSlide'><input id='createSlide' class='button' type='button' value='createSlide'/></template>
@@ -144,9 +144,21 @@
     <div id='{{_id}}' class='slide {{isActive}}' style='top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px'> 
          {{> deleteSlide }}
          {{> createElementTexte }}
+         {{> editSlideContent}}
          <p class='title'> {{informations.title}} </p>
     
       {{> elementsArea}}
+    </div>  
+    
+</template> 
+
+<template name='editorSlideCurrentEditing'>
+
+    <div id='{{_id}}'> 
+         {{> createElementTexte }}
+         <p class='title'> {{informations.title}} </p>
+    
+      {{> elementsAreaCurrentEditing}}
     </div>  
     
 </template> 
@@ -180,13 +192,33 @@
    
 </template>
 
+<template name='elementsAreaCurrentEditing'>
+
+    <div class='elementsAreaCurrentEditing'>        
+        {{#each elements}}              
+          {{> elementCurrentEditing}}
+        {{/each}}         
+    </div>
+   
+</template>
+
 
 <template name='element'>
 
     <div id='{{_id}}-wrapper' class='wrapper-element element' style='top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px' >
-      {{>deleteElement}}
         <div id='{{_id}}' class='editor {{type}}'>
-            {{content}}
+            {{{content}}}
+        </div>       
+    </div>
+
+</template> 
+
+<template name='elementCurrentEditing'>
+
+    <div id='{{_id}}-currentEditing-wrapper' class='wrapper-element-currentEditing element' style='top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px' >
+      {{>deleteElement}}
+        <div id='{{_id}}-currentEditing' class='editor {{type}}'>
+            {{{content}}}
         </div>       
     </div>
 
@@ -196,7 +228,20 @@
 <template name='deleteSlide'><input type='button' class='deleteSlide' value='X'></template>
 <template name='createElementTexte'><input type='button' class='addElement' value='+'></template>
 <template name='deleteElement'><input type='button' class='deleteElement' value='X'></template>
+<template name='editSlideContent'><input type='button' class='editSlideContent' value='edit'></template>
 
+
+
+
+<template name='modalCurrentEditing'>
+    {{#if isVisible}}
+        <div id='modalCurrentEditing'>
+          {{#each editorSlideCurrentEditing}}
+          {{> editorSlideCurrentEditing}}
+          {{/each}}
+        </div>
+   {{/if}}
+</template>
 
 
 <template name='modalTemplate'>

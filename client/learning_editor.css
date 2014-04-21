@@ -6,7 +6,10 @@
     width: 90%;
 }
 
-
+/*#toolbar{
+    position: relative;
+    top: 10px;
+}*/
 
 #toolbar > > {
     display: inline-block;
@@ -28,6 +31,23 @@
     position: absolute;
 }
 
+
+
+#modalCurrentEditing .wrapper-element-currentEditing{
+    position: absolute;
+}
+
+#buttons{
+    position: absolute;
+    top:30px; 
+    display: inline-block;
+}
+
+#modalCurrentEditing {
+    background-color: gray;
+   position: absolute;
+    top: 70px;
+}
 
 
 #editor-container >.active {

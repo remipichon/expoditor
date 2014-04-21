@@ -16,8 +16,16 @@ Elements = new Meteor.Collection("elements");
 Locks = new Meteor.Collection("lock");
 Remote = new Meteor.Collection("remoteSlides");
 
+//slide en cours d'édition
+CurrentEditing = new Meteor.Collection('currentEditing', {
+    connection: null
+});
+
 //pour conversion editor vers jmpress
 ratio = 5;
+
+//reinit des variables de sessions
+Session.set('modalCurrentEditing', false);
 
 
 /*****
@@ -26,7 +34,8 @@ ratio = 5;
 Meteor.startup(function() {
     //init toolbar, global pour l'init des editeurs de textes
     toolbar = setToolbar();
-    
+    goog.style.setOpacity(goog.dom.getElement('toolbar'), '0');
+
 
 
     //listener jquery pour la remote
@@ -75,9 +84,46 @@ Meteor.startup(function() {
 });
 
 
+resizeModalCurrentEditing = function() {
+    var $modal = $("#modalCurrentEditing");
+    if ($modal.length === 1) {
+        var offSetTop = parseInt($modal.css("top"));
+        var rapportHW = 7 / 9;
+        var $window = $(window);
+        var W = $window.width();
+        var H = $window.height() - offSetTop;
+        var h, w;
+        if (H < rapportHW * W) {
+            h = H;
+            w = 1 / rapportHW * h;
+        } else if (H >= rapportHW * W) {
+            w = W;
+            h = rapportHW * w;
+        }
+        console.log('W:', W, 'H:', H, 'offset:', offSetTop);
+        console.log("resize modal to w h", w, h);
+        $modal.css("width", w).css("height", h);
+    }
+
+    setTimeout(repositionElementModalCurrentEditing,100);
+
+
+}
+
+
+//gestion de la taille de la modalEditContent
+$(window).on('resize', resizeModalCurrentEditing);
+
+
 setToolbar = function() {
-    var quitEditButton = goog.ui.editor.ToolbarFactory
-        .makeButton('quitEdit', 'Quit edit texte', 'Quit Edit', goog.getCssName('expo-toolbar-quitEdit'));
+    // if(typeof toolbar !== 'undefined'){
+    //     throw new Meteor.Error("500","A toolbar is alredy set",toolbar);
+    // }
+
+    var quitEditTexteButton = goog.ui.editor.ToolbarFactory
+        .makeButton('quitEditTexteButton', 'Quit edit texte', 'Quit Edit Texte', goog.getCssName('expo-toolbar-quitEdit-texte'));
+    var quitEditSlideButton = goog.ui.editor.ToolbarFactory
+        .makeButton('quitEditSlideButton', 'Quit edit slide', 'Quit Edit Slide', goog.getCssName('expo-toolbar-quitEdit-slide'));
 
     // Specify the buttons to add to the toolbar, using built in default buttons.
     var buttons = [
@@ -103,14 +149,38 @@ setToolbar = function() {
         goog.editor.Command.STRIKE_THROUGH,
         goog.editor.Command.REMOVE_FORMAT,
 
-        quitEditButton
+        quitEditSlideButton,
+        quitEditTexteButton
     ];
     var myToolbar = goog.ui.editor.DefaultToolbar.makeToolbar(buttons,
         goog.dom.getElement('toolbar'));
 
+    goog.events.listen(goog.dom.getElement("quitEditSlideButton"), goog.events.EventType.CLICK, quitEditSlide);
+
+
+    var button = goog.dom.getElement('quitEditTexteButton');
+    goog.style.setOpacity(button, '0');
+
+    // goog.style.setOpacity(goog.dom.getElement('toolbar'), '0');
+
+
     return myToolbar;
 }
 
+
+quitEditSlide = function() {
+    //cancel all remaining editor (if exists)
+    $(".expo-toolbar-quitEdit").trigger("click");
+
+    Session.set("modalCurrentEditing", false);
+    CurrentEditing.remove({});
+
+
+    // goog.style.setOpacity(goog.dom.getElement('buttons'), '1');
+    goog.style.setStyle(goog.dom.getElement('buttons'), 'display', 'block');
+    goog.style.setOpacity(goog.dom.getElement('toolbar'), '0');
+
+}
 
 
 makeEditableCallback = function(e) {
@@ -118,12 +188,12 @@ makeEditableCallback = function(e) {
         _id: this._id
     }))) {
         //cancel all other editor (if exists)
-        $(".expo-toolbar-quitEdit").trigger("click");
+        $("#quitEditTexteButton").trigger("click");
         console.log("makeEditableCallback", this._id);
         this.makeEditable();
 
-        var button = goog.dom.query('.expo-toolbar-quitEdit')[0];
-        goog.style.setStyle(button, 'display', 'block');
+        var button = goog.dom.getElement('quitEditTexteButton');
+        goog.style.setOpacity(button, '1');
     }
 }
 
@@ -139,8 +209,8 @@ makeUneditableCallback = function(e) {
     var content = this.getCleanContents();
     updateSlideElementModel.apply(this, [content]);
 
-    var button = goog.dom.query('.expo-toolbar-quitEdit')[0];
-    goog.style.setStyle(button, 'display', 'none');
+    var button = goog.dom.getElement('quitEditTexteButton');
+    goog.style.setOpacity(button, '0');
 }
 
 updateFieldContents = function(e) {
@@ -155,7 +225,8 @@ setEditor = function(idElement) {
 
     var myField = new goog.editor.Field(idElement);
     myField.id = idElement;
-    myField._id = idElement; //pour coller à miniMongo
+    var mongoId = idElement.split('-')[0]
+    myField._id = mongoId; //pour coller à miniMongo
 
     // Create and register all of the editing plugins you want to use.
     myField.registerPlugin(new goog.editor.plugins.BasicTextFormatter());
@@ -184,8 +255,7 @@ setEditor = function(idElement) {
     goog.events.listen(goog.dom.getElement(myField.id), goog.events.EventType.CLICK, makeEditableCallback, 'false', myField);
 
     // click on button to disable editor
-    var button = goog.dom.query('.expo-toolbar-quitEdit')[0];
-    goog.style.setStyle(button, 'display', 'none');
+    var button = goog.dom.getElement('quitEditTexteButton');
     goog.events.listen(goog.dom.getElement(button), goog.events.EventType.CLICK, makeUneditableCallback, 'false', myField);
 
     return myField;
@@ -215,8 +285,6 @@ Remote.find({}).observeChanges({
         }
     }
 });
-
-
 
 
 
@@ -292,6 +360,14 @@ Template.createElementTexte.events({
     }
 });
 
+Template.editSlideContent.events({
+    'click': function(event) {
+        event.stopPropagation();
+        editSlideContent.call(this);
+    }
+});
+
+
 
 /***
  * mouse action
@@ -315,6 +391,12 @@ Template.deleteElement.events({
         deleteSlideElement.call(this);
     }
 });
+
+Template.modalCurrentEditing.events({
+    'click': function(event) {
+        event.stopPropagation();
+    }
+})
 
 
 
@@ -349,8 +431,19 @@ Template.deckContainer.slides = function() {
     return Slides.find({});
 };
 
+
+Template.modalCurrentEditing.editorSlideCurrentEditing = function() {
+    if (CurrentEditing.find({}).fetch().length !== 0) {
+        // throw new Meteor.Error("500","More than one slide in CurrentEditing");
+        console.log("More than one slide in CurrentEditing");
+    }
+    return CurrentEditing.find({});
+}
+
+
+
 //test
-Template.editorSlide.destroyed = function(){
+Template.editorSlide.destroyed = function() {
     console.log("test editor slide destroyed");
 }
 
@@ -362,14 +455,21 @@ Template.elementsArea.elements = function() {
     });
 };
 
+Template.elementsAreaCurrentEditing.elements = function() {
+    return Elements.find({
+        slideReference: {
+            $in: [this._id]
+        }
+    });
+};
 
-Template.element.rendered = function() {
-    console.log("render element",this.data._id);
-    setEditor(this.data._id);
-  
-    this.data.id = this.data._id;
-    var dragger = new goog.fx.Dragger(goog.dom.getElement(this.data._id+'-wrapper'));
-    goog.events.listen(dragger, 'start', startDragElement,'false',this.data);
+Template.elementCurrentEditing.rendered = function() {
+    console.log("render element for currentEditing", this.data._id);
+    setEditor(this.data._id + '-currentEditing');
+
+    this.data.id = this.data._id + '-currentEditing';
+    var dragger = new goog.fx.Dragger(goog.dom.getElement(this.data._id + '-currentEditing-wrapper'));
+    goog.events.listen(dragger, 'start', startDragElement, 'false', this.data);
     goog.events.listen(dragger, 'end', endDragElement, 'false', this.data);
 }
 
@@ -381,27 +481,27 @@ Template.editorSlide.rendered = function() {
 
     this.data.id = this.data._id;
     var dragger = new goog.fx.Dragger(goog.dom.getElement(this.data._id));
-    goog.events.listen(dragger, 'start',startDragSlide,'false',this.data);
-    goog.events.listen(dragger, 'end',endSlideElement, 'false', this.data);
+    goog.events.listen(dragger, 'start', startDragSlide, 'false', this.data);
+    goog.events.listen(dragger, 'end', endSlideElement, 'false', this.data);
 };
 
 startDragSlide = function(e) {
     e.stopPropagation();
-    $("#"+this._id).toggleClass('dragged');
+    $("#" + this._id).toggleClass('dragged');
     console.log("slide start drag");
 }
-startDragElement = function(e) {    
+startDragElement = function(e) {
     e.stopPropagation();
-    $("#"+this._id).toggleClass('dragged');
+    $("#" + this._id).toggleClass('dragged');
     e.stopPropagation();
     console.log("elment start drag")
 }
-endSlideElement = function(e){
-    $("#"+this._id).toggleClass('dragged');
+endSlideElement = function(e) {
+    $("#" + this._id).toggleClass('dragged');
     updateSlidePos.call(this);
 }
-endDragElement = function(e){
-    $("#"+this._id).toggleClass('dragged');
+endDragElement = function(e) {
+    $("#" + this._id).toggleClass('dragged');
     updateElementPos.call(this);
 }
 /*
@@ -413,7 +513,7 @@ Template.jmpressSlide.rendered = function() {
 
     var posX = this.data.displayOptions.jmpress.positions.x;
     var posY = this.data.displayOptions.jmpress.positions.y;
-    
+
 
 
     /*
@@ -423,9 +523,6 @@ Template.jmpressSlide.rendered = function() {
      * ajoutée par Handelbars puis supprimer le DOM de cette slide là
      */
     if ($("#jmpress-container").jmpress('initialized')) {
-
-
-
         var $slideToMaj = $("#jmpress-container >div #" + this.data._id);
 
         if ($slideToMaj.length === 0) {
@@ -448,7 +545,7 @@ Template.jmpressSlide.rendered = function() {
 };
 
 //test
-Template.jmpressSlide.created = function(){
+Template.jmpressSlide.created = function() {
     console.log("jmpress slide created");
 }
 
@@ -528,7 +625,7 @@ Template.jmpressSlide.getJmpressData = function(axis) {
 
 Template.editorSlide.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
     var ratio = 1;
-    // console.log('editorSlide',this);
+    console.log('editorSlide', this);
     switch (axis) {
         case "x":
             var coord = parseInt(this.displayOptions.editor.positions.x) * ratio;
@@ -546,14 +643,80 @@ Template.editorSlide.getEditorData = function(axis) { //pas encore utilisé à c
     return coord;
 };
 
+
 Template.element.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
     var ratio = 1;
+    var slideW = parseInt($($('.slide')).css('width'));
+    var slideH = parseInt($($('.slide')).css('height'));
+    var rapporHW = slideH / slideW;
+
+    var ratioLeft = 900 / slideW;
+    var ratioTop = 700 / slideH;
+
     switch (axis) {
         case "x":
-            var coord = parseInt(this.displayOptions.editor.positions.x) * ratio;
+            var coord = parseInt(this.displayOptions.editor.positions.x) / ratioLeft;
             break;
         case "y":
-            var coord = parseInt(this.displayOptions.editor.positions.y) * ratio;
+            var coord = parseInt(this.displayOptions.editor.positions.y) / ratioTop;
+            break;
+        case "z":
+            var coord = 0;
+            break;
+        default:
+            return "";
+
+    }
+    return coord;
+};
+
+repositionElementModalCurrentEditing = function() {
+    $(Elements.find({
+        slideReference: {
+            $in: [CurrentEditing.findOne({})._id]
+        }
+    }).fetch()).each(function () {
+        var ele = Elements.findOne({
+            _id: this._id
+        });
+        var $ele = $("#" + this._id + "-currentEditing-wrapper");
+
+        var slideW = parseInt($($('#modalCurrentEditing')).css('width'));
+        var slideH = parseInt($($('#modalCurrentEditing')).css('height'));
+        var rapporHW = slideH / slideW;
+
+        var ratioLeft = 900 / slideW;
+        var ratioTop = 700 / slideH;
+
+        var l = ele.displayOptions.editor.positions.x / ratioLeft;
+        l = l+"px";
+         var t = ele.displayOptions.editor.positions.y / ratioTop;
+        t = t+"px";
+        console.log(l,t)
+        $ele.css('left', l)
+            .css('top', t);
+    });
+};
+
+
+
+Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
+    var ratio = 1;
+
+    var slideW = parseInt($($('#modalCurrentEditing')).css('width'));
+    var slideH = parseInt($($('#modalCurrentEditing')).css('height'));
+    var rapporHW = slideH / slideW;
+    console.log(slideW, slideH);
+
+    var ratioLeft = 900 / slideW;
+    var ratioTop = 700 / slideH;
+
+    switch (axis) {
+        case "x":
+            var coord = parseInt(this.displayOptions.editor.positions.x) / ratioLeft;
+            break;
+        case "y":
+            var coord = parseInt(this.displayOptions.editor.positions.y) / ratioTop;
             break;
         case "z":
             var coord = 0;
@@ -570,6 +733,14 @@ Template.element.getEditorData = function(axis) { //pas encore utilisé à cause
 /**************
  * modal
  *************/
+Template.modalCurrentEditing.isVisible = function() {
+    if (Session.get("modalCurrentEditing")) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
 Template.modalTemplate.isVisible = function() {
     if (Session.get("modalSelectSlideshow")) {
         return true;
@@ -612,8 +783,8 @@ initDeck = function() {
 
 
 initJmpress = function() {
-    console.log("init jmpress desactivé");
-    return;
+    // console.log("init jmpress desactivé");
+    // return;
     console.log("init jmpress");
     //launch jmpress first time
     $('#jmpress-container').jmpress({
@@ -659,6 +830,30 @@ createSlide = function(options) {
         }
     });
 };
+
+
+editSlideContent = function() {
+    if (CurrentEditing.find({}).fetch().length !== 0) {
+        throw new Meteor.Error("500", "a slide is already currently editing (or the last currentEditing doesn't terminate properly");
+    }
+    console.log("editSlideContent insert ", this._id);
+    Session.set("modalCurrentEditing", true);
+    CurrentEditing.insert(Slides.findOne({
+        _id: this._id
+    }));
+
+    goog.style.setOpacity(goog.dom.getElement('toolbar'), '1');
+    // goog.style.setOpacity(goog.dom.getElement('buttons'), '0');
+    goog.style.setStyle(goog.dom.getElement('buttons'), 'display', 'none');
+
+
+    setTimeout(resizeModalCurrentEditing, 100);
+    // resizeModalCurrentEditing();
+    setTimeout(repositionElementModalCurrentEditing,200);
+
+
+
+}
 
 deleteSlide = function() {
     console.log("delete slide : ", this._id);
@@ -785,7 +980,7 @@ updateSlideTitleModel = function(slide) {
  * TODO : remettre au gout du jour le getCloserSlide
  */
 updateSlidePos = function() {
-     console.log("updateSlidePos",this._id);
+    console.log("updateSlidePos", this._id);
 
     var $slide = $("#" + this._id);
     var top = parseInt($slide.css('top'));
@@ -825,21 +1020,32 @@ updateSlidePos = function() {
 };
 
 updateElementPos = function() {
-    console.log("updateElementPos",this._id);
+    console.log("updateElementPos", this._id, this.id);
 
-    var $element = $("#" + this._id+'-wrapper')
+    var $element = $("#" + this.id + '-wrapper')
+
+    var slideW = parseInt($($('#modalCurrentEditing')).css('width'));
+    var slideH = parseInt($($('#modalCurrentEditing')).css('height'));
+    var rapporHW = slideH / slideW;
+
+    var ratioLeft = 900 / slideW;
+    var ratioTop = 700 / slideH;
+
+
     var top = parseInt($element.css('top'));
     var left = parseInt($element.css('left'));
     var pos = {
-        x: left,
-        y: top,
+        x: left * ratioLeft,
+        y: top * ratioTop,
         z: 0
     };
 
     var element = Elements.findOne({
         _id: this._id
     });
-    
+
+    console.log("debug : updateElementPos", pos, $element, element);
+
     //petite verif que l'element ait effectivement été bougé
     if (element.displayOptions.editor.positions.x == left && element.displayOptions.editor.positions.y == top) {
         console.log("updateElementPos : element didn't really move");
@@ -874,8 +1080,8 @@ updateSlideElementModel = function(content) {
 
 deleteSlideElement = function() {
     console.log("delete element ", this._id);
-    if( !userHasAccessToComponent.call(this) ){
-        throw new Meteor.Error('500','deleteSlideElement : cannot remove an element locked');
+    if (!userHasAccessToComponent.call(this)) {
+        throw new Meteor.Error('500', 'deleteSlideElement : cannot remove an element locked');
     }
     Elements.remove(this._id);
 };
