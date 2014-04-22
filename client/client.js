@@ -26,6 +26,7 @@ ratio = 5;
 
 //reinit des variables de sessions
 Session.set('modalCurrentEditing', false);
+Session.set("heavyRefresh",false); //false to update positions and content less frequently
 
 
 /*****
@@ -81,6 +82,9 @@ Meteor.startup(function() {
     getSlideshowModel({
         title: 'test1'
     });
+    setTimeout(function() {
+        $($(".editSlideContent")[0]).trigger('click');
+    }, 1000);
 });
 
 
@@ -105,7 +109,7 @@ resizeModalCurrentEditing = function() {
         $modal.css("width", w).css("height", h);
     }
 
-    setTimeout(repositionElementModalCurrentEditing,100);
+    setTimeout(repositionElementModalCurrentEditing, 100);
 
 
 }
@@ -216,7 +220,7 @@ makeUneditableCallback = function(e) {
 updateFieldContents = function(e) {
     var content = this.getCleanContents();
     console.log('content chanded : ', content);
-    //updateSlideElementModel.apply(this,[content]);
+    if(Session.get("heavyRefresh"))updateSlideElementModel.apply(this,[content]);
 }
 
 setEditor = function(idElement) {
@@ -253,6 +257,10 @@ setEditor = function(idElement) {
     //manage event
     //double click pour activer l'édition de texte
     goog.events.listen(goog.dom.getElement(myField.id), goog.events.EventType.CLICK, makeEditableCallback, 'false', myField);
+    console.log('#', idElement, '.editTextContent');
+    $('#' + idElement + '-wrapper .editTextContent').on('click', function() {
+        makeEditableCallback.call(myField);
+    });
 
     // click on button to disable editor
     var button = goog.dom.getElement('quitEditTexteButton');
@@ -260,6 +268,71 @@ setEditor = function(idElement) {
 
     return myField;
 }
+
+
+/**
+ * maj des elements en cours d'édition à la main
+ */
+//tous les elements de la slide en cours d'édition
+
+CurrentEditing.find({}).observeChanges({
+    added: function(_id, fields) {
+        console.log("slide added to current editing", _id, Elements.find({
+            slideReference: {
+                $in: [_id]
+            }
+        }).fetch());
+
+        Elements.find({
+            slideReference: {
+                $in: [_id]
+            }
+        }).observeChanges({
+            added: function(_id) {
+                console.log("debug : an element has been added");
+            },
+            changed: function(_id, fields) {
+                console.log("elements changed", _id, fields);
+
+                //display options
+                if (typeof fields.displayOptions !== 'undefined') {
+                    var gwrapper = goog.dom.getElement(_id + '-currentEditing-wrapper');
+
+                    //positions
+                    var current = goog.style.getPosition(gwrapper);
+                    var update = fields.displayOptions.editor.positions;
+
+                    //TODO : a factoriser
+                    var slideW = parseInt($($('#modalCurrentEditing')).css('width'));
+                    var slideH = parseInt($($('#modalCurrentEditing')).css('height'));
+                    var rapporHW = slideH / slideW;
+
+                    var ratioLeft = 900 / slideW;
+                    var ratioTop = 700 / slideH;
+
+
+                    goog.style.setPosition(gwrapper, update.x/ratioLeft, update.y/ratioTop);
+
+                }
+
+                //content
+                if (typeof fields.content !== 'undefined') {
+                    var $editor = $('#' + _id + '-currentEditing');
+                    $editor.html(fields.content);
+                }
+            }
+
+        });
+    },
+    changed: function(_id, fields) {
+        //nothing to do
+    },
+    removed: function(_id, fields) {
+        console.log("slide removed to current editing (a TODO)")
+        //TODO supprimer le handler créé
+    }
+});
+
 
 
 /*
@@ -463,6 +536,11 @@ Template.elementsAreaCurrentEditing.elements = function() {
     });
 };
 
+/**
+ * TODO : trouver un moyen pour empecher de refoutre un editor si on a faire un RErender
+ * le .create est appelé à chaque fois c'est juste un precallback du render
+ * @return {[type]} [description]
+ */
 Template.elementCurrentEditing.rendered = function() {
     console.log("render element for currentEditing", this.data._id);
     setEditor(this.data._id + '-currentEditing');
@@ -470,6 +548,7 @@ Template.elementCurrentEditing.rendered = function() {
     this.data.id = this.data._id + '-currentEditing';
     var dragger = new goog.fx.Dragger(goog.dom.getElement(this.data._id + '-currentEditing-wrapper'));
     goog.events.listen(dragger, 'start', startDragElement, 'false', this.data);
+    if(Session.get("heavyRefresh")) goog.events.listen(dragger, goog.fx.Dragger.EventType.DRAG, dragElement, 'false', this.data);    
     goog.events.listen(dragger, 'end', endDragElement, 'false', this.data);
 }
 
@@ -482,7 +561,8 @@ Template.editorSlide.rendered = function() {
     this.data.id = this.data._id;
     var dragger = new goog.fx.Dragger(goog.dom.getElement(this.data._id));
     goog.events.listen(dragger, 'start', startDragSlide, 'false', this.data);
-    goog.events.listen(dragger, 'end', endSlideElement, 'false', this.data);
+    // if(Session.get("heavyRefresh")) goog.events.listen(dragger, goog.fx.Dragger.EventType.DRAG, dragSlide, 'false', this.data);    
+    goog.events.listen(dragger, 'end', endDragSlide, 'false', this.data);
 };
 
 startDragSlide = function(e) {
@@ -496,12 +576,18 @@ startDragElement = function(e) {
     e.stopPropagation();
     console.log("elment start drag")
 }
-endSlideElement = function(e) {
+endDragSlide = function(e) {
     $("#" + this._id).toggleClass('dragged');
+    updateSlidePos.call(this);
+}
+dragSlide = function(e) {
     updateSlidePos.call(this);
 }
 endDragElement = function(e) {
     $("#" + this._id).toggleClass('dragged');
+    updateElementPos.call(this);
+}
+dragElement = function(e){
     updateElementPos.call(this);
 }
 /*
@@ -624,14 +710,14 @@ Template.jmpressSlide.getJmpressData = function(axis) {
 };
 
 Template.editorSlide.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
-    var ratio = 1;
+   
     console.log('editorSlide', this);
     switch (axis) {
         case "x":
-            var coord = parseInt(this.displayOptions.editor.positions.x) * ratio;
+            var coord = parseInt(this.displayOptions.editor.positions.x) ;
             break;
         case "y":
-            var coord = parseInt(this.displayOptions.editor.positions.y) * ratio;
+            var coord = parseInt(this.displayOptions.editor.positions.y) ;
             break;
         case "z":
             var coord = 0;
@@ -642,6 +728,7 @@ Template.editorSlide.getEditorData = function(axis) { //pas encore utilisé à c
     }
     return coord;
 };
+
 
 
 Template.element.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
@@ -663,6 +750,12 @@ Template.element.getEditorData = function(axis) { //pas encore utilisé à cause
         case "z":
             var coord = 0;
             break;
+        case "scaleX":
+            var coord = ratioLeft;
+            break;
+        case "scaleY":
+            var coord = ratioTop;
+            break;
         default:
             return "";
 
@@ -675,7 +768,7 @@ repositionElementModalCurrentEditing = function() {
         slideReference: {
             $in: [CurrentEditing.findOne({})._id]
         }
-    }).fetch()).each(function () {
+    }).fetch()).each(function() {
         var ele = Elements.findOne({
             _id: this._id
         });
@@ -689,12 +782,16 @@ repositionElementModalCurrentEditing = function() {
         var ratioTop = 700 / slideH;
 
         var l = ele.displayOptions.editor.positions.x / ratioLeft;
-        l = l+"px";
-         var t = ele.displayOptions.editor.positions.y / ratioTop;
-        t = t+"px";
-        console.log(l,t)
+        l = l + "px";
+        var t = ele.displayOptions.editor.positions.y / ratioTop;
+        t = t + "px";
+        console.log(l, t)
         $ele.css('left', l)
             .css('top', t);
+
+        //scale    
+        var scale = 'scale('+1/ratioLeft+','+1/ratioTop+')';
+        $ele.css("transform",scale);
     });
 };
 
@@ -706,7 +803,6 @@ Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore uti
     var slideW = parseInt($($('#modalCurrentEditing')).css('width'));
     var slideH = parseInt($($('#modalCurrentEditing')).css('height'));
     var rapporHW = slideH / slideW;
-    console.log(slideW, slideH);
 
     var ratioLeft = 900 / slideW;
     var ratioTop = 700 / slideH;
@@ -849,7 +945,7 @@ editSlideContent = function() {
 
     setTimeout(resizeModalCurrentEditing, 100);
     // resizeModalCurrentEditing();
-    setTimeout(repositionElementModalCurrentEditing,200);
+    setTimeout(repositionElementModalCurrentEditing, 200);
 
 
 
@@ -1044,7 +1140,6 @@ updateElementPos = function() {
         _id: this._id
     });
 
-    console.log("debug : updateElementPos", pos, $element, element);
 
     //petite verif que l'element ait effectivement été bougé
     if (element.displayOptions.editor.positions.x == left && element.displayOptions.editor.positions.y == top) {

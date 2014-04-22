@@ -1,6 +1,6 @@
 <head>
     <title>learning_editor</title>
-     <script src='http://192.168.1.2:2438/closure-library/closure/goog/base.js'></script> 
+     <script src='http://192.168.1.4:2438/closure-library/closure/goog/base.js'></script> 
     
 
      
@@ -17,7 +17,7 @@
     //add goog.dom.query (jQuery like)
     s = document.createElement('script');
     s.type = 'text/javascript';
-    s.src = 'http://192.168.1.2:2438/query.js';
+    s.src = 'http://192.168.1.4:2438/query.js';
     $('head').append(s);
 
     //editor  
@@ -38,23 +38,23 @@
     goog.require('goog.ui.editor.ToolbarController');
   </script>
 
-   <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/common.css'>
-  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/button.css' />
-  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/dialog.css' />
-  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/linkbutton.css' />
-  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/menu.css'>
-  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/menuitem.css'>
-  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/menuseparator.css'>
-  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/tab.css' />
-  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/tabbar.css' />
-  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/toolbar.css' />
-  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/colormenubutton.css' />
-  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/palette.css' />
-  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/colorpalette.css' />
-  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/editor/bubble.css' />
-  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/editor/dialog.css' />
-  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/editor/linkdialog.css' />
-  <link rel='stylesheet' href='http://192.168.1.2:2438/closure-library/closure/goog/css/editortoolbar.css' />
+   <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/common.css'>
+  <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/button.css' />
+  <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/dialog.css' />
+  <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/linkbutton.css' />
+  <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/menu.css'>
+  <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/menuitem.css'>
+  <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/menuseparator.css'>
+  <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/tab.css' />
+  <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/tabbar.css' />
+  <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/toolbar.css' />
+  <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/colormenubutton.css' />
+  <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/palette.css' />
+  <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/colorpalette.css' />
+  <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/editor/bubble.css' />
+  <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/editor/dialog.css' />
+  <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/editor/linkdialog.css' />
+  <link rel='stylesheet' href='http://192.168.1.4:2438/closure-library/closure/goog/css/editortoolbar.css' />
 
 
     
@@ -193,19 +193,19 @@
 </template>
 
 <template name='elementsAreaCurrentEditing'>
-
     <div class='elementsAreaCurrentEditing'>        
-        {{#each elements}}              
-          {{> elementCurrentEditing}}
+        {{#each elements}}     
+          {{#constant}}         
+            {{> elementCurrentEditing}}
+          {{/constant}}
         {{/each}}         
     </div>
-   
 </template>
 
 
 <template name='element'>
 
-    <div id='{{_id}}-wrapper' class='wrapper-element element' style='top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px' >
+    <div id='{{_id}}-wrapper' class='wrapper-element element' style='top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px transform:scale({{getEditorData 'scaleX'}},({{getEditorData 'scaleY'}})' >
         <div id='{{_id}}' class='editor {{type}}'>
             {{{content}}}
         </div>       
@@ -215,13 +215,14 @@
 
 <template name='elementCurrentEditing'>
 
-    <div id='{{_id}}-currentEditing-wrapper' class='wrapper-element-currentEditing element' style='top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px' >
+   <div id='{{_id}}-currentEditing-wrapper' class='wrapper-element-currentEditing element' style='top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px' >
       {{>deleteElement}}
+      {{>editTexteContent}}
         <div id='{{_id}}-currentEditing' class='editor {{type}}'>
             {{{content}}}
         </div>       
     </div>
-
+  
 </template> 
 
 <template name='quitEdit'><input type='button' class='buttonQuitEdit' value='qui edit'></template>
@@ -229,6 +230,7 @@
 <template name='createElementTexte'><input type='button' class='addElement' value='+'></template>
 <template name='deleteElement'><input type='button' class='deleteElement' value='X'></template>
 <template name='editSlideContent'><input type='button' class='editSlideContent' value='edit'></template>
+<template name='editTexteContent'><input type='button' class='editTextContent' value='edit'></template>
 
 
 
