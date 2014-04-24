@@ -11,6 +11,10 @@
     top: 10px;
 }*/
 
+#editor-container input[type=button]:hover{
+    transform: scale(10,10);
+}
+
 #toolbar > > {
     display: inline-block;
 }

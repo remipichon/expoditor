@@ -162,7 +162,7 @@ Meteor.methods({
             Meteor.publish(strSlidesName, function() {
                 return Slides.find({
                     slideshowReference: {$in: [newCreatedSlideshow._id]} //get all slides which are linked to the slideshow
-//                   , {slideshowReference: 0 } //TODO gerer le fait que le client ne recoive pas cette donnée
+                  // , {slideshowReference: 0 } //TODO gerer le fait que le client ne recoive pas cette donnée
                 });
             });
 
