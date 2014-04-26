@@ -11,9 +11,7 @@
     top: 10px;
 }*/
 
-#editor-container input[type=button]:hover{
-    transform: scale(10,10);
-}
+
 
 #toolbar > > {
     display: inline-block;
@@ -48,11 +46,20 @@
 }
 
 #modalCurrentEditing {
-    background-color: gray;
+    /*background-color: gray;*/
    position: absolute;
     top: 70px;
 }
 
+.elementsAreaCurrentEditing{
+    background-color: gray;
+     position: absolute;
+     top: 10px;
+}
+
+.addElement{
+     position: absolute;
+}
 
 #editor-container >.active {
     border : dashed red 2px;
@@ -73,12 +80,12 @@
 
 
 #modalSelectSlideshow{
-    width : 50%;
+    /*width : 50%;
     height: 70%;
     position : absolute;
     top : 10%;
     left: 20%;
-    background-color: #ff9999;
+    background-color: #ff9999;*/
     
    
 }
