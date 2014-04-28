@@ -66,6 +66,7 @@
     {{loginButtons}}
     {{> toolbar}}
     {{> buttons}}
+    {{> timeline}}
     <div id='editor-container'>
         {{> editorContainer}}
     </div>
@@ -105,17 +106,9 @@
         <!-- </p> -->
     </div>
 </template>
-<template name='createSlide'><input id='createSlide' class='button' type='button' value='createSlide'/></template>
-<template name='loadEditor'><input id='loadEditor' class='button' type='button' value='loadEditor' /></template>
-<template name='loadJmpress'><input id='loadJmpress' class='button' type='button' value='loadJmpress'/></template>
-<template name='loadDeck'><input id='loadDeck' class='button' type='button' value='loadDeck'/></template>
 
-<template name='createSlideshow'><input id='createSlideshow' class='button' type='button' value='createSlideshow'/></template>
-<template name='updateSlideshow'><input id='updateSlideshow' class='button' type='button' value='updateSlideshow'/></template>
-<template name='deleteSlideshow'><input id='deleteSlideshow' class='button' type='button' value='deleteSlideshow'/></template>
-<template name='loadSlideshow'><input id='loadSlideshow' class='button' type='button' value='loadSlideshow'/></template>
-
-
+ 
+<!---------------------------- slide container ---------------------------->
 
 <template name='editorContainer' >  
     {{!#each slideshow}}
@@ -141,56 +134,77 @@
     {{!/each}}
 </template>
 
-<template name='editorSlide'>
+<template name='modalCurrentEditing'>
+        <div id='modalCurrentEditing'>
+          {{#each editorSlideCurrentEditing}}
+          {{> editorSlideCurrentEditing}}
+          {{/each}}
+        </div>
+</template>
 
+<template name="timeline">
+    <div id="timeline">
+      <h2 class='timeline-slides-title'> Timeline </h2>
+      {{#each slides}}
+          {{#constant}}
+              {{> timelineSlide}}
+          {{/constant}}
+      {{/each}}
+    </div>  
+    <div class='cloned-slides' id='cloned-slides'></div>
+</template>  
+
+<!---------------------------- slide  ---------------------------->
+
+<template name='editorSlide'>
     <div id='{{_id}}' class='slide {{isActive}}' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px; top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px ;transform:scale({{getEditorData 'scaleX'}},{{getEditorData 'scaleY'}})'> 
          {{> deleteSlide }}
          {{> editSlideContent}}
-         <p class='title'> {{informations.title}} </p>
+         <p class='title'> {{order}} - {{informations.title}} </p>
     
       {{> elementsArea}}
-    </div>  
-    
-</template> 
-
-<template name='editorSlideCurrentEditing'>
-
-    <div id='{{_id}}'> 
-         {{> createElementTexte }}
-         <p class='title'> {{informations.title}} </p>
-    
-      {{> elementsAreaCurrentEditing}}
-    </div>  
-    
+    </div>      
 </template> 
 
 <template name='jmpressSlide'>
-
     <div id='{{_id}}' class='step slide' 
          {{getJmpressData 'x'}} {{getJmpressData 'y'}} {{getJmpressData 'z'}}>        
          <p class='title'> {{informations.title}} </p>         
       {{> elementsArea}}        
     </div>    
-
 </template> 
 
 <template name='deckSlide'>
-
     <section id='{{_id}}' class='slide'>        
          <h1> {{informations.title}} </h1>         
          {{> elementsArea}}
-    </section>  
-    
+    </section>      
 </template> 
 
-<template name='elementsArea'>
+<template name='editorSlideCurrentEditing'>
+    <div id='{{_id}}'> 
+         {{> createElementTexte }}
+         <p class='title'> {{informations.title}} </p>
+    
+        {{> elementsAreaCurrentEditing}}
+    </div>      
+</template> 
 
+<template name="timelineSlide">
+  <div class="timeline-slide" id='{{_id}}-timeline'> 
+      <p class='title'> {{informations.title}} </p>
+      {{> elementsAreaTimeline}}
+  </div>
+</template> 
+
+<!---------------------------- element container  ---------------------------->
+
+<template name='elementsArea'>
     <div class='elementsArea'>        
         {{#each elements}}              
           {{> element}}
         {{/each}}         
-    </div>
-   
+    </div>   
 </template>
 
 <template name='elementsAreaCurrentEditing'>
@@ -203,28 +217,53 @@
     </div>
 </template>
 
+<template name='elementsAreaTimeline'>
+    <div class='elementsAreaTimeline'>        
+        {{#each elements}}              
+          {{> elementTimeline}}
+        {{/each}}         
+    </div>   
+</template>
+
+<!---------------------------- element   ---------------------------->
 
 <template name='element'>
-
     <div id='{{_id}}-wrapper' class='wrapper-element element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px; top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px ;transform:scale({{getEditorData 'scaleX'}},{{getEditorData 'scaleY'}})' >
         <div id='{{_id}}' class='editor {{type}}'>
             {{!{content}}
         </div>       
     </div>
-
 </template> 
 
 <template name='elementCurrentEditing'>
-
    <div id='{{_id}}-currentEditing-wrapper' class='wrapper-element-currentEditing element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px;top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px '>
       {{>editTexteContent}}
       {{>deleteElement}}
         <div id='{{_id}}-currentEditing' class='editor {{type}}'>
             {{{content}}}
         </div>       
-    </div>
-  
+    </div>  
 </template> 
+
+<template name='elementTimeline'>
+    <div id='{{_id}}-wrapper-timeline' class='wrapper-element-timeline element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px; top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px ;transform:scale({{getEditorData 'scaleX'}},{{getEditorData 'scaleY'}})' >
+        <div id='{{_id}}-timeline' class='{{type}}'>
+            {{!{content}}
+        </div>       
+    </div>
+</template> 
+
+<!---------------------------- button   ---------------------------->
+
+<template name='createSlide'><input id='createSlide' class='button' type='button' value='createSlide'/></template>
+<template name='loadEditor'><input id='loadEditor' class='button' type='button' value='loadEditor' /></template>
+<template name='loadJmpress'><input id='loadJmpress' class='button' type='button' value='loadJmpress'/></template>
+<template name='loadDeck'><input id='loadDeck' class='button' type='button' value='loadDeck'/></template>
+
+<template name='createSlideshow'><input id='createSlideshow' class='button' type='button' value='createSlideshow'/></template>
+<template name='updateSlideshow'><input id='updateSlideshow' class='button' type='button' value='updateSlideshow'/></template>
+<template name='deleteSlideshow'><input id='deleteSlideshow' class='button' type='button' value='deleteSlideshow'/></template>
+<template name='loadSlideshow'><input id='loadSlideshow' class='button' type='button' value='loadSlideshow'/></template>
 
 <template name='quitEdit'><input type='button' class='buttonQuitEdit' value='qui edit'></template>
 <template name='deleteSlide'><input type='button' class='deleteSlide' value='X'></template>
@@ -234,15 +273,7 @@
 <template name='editTexteContent'><input type='button' class='editTextContent' value='edit'></template>
 
 
-
-
-<template name='modalCurrentEditing'>
-        <div id='modalCurrentEditing'>
-          {{#each editorSlideCurrentEditing}}
-          {{> editorSlideCurrentEditing}}
-          {{/each}}
-        </div>
-</template>
+<!---------------------------- modal   ---------------------------->
 
 
 <template name='modalTemplate'>

@@ -5,9 +5,12 @@ createSlide = function(options) {
     }
     if (typeof options.pos === "undefined") {
         options.pos = {
-            x: 200,
-            y: 200
+            x: 2000,
+            y: 2000
         };
+    }
+    if(typeof options.order === "undefined"){
+        options.order = $("#timeline .timeline-slide").length+1;
     }
     return Slides.insert({
         _id: Random.id(),
@@ -16,6 +19,7 @@ createSlide = function(options) {
         },
         slideshowReference: [Slideshow.findOne({})._id],
         elements: [],
+        order:options.order,
         displayOptions: {
             editor: {
                 positions: {

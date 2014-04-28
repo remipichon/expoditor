@@ -394,6 +394,12 @@ Slides.allow({
             return true;
         }
 
+        //order
+         if (_.contains(fields, 'order')) {
+            //TODO
+            return true;
+        }
+
 
         console.log("info : slidesLock.allow.update pos : case not expected, return false");
         return false;

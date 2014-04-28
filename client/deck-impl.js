@@ -5,7 +5,7 @@ Template.deckContainer.slides = function() {
         return [];
     }
     console.log("deckContainer inject data");
-    return Slides.find({});
+   return Slides.find({},{sort:{order:1}});
 };
 
 

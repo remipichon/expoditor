@@ -5,7 +5,7 @@ Template.jmpressContainer.slides = function() {
         return [];
     }
     console.log("jmpressContainer inject data");
-    return Slides.find({});
+    return Slides.find({},{sort:{order:1}});    
 };
 
 

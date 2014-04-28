@@ -1,6 +1,7 @@
 
 ratioSlideshowMode = 5;
 ratioContentMode = 1;
+ratioTimeline = 10;
 
 
 /*

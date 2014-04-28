@@ -4,10 +4,8 @@ Template.editorContainer.slides = function() {
         return [];
     }
     console.log("editorContainer inject data");
-    return Slides.find({});
+    return Slides.find({},{sort:{order:1}}); //enfait pas besoin du sort ici
 };
-
-
 
 
 
@@ -19,8 +17,6 @@ Template.modalCurrentEditing.editorSlideCurrentEditing = function() {
     console.log("Template.modalCurrentEditing.editorSlideCurrentEditing");
     return CurrentEditing.find({});
 };
-
-
 
 
 
@@ -37,10 +33,8 @@ Template.editorSlide.rendered = function() {
     goog.events.listen(dragger, 'start', startDragSlide, 'false', this.data);
     //if(Session.get("heavyRefresh")) goog.events.listen(dragger, goog.fx.Dragger.EventType.DRAG, dragSlide, 'false', this.data);    
     goog.events.listen(dragger, 'end', endDragSlide, 'false', this.data);
+
 };
-
-
-
 
 
 
@@ -63,17 +57,14 @@ Template.editorSlide.isActive = function() {
 
 
 
-
-
-
 Template.editorSlide.getEditorData = function(axis) {
 
     // if(typeof this.CSS === "undefined"){
-    console.log('editorSlide.getEditorData',this._id);
+    console.log('editorSlide.getEditorData', this._id);
     var posX = parseFloat(this.displayOptions.editor.positions.x);
     var posY = parseFloat(this.displayOptions.editor.positions.y);
 
-   this.center = {
+    this.center = {
         x: parseFloat(this.displayOptions.editor.positions.x),
         y: parseFloat(this.displayOptions.editor.positions.y)
     };
@@ -81,29 +72,29 @@ Template.editorSlide.getEditorData = function(axis) {
         width: parseFloat(this.displayOptions.editor.size.width),
         height: parseFloat(this.displayOptions.editor.size.height)
     }
-     this.ratio = {
+    this.ratio = {
         top: ratioSlideshowMode,
         left: ratioSlideshowMode
     }
     delete this.CSS;
     posToCSS.call(this);
-// }
+    // }
 
     switch (axis) {
         case "x":
-            var coord = this.CSS.left;//posX / ratioSlideshowMode;
+            var coord = this.CSS.left; //posX / ratioSlideshowMode;
             break;
         case "y":
-            var coord = this.CSS.top;//tposY / ratioSlideshowMode;
+            var coord = this.CSS.top; //tposY / ratioSlideshowMode;
             break;
         case "z":
             var coord = 0;
             break;
         case "scaleX":
-            var coord = 1 ;/// 5;
+            var coord = 1; /// 5;
             break;
         case "scaleY":
-            var coord = 1 ;/// 5;
+            var coord = 1; /// 5;
             break;
         case "h":
             var coord = this.displayOptions.editor.size.height / ratioSlideshowMode; //
