@@ -1,3 +1,10 @@
+/**
+ * [createSlide description]
+ * @param  {object} options given options to set a slide : 
+ *                          * pos.x/y   (default)
+ *                          * title     (default)
+ *                          * order     (default)
+ */
 createSlide = function(options) {
     console.log("create slide", options.type);
     if (typeof options === "undefined") {
@@ -56,7 +63,9 @@ deleteSlide = function() {
 };
 
 
-
+/*
+* TODO : passer ca en mode this !!!
+ */
 updateSlideTitleModel = function(slide) {
     console.log("update title, model");
     var title = prompt("new title", slide.informations.title);
@@ -79,6 +88,11 @@ updateSlideTitleModel = function(slide) {
 /*
  * TODO : remettre au gout du jour le getCloserSlide
  */
+/**
+ * update a slide by this._id. Read CSS left/top in DOM and convert into real pos accordind to 
+ * slide size and ratioSlideshowMode
+ * 
+ */
 updateSlidePos = function() {
     console.log("updateSlidePos", this._id);
 
@@ -87,34 +101,6 @@ updateSlidePos = function() {
     var $slide = $("#" + this._id);
     var top = parseFloat($slide.css('top'));
     var left = parseFloat($slide.css('left'));
-    //var scaleX = parseFloat($slide.css("transform").split(',')[0].match(/[0-9]/g).join().replace(',','.'));
-    //var scaleY = parseFloat($slide.css("transform").split(',')[3].match(/[0-9]/g).join().replace(',','.'));
-    /*
-    this.CSS = {
-        top: top,
-        left: left
-    };
-    this.size = {
-        width: 900, //parseFloat(this.displayOptions.editor.size.width),
-        height: 700 //parseFloat(this.displayOptions.editor.size.height)
-    }
-
-    delete this.center; // pour liberer la place
-    recalcPos.apply(this, [{
-        ratioLeft: 5,
-        ratioTop: 5
-    }]);
-
-    var pos = {
-        x: this.center.x,
-        y: this.center.y,
-        z: 0
-    };
-    //console.log("updateSlidePos",left,top,scaleX,scaleY,pos.x,pos.y)
-
-*/
-
-    //console.log("updateSlidePos debug pos", top, left);
     
 
     this.CSS = {
@@ -135,8 +121,8 @@ updateSlidePos = function() {
     
 
     var pos = {
-        x: this.center.x,//left * ratioSlideshowMode,
-        y: this.center.y,//top * ratioSlideshowMode,
+        x: this.center.x,
+        y: this.center.y,
         z: 0
     };
 

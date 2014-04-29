@@ -1,3 +1,8 @@
+/***********************
+ * Manage locks
+ * 
+ ***********************/
+
 
 /*
  * set lock if component is free to edit

@@ -145,12 +145,11 @@ setActive = function(activeSlide) {
 
 };
 
+
+
 /**********************************************************
- * / end manage live Remote
+ * buttons to switch between editor and presentator technos
  **********************************************************/
-
-
-
 
 Template.loadEditor.events({
     'click input': function() {

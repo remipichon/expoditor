@@ -1,3 +1,7 @@
+/**
+ * gives slides to slideshow editor mode
+ * @return {cursor} all slides related to the slideshow loaded, sorted by order
+ */
 Template.editorContainer.slides = function() {
     if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'editor') {
         console.log("editorContainer empty");
@@ -8,7 +12,10 @@ Template.editorContainer.slides = function() {
 };
 
 
-
+/**
+ * if a slide is added to collection CurrentEditing, it active the modal related
+ * @return {[cursor]} one slide max, if not empty
+ */
 Template.modalCurrentEditing.editorSlideCurrentEditing = function() {
     if (CurrentEditing.find({}).fetch().length !== 0) {
         // throw new Meteor.Error("500","More than one slide in CurrentEditing");
@@ -23,7 +30,7 @@ Template.modalCurrentEditing.editorSlideCurrentEditing = function() {
 /****** render *****/
 
 /*
- * callback of render to add draggable when edit
+ * callback of render to add draggable when in slideshow edit mode
  */
 Template.editorSlide.rendered = function() {
     console.log("slide.rendered for editor", this.data._id);
@@ -41,6 +48,10 @@ Template.editorSlide.rendered = function() {
 /******
  *  method
  ******/
+ /**
+  * deprecated : show in slideshow editor mode if a slide is active in a presentator mode
+  * @return {Boolean} [description]
+  */
 Template.editorSlide.isActive = function() {
 
     var remote = Remote.findOne({
@@ -56,7 +67,11 @@ Template.editorSlide.isActive = function() {
 };
 
 
-
+/**
+ * calculate position and size of a slide in slideshow editor mode according to ratioSlideshowMode
+ * @param  {string} axis which CSS style is needed
+ * @return {int}      value of the CSS style 
+ */
 Template.editorSlide.getEditorData = function(axis) {
 
     // if(typeof this.CSS === "undefined"){

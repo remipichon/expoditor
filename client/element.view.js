@@ -1,3 +1,10 @@
+/**
+ * The following give elements of the slide (onto the slide) to each elements area needed
+ */
+
+/**
+ * slideshow editor mode
+ */
 Template.elementsArea.elements = function() {
     return Elements.find({
         slideReference: {
@@ -6,6 +13,9 @@ Template.elementsArea.elements = function() {
     });
 };
 
+/**
+ * content slide editor mode
+ */
 Template.elementsAreaCurrentEditing.elements = function() {
     return Elements.find({
         slideReference: {
@@ -14,6 +24,9 @@ Template.elementsAreaCurrentEditing.elements = function() {
     });
 };
 
+/**
+ * timeline
+ */
 Template.elementsAreaTimeline.elements = function() {
     return Elements.find({
         slideReference: {
@@ -29,11 +42,9 @@ Template.elementsAreaTimeline.elements = function() {
 
 /**
  * le .create est appelé à chaque fois c'est juste un precallback du render
- * @return {[type]} [description]
  */
 /**
- * add editor and dragger
- * @return {[type]} [description]
+ * add editor and dragger on an element in slide content editor mode
  */
 Template.elementCurrentEditing.rendered = function() {
     //pour eviter d'ajouter un editor et un handler dragger à chaque rended
@@ -55,7 +66,11 @@ Template.elementCurrentEditing.rendered = function() {
     }
 }
 
-
+/**
+ * calculate position and size of an element in slideshow editor mode according to ratioSlideshowMode
+ * @param  {string} axis which CSS style is needed
+ * @return {int}      value of the CSS style 
+ */
 Template.element.getEditorData = function(axis) {
    // if (typeof this.CSS === 'undefined') {
     console.log("element.getEditorData", this._id);
@@ -106,7 +121,11 @@ Template.element.getEditorData = function(axis) {
     return coord;
 };
 
-
+/**
+ * calculate position and size of an element in slide content editor mode according to ratioSlideshowMode
+ * @param  {string} axis which CSS style is needed
+ * @return {int}      value of the CSS style 
+ */
 Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
 
     if (typeof this.CSS === 'undefined') { //works here because elementCurrendEditing are #constant
@@ -161,7 +180,11 @@ Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore uti
 };
 
 
-
+/**
+ * calculate position and size of an element in the timeline according to ratioTimeline
+ * @param  {string} axis which CSS style is needed
+ * @return {int}      value of the CSS style 
+ */
 Template.elementTimeline.getEditorData = function(axis) {
    // if (typeof this.CSS === 'undefined') {
     console.log("elementTimeline.getEditorData", this._id);

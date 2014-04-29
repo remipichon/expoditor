@@ -26,7 +26,12 @@ updateSlideElementControler = function() {
  * maj des elements en cours d'édition à la main
  */
 //tous les elements de la slide en cours d'édition
-
+/**
+ * When a slide is added to CurrentEditing, create an handler to watch for news elements created
+ * and updated by others client. Element in slide content editor are {#constant} in order to prevent
+ * losing dragger and editor aspect, this observeChanges manually update pos and content of elements 
+ * updating by others clients (and skip element currently editing by the client TODO improve this) 
+ */
 CurrentEditing.find({}).observeChanges({
     added: function(_id, fields) {
         console.log("slide added to current editing", _id, Elements.find({

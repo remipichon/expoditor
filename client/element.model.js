@@ -1,3 +1,8 @@
+/**
+ * create an element texte in the slide currently editing (_id get from CurrentEditing)
+ * @param  {[object]} options nothing by now
+ * @return {[type]}         [description]
+ */
 createElementTexte = function(options) {
     console.log("create element texte");
     var d = new Date;
@@ -39,46 +44,17 @@ createElementTexte = function(options) {
 };
 
 
-
+/**
+ * update a element pos by this._id. Read CSS left/top in DOM and convert into real pos accordind to 
+ * slide size and ratioContentMode * 
+ */
 updateElementPos = function() {
     console.log("updateElementPos", this._id, this.id);
 
     var $element = $("#" + this.id + '-wrapper')
-    /*
-     var slideW = parseFloat($($('#modalCurrentEditing')).css('width'));
-    var slideH = parseFloat($($('#modalCurrentEditing')).css('height'));
-    var rapporHW = slideH / slideW;
-
-    var ratioLeft = 900 / slideW;
-    var ratioTop = 700 / slideH;
-
-*/
-
-    var top = parseFloat($element.css('top'));
+       var top = parseFloat($element.css('top'));
     var left = parseFloat($element.css('left'));
-    /*
-    console.log("updateElementPos debug pos", top, left);
-
-
-    this.CSS = {
-        top: top,
-        left: left
-    };
-    this.size = {
-        width: parseFloat(this.displayOptions.editor.size.width),
-        height: parseFloat(this.displayOptions.editor.size.height)
-    }
-
-    delete this.center; // pour liberer la place
-    recalcPos.apply(this, ['#modalCurrentEditing']);
-
-    var pos = {
-        x: this.center.x,
-        y: this.center.y,
-        z: 0
-    };
-    */
-
+    
     this.CSS = {
         top: top,
         left: left
@@ -121,7 +97,11 @@ updateElementPos = function() {
 };
 
 
-
+/**
+ * update content of an element given by this._id
+ * @param  {string} content : whole new content
+ * @return {[type]}         [description]
+ */
 updateSlideElementModel = function(content) {
     console.log("update element model");
 
@@ -133,7 +113,10 @@ updateSlideElementModel = function(content) {
 };
 
 
-
+/**
+ * delete an element given by this._id
+ * @return {[type]} [description]
+ */
 deleteSlideElement = function() {
     console.log("delete element ", this._id);
     if (!userHasAccessToComponent.call(this)) {
