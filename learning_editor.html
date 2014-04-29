@@ -63,7 +63,7 @@
 </head>
 
 <body>
-    {{loginButtons}}
+    {{> loginButtons}}
     {{> toolbar}}
     {{> buttons}}
     {{> timeline}}
@@ -110,34 +110,28 @@
  
 <!---------------------------- slide container ---------------------------->
 
-<template name='editorContainer' >  
-    {{!#each slideshow}}
+<template name='editorContainer' > 
     {{#each slides}}
          {{> editorSlide}}
     {{/each}}
-    {{!/each}}
 </template>
 
 <template name='jmpressContainer'>  
-    {{!#each slideshow}}
     {{#each slides}}
          {{> jmpressSlide}}
     {{/each}}
-    {{!/each}}
 </template>
 
 <template name='deckContainer'>   
-    {{!#each slideshow}}
     {{#each slides}}
          {{> deckSlide}}
     {{/each}}
-    {{!/each}}
 </template>
 
 <template name='modalCurrentEditing'>
         <div id='modalCurrentEditing'>
           {{#each editorSlideCurrentEditing}}
-          {{> editorSlideCurrentEditing}}
+          {{> editorSlideCurrentEditingT}}
           {{/each}}
         </div>
 </template>
@@ -146,12 +140,14 @@
     <div id="timeline">
       <h2 class='timeline-slides-title'> Timeline </h2>
       {{#each slides}}
-          {{#constant}}
               {{> timelineSlide}}
-          {{/constant}}
       {{/each}}
     </div>  
-    <div class='cloned-slides' id='cloned-slides'></div>
+    <div class='cloned-slides' id='cloned-slides'>
+      {{#each slides}}
+              {{> timelineSlide}}
+      {{/each}}
+    </div>
 </template>  
 
 <!---------------------------- slide  ---------------------------->
@@ -181,7 +177,7 @@
     </section>      
 </template> 
 
-<template name='editorSlideCurrentEditing'>
+<template name='editorSlideCurrentEditingT'>
     <div id='{{_id}}'> 
          {{> createElementTexte }}
          <p class='title'> {{informations.title}} </p>
@@ -209,10 +205,8 @@
 
 <template name='elementsAreaCurrentEditing'>
     <div class='elementsAreaCurrentEditing' style="width:900px; height:700px;">        
-        {{#each elements}}     
-          {{#constant}}         
+        {{#each elements}}         
             {{> elementCurrentEditing}}
-          {{/constant}}
         {{/each}}         
     </div>
 </template>
@@ -230,7 +224,8 @@
 <template name='element'>
     <div id='{{_id}}-wrapper' class='wrapper-element element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px; top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px ;transform:scale({{getEditorData 'scaleX'}},{{getEditorData 'scaleY'}})' >
         <div id='{{_id}}' class='editor {{type}}'>
-            {{!{content}}
+
+
         </div>       
     </div>
 </template> 
@@ -248,7 +243,8 @@
 <template name='elementTimeline'>
     <div id='{{_id}}-wrapper-timeline' class='wrapper-element-timeline element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px; top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px ;transform:scale({{getEditorData 'scaleX'}},{{getEditorData 'scaleY'}})' >
         <div id='{{_id}}-timeline' class='{{type}}'>
-            {{!{content}}
+
+
         </div>       
     </div>
 </template> 

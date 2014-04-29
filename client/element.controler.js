@@ -22,6 +22,17 @@ updateSlideElementControler = function() {
 };
 
 
+
+
+
+
+/*********************
+    Le code ci dessous n'est plus utile depuis la migration de Spark vers Blaze.
+    En revanche, je le garde parce qu'il est bien fait ;)
+
+*********************/    
+
+
 /**
  * maj des elements en cours d'édition à la main
  */
@@ -32,6 +43,8 @@ updateSlideElementControler = function() {
  * losing dragger and editor aspect, this observeChanges manually update pos and content of elements 
  * updating by others clients (and skip element currently editing by the client TODO improve this) 
  */
+
+/*
 CurrentEditing.find({}).observeChanges({
     added: function(_id, fields) {
         console.log("slide added to current editing", _id, Elements.find({
@@ -104,3 +117,4 @@ CurrentEditing.find({}).observeChanges({
         handleElementCurrentEditing.stop();
     }
 });
+*/

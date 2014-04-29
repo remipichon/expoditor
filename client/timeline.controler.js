@@ -1,0 +1,116 @@
+cloneSlide = function(i, doSetSortable) {
+  var item = $("#timeline #"+this.id);
+  var item_clone =  $(".cloned-slides #"+this.id); //hohoho c'est pas beau cela
+  console.log("clonSlide",item,item_clone);
+  item.data("clone", item_clone);
+  var position = item.position();
+  item_clone
+    .css({
+      left: position.left,
+      top: position.top,
+      visibility: "hidden"
+    })
+    .attr("data-pos", i );//.attr("id", $(this).attr('id') + "-cloned");
+
+  item.attr("data-pos", i );
+
+  //$("#cloned-slides").append(item_clone);
+
+  if (typeof doSetSortable !== 'undefined' && doSetSortable) {
+    setSortable();
+  }
+  
+}
+
+removeClone = function() {
+  $(this.id).remove();
+}
+
+
+setTimeline = function() {
+  // Some of this code is me
+  // Some of this code is this fiddle http://jsfiddle.net/dNfsJ/ thx to AJ for finding it for me.
+
+  //temporary hack thanks to dom (it's a TODO)
+  $(".timeline-slide").each(function(i) {
+    this.id = $(this).attr("id");
+    cloneSlide.apply(this, [i]);
+  });
+
+  setSortable();
+
+}
+
+setSortable = function() {
+  console.log("setSortable");
+  $("#timeline").sortable({
+
+    axis: "y",
+    revert: true,
+    scroll: true,
+    placeholder: "sortable-placeholder",
+    cursor: "move",
+
+    start: function(e, ui) {
+      ui.helper.addClass("exclude-me");
+      $("#timeline .timeline-slide:not(.exclude-me)")
+        .css("visibility", "hidden"); //cache toutes les vrais slides sauf celle en cours de déplacement
+      $("#cloned-slides .timeline-slide").css("visibility", "visible"); //affiche tous les clones      
+      ui.helper.data("clone").hide(); //cache le clone de la slide en cours de déplacement
+    },
+
+    stop: function(e, ui) {
+      $("#timeline .timeline-slide.exclude-me").each(function() {
+        var item = $(this);
+        var clone = item.data("clone");
+        var position = item.position();
+
+        clone.css("left", position.left);
+        clone.css("top", position.top);
+        clone.show();
+
+        item.removeClass("exclude-me");
+      });
+
+      //met à jour les data-pos des clones
+      $("#timeline .timeline-slide").each(function() {
+        var item = $(this);
+        var clone = item.data("clone");
+
+        console.log("sortable.stop",clone.attr("data-pos"),item.index());
+        if(parseInt(clone.attr("data-pos")) !== item.index()){ //if update needed
+          //update order
+          updateOrder.apply($(this),[item.index()]) ;
+        }
+
+        clone.attr("data-pos", item.index());
+        item.attr("data-pos", item.index());
+
+      });
+
+      //cache tous les clones, affiche toutes les slides
+      $("#timeline .timeline-slide").css("visibility", "visible");
+      $("#cloned-slides .timeline-slide").css("visibility", "hidden");
+
+      
+    },
+
+    change: function(e, ui) {
+      //pour toutes les slides sauf celle en cours de déplacement
+      //on anime le déplacement vers sa position de déplacement
+      $("#timeline .timeline-slide:not(.exclude-me)").each(function() {
+        var item = $(this);
+        var clone = item.data("clone");
+        clone.stop(true, false);
+        var position = item.position();
+        console.log("sortable.change",position.left,position.top);
+        clone.animate({
+          left: position.left,
+          top: position.top
+        }, 200);
+      });
+    }
+
+  });
+
+}

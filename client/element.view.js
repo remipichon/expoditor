@@ -40,30 +40,19 @@ Template.elementsAreaTimeline.elements = function() {
 
 
 
-/**
- * le .create est appelé à chaque fois c'est juste un precallback du render
- */
+
 /**
  * add editor and dragger on an element in slide content editor mode
  */
 Template.elementCurrentEditing.rendered = function() {
-    //pour eviter d'ajouter un editor et un handler dragger à chaque rended
-    //on ecrit dans le data du DOM qu'on a déjà init le bazar
-    console.log("#" + this.data._id + '-currentEditing');
-    if (typeof $("#" + this.data._id + '-currentEditing').data("editorDraggedIsSet") === 'undefined') {
-        console.log("render element for currentEditing", this.data._id);
-        setEditor(this.data._id + '-currentEditing');
+    console.log("render element for currentEditing", this.data._id);
+    setEditor(this.data._id + '-currentEditing');
 
-        this.data.id = this.data._id + '-currentEditing';
-        var dragger = new goog.fx.Dragger(goog.dom.getElement(this.data._id + '-currentEditing-wrapper'));
-        goog.events.listen(dragger, 'start', startDragElement, 'false', this.data);
-        if (Session.get("heavyRefresh")) goog.events.listen(dragger, goog.fx.Dragger.EventType.DRAG, dragElement, 'false', this.data);
-        goog.events.listen(dragger, 'end', endDragElement, 'false', this.data);
-
-        $("#" + this.data._id + '-currentEditing').data("editorDraggedIsSet", true);
-    } else {
-        console.log("render element for currentEditing SKIPPED", this.data._id);
-    }
+    this.data.id = this.data._id + '-currentEditing';
+    var dragger = new goog.fx.Dragger(goog.dom.getElement(this.data._id + '-currentEditing-wrapper'));
+    goog.events.listen(dragger, 'start', startDragElement, 'false', this.data);
+    if (Session.get("heavyRefresh")) goog.events.listen(dragger, goog.fx.Dragger.EventType.DRAG, dragElement, 'false', this.data);
+    goog.events.listen(dragger, 'end', endDragElement, 'false', this.data);
 }
 
 /**
