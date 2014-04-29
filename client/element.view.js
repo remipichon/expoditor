@@ -31,6 +31,10 @@ Template.elementsAreaTimeline.elements = function() {
  * le .create est appelé à chaque fois c'est juste un precallback du render
  * @return {[type]} [description]
  */
+/**
+ * add editor and dragger
+ * @return {[type]} [description]
+ */
 Template.elementCurrentEditing.rendered = function() {
     //pour eviter d'ajouter un editor et un handler dragger à chaque rended
     //on ecrit dans le data du DOM qu'on a déjà init le bazar
@@ -70,7 +74,7 @@ Template.element.getEditorData = function(axis) {
     }
     delete this.CSS;
     posToCSS.call(this);
-//}
+    //}
 
     switch (axis) {
         case "x":
@@ -105,7 +109,7 @@ Template.element.getEditorData = function(axis) {
 
 Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
 
-    if (typeof this.CSS === 'undefined') {
+    if (typeof this.CSS === 'undefined') { //works here because elementCurrendEditing are #constant
         console.log("elementCurrentEditing.getEditorData", this._id);
 
         //a a factoriser avec l'observeChanges
@@ -176,7 +180,7 @@ Template.elementTimeline.getEditorData = function(axis) {
     }
     delete this.CSS;
     posToCSS.call(this);
-//}
+    //}
 
     switch (axis) {
         case "x":

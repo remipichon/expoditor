@@ -39,7 +39,7 @@ ratio = 5;
 
 //reinit des variables de sessions
 Session.set('modalCurrentEditing', false);
-Session.set("heavyRefresh", true); //false to update positions and content less frequently
+Session.set("heavyRefresh", false); //false to update positions and content less frequently
 
 
 
