@@ -60,7 +60,7 @@ Meteor.startup(function() {
     //listener jquery pour la remote
     //keypress ne fire pas les arrow sont webkit et IE
     $(document).on("keypress", function(event) {
-        setTimeline();
+        //setTimeline();
 
         var activeSlide = null;
         if (Session.get("clientMode") === "jmpress") {

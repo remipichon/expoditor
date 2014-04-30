@@ -6,6 +6,15 @@ Template.timeline.slides = function() {
 	})
 }
 
+Template.clonedTimeline.slides = function() {
+	return Slides.find({}, {
+		sort: {
+			order: 1
+		}
+	})
+}
+
+/*
 Slides.find({}).observeChanges({
 	added: function(_id) {
 
@@ -35,39 +44,47 @@ Slides.find({}).observeChanges({
 		setSortable();
 	}
 })
+*/
+
+Template.timelineSlide.destroyed = function() {
+    console.log("timelineSlide.destroyed");
+    updateOrderControler();
+
+}
+
 
 Template.timelineSlide.rendered = function() {
 
 	// settimelineOnSlide = function() {
 	// console.log("render timelineslide");
 	// var setToTimeline = false;
-	// //ca me saoul mais je mets cela là quand meme
-	// if (typeof $("#timeline").data("timelineSlide") === "undefined") {
-	// 	$("#timeline").data("timelineSlide", "");
-	// }
+	//ca me saoul mais je mets cela là quand meme
+	if (typeof $("#timeline").data("timelineSlide") === "undefined") {
+		$("#timeline").data("timelineSlide", "");
+	}
 
-	// if(typeof $("#" + this.data._id).data("timelineIsSet") !== 'undefined'){  //je crois que ca ne sert jamais
-	// 	setToTimeline = false;
-	// }
-	// if ($("#timeline").data("timelineSlide").indexOf(this.data._id) === -1) {
-	// 	setToTimeline = true;
-	// }
+	if(typeof $("#" + this.data._id).data("timelineIsSet") !== 'undefined'){  //je crois que ca ne sert jamais
+		setToTimeline = false;
+	}
+	if ($("#timeline").data("timelineSlide").indexOf(this.data._id) === -1) {
+		setToTimeline = true;
+	}
 
 
-	// if (setToTimeline) {
+	if (setToTimeline) {
 		console.log("render timelineslide for editor", this.data._id);
 
 		//ajout à la timeline
 		//c'est pas top parce que la premiere fois on setSortable pour chaque slide 
 		this._id = this.data._id;
 		this.id = this.data._id + "-timeline";
-		cloneSlide.apply(this, [$("#cloned-slides").children().length, true]);
+		cloneSlide.apply(this, [this.data.order, true]);
 
-		//$("#" + this.data._id).data("timelineIsSet", true);
-		//$("#timeline").data("timelineSlide", $("#timeline").data("timelineSlide") + "-" + this.data._id);
-	// } else {
-	// 	console.log("render timelineslide for editor SKIPPED", this.data._id);
-	// }
+		$("#" + this.data._id).data("timelineIsSet", true);
+		$("#timeline").data("timelineSlide", $("#timeline").data("timelineSlide") + "-" + this.data._id);
+	} else {
+		console.log("render timelineslide for editor SKIPPED", this.data._id);
+	}
 }
 
 /**

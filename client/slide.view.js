@@ -8,7 +8,11 @@ Template.editorContainer.slides = function() {
         return [];
     }
     console.log("editorContainer inject data");
-    return Slides.find({},{sort:{order:1}}); //enfait pas besoin du sort ici
+    return Slides.find({}, {
+        sort: {
+            order: 1
+        }
+    }); //enfait pas besoin du sort ici
 };
 
 
@@ -44,14 +48,24 @@ Template.editorSlide.rendered = function() {
 };
 
 
+/**
+ * works more effeciently with timelineSlide.destroy
+ */
+/*Template.editorSlide.destroyed = function() {
+    console.log("editorSlide.destroyed");
+    updateOrderControler();
+
+}*/
+
+
 
 /******
  *  method
  ******/
- /**
-  * deprecated : show in slideshow editor mode if a slide is active in a presentator mode
-  * @return {Boolean} [description]
-  */
+/**
+ * deprecated : show in slideshow editor mode if a slide is active in a presentator mode
+ * @return {Boolean} [description]
+ */
 Template.editorSlide.isActive = function() {
 
     var remote = Remote.findOne({
@@ -70,7 +84,7 @@ Template.editorSlide.isActive = function() {
 /**
  * calculate position and size of a slide in slideshow editor mode according to ratioSlideshowMode
  * @param  {string} axis which CSS style is needed
- * @return {int}      value of the CSS style 
+ * @return {int}      value of the CSS style
  */
 Template.editorSlide.getEditorData = function(axis) {
 
