@@ -42,7 +42,7 @@ Template.elementsAreaTimeline.elements = function() {
 
 
 /**
- * add editor and dragger on an element in slide content editor mode
+ * add editor and dragger and resize on an element in slide content editor mode
  */
 Template.elementCurrentEditing.rendered = function() {
     console.log("render element for currentEditing", this.data._id);
@@ -53,6 +53,8 @@ Template.elementCurrentEditing.rendered = function() {
     goog.events.listen(dragger, 'start', startDragElement, 'false', this.data);
     if (Session.get("heavyRefresh")) goog.events.listen(dragger, goog.fx.Dragger.EventType.DRAG, dragElement, 'false', this.data);
     goog.events.listen(dragger, 'end', endDragElement, 'false', this.data);
+
+    setResize(this.data._id);
 }
 
 /**

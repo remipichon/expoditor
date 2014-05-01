@@ -64,7 +64,7 @@ quitEditSlide = function() {
     Session.set("modalCurrentEditing", false);
     CurrentEditing.remove({});
 
-    goog.style.setOpacity(goog.dom.getElement('timeline'),'1');
+    goog.style.setOpacity(goog.dom.getElement('timeline'), '1');
     // goog.style.setOpacity(goog.dom.getElement('buttons'), '1');
     goog.style.setStyle(goog.dom.getElement('buttons'), 'display', 'block');
     goog.style.setOpacity(goog.dom.getElement('toolbar'), '0');
@@ -159,31 +159,37 @@ setEditor = function(idElement) {
 
 
 startDragSlide = function(e) {
+    if(isResizing.call(this))return;
     e.stopPropagation();
     $("#" + this._id).toggleClass('dragged');
     console.log("slide start drag");
 }
-startDragElement = function(e) {
+startDragElement = function(e) {    
+    if(isResizing.call(this))return;
     e.stopPropagation();
     $("#" + this._id).toggleClass('dragged');
     $("#" + this._id + '-currentEditing-wrapper').toggleClass('currentlyEditingByMe');
     e.stopPropagation();
     console.log("elment start drag")
 }
-endDragSlide = function(e) {
+endDragSlide = function(e) {    
+    if(isResizing.call(this))return;
     $("#" + this._id).toggleClass('dragged');
     updateSlidePos.call(this);
 }
 
 dragSlide = function(e) {
+    if(isResizing.call(this))return;
     updateSlidePos.call(this);
 }
 endDragElement = function(e) {
+    if(isResizing.call(this))return;
     $("#" + this._id).toggleClass('dragged');
     $("#" + this._id + '-currentEditing-wrapper').toggleClass('currentlyEditingByMe');
     console.log("endDragElement");
     updateElementPos.call(this);
 }
 dragElement = function(e) {
+    if(isResizing.call(this))return;
     updateElementPos.call(this);
 }

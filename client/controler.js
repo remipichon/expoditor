@@ -24,7 +24,7 @@ subscriptionRemote = null;
 subscriptionLocks = null;
 
 Slideshow = new Meteor.Collection("slideshow");
-Slides = new Meteor.Collection("slides");
+Slides = new Meteor.Collection("slides",{idGeneration : 'MONGO'});
 Elements = new Meteor.Collection("elements");
 Locks = new Meteor.Collection("lock");
 Remote = new Meteor.Collection("remoteSlides");
