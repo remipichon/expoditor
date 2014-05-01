@@ -70,7 +70,7 @@
 
   </script>
 
- 
+
 
    <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/common.css'>
   <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/button.css' />
@@ -278,6 +278,7 @@
    <div id='{{_id}}-currentEditing-wrapper' class='wrapper-element-currentEditing element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px;top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px '>
       {{>editTexteContent}}
       {{>deleteElement}}
+      <div id='{{_id}}-dragMe' class='dragMe'>dragMe</div>
         <div id='{{_id}}-currentEditing' class='editor {{type}}'>
             {{{content}}}
         </div>       

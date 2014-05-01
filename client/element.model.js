@@ -14,15 +14,15 @@ createElementTexte = function(options) {
     return Elements.insert({
         _id: Random.id(),
         slideReference: [
-           slideId
+            slideId
         ],
         content: content,
         type: "text",
         displayOptions: {
             editor: {
                 positions: {
-                    x: 0,
-                    y: 0
+                    x: 100,
+                    y: 100
                 },
                 size: {
                     height: 100,
@@ -45,16 +45,16 @@ createElementTexte = function(options) {
 
 
 /**
- * update a element pos by this._id. Read CSS left/top in DOM and convert into real pos accordind to 
- * slide size and ratioContentMode * 
+ * update a element pos by this._id. Read CSS left/top in DOM and convert into real pos accordind to
+ * slide size and ratioContentMode *
  */
 updateElementPos = function() {
     console.log("updateElementPos", this._id, this.id);
 
-    var $element = $("#" + this.id + '-wrapper')
-       var top = parseFloat($element.css('top'));
+    var $element = $("#" + this.id)
+    var top = parseFloat($element.css('top'));
     var left = parseFloat($element.css('left'));
-    
+
     this.CSS = {
         top: top,
         left: left
@@ -62,7 +62,12 @@ updateElementPos = function() {
     this.size = {
         width: parseFloat(this.displayOptions.editor.size.width),
         height: parseFloat(this.displayOptions.editor.size.height)
-    }
+    };
+    //si resize en cours les données dans la bd ne sont pas accurate
+   this.size = {
+        width: parseFloat($element.css('width')),
+        height: parseFloat($element.css('height'))
+    };
     this.ratio = {
         top: ratioContentMode,
         left: ratioContentMode

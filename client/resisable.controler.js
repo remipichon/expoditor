@@ -11,12 +11,13 @@ resizeElement = function() {
 }
 endResizeElement = function() {
   console.log("endResizeElement", this._id, this.id);
+  resizeModel.call(this);
    $("#"+this.id).data("isResizabling",false);
 }
 
 
-setResize = function(id) {
-  console.log("setResize",id);
+setResize = function() {
+  console.log("setResize",this.id);
 
 
   // var EVENTS = goog.object.getValues(goog.ui.Component.EventType);
@@ -24,7 +25,7 @@ setResize = function(id) {
 
 
 
-  var widgetbox = goog.dom.getElement(id);
+  var widgetbox = goog.dom.getElement(this.id);
 
   // var resetBox = function(a, b) {
   var l_minWidth = 10;
@@ -37,8 +38,8 @@ setResize = function(id) {
   });
   //goog.events.listen(resizeelem, EVENTS, logEvent);
   // goog.events.listen(resizeelem, EVENTS2, logEvent);
-  widgetbox.id = id;
-  widgetbox._id = id.split('-')[0];
+  
+  $.extend(widgetbox,this);
   goog.events.listen(resizeelem, goog.ui.Resizable.EventType.START_RESIZE, startResizeElement,'false',widgetbox);
   goog.events.listen(resizeelem, goog.ui.Resizable.EventType.RESIZE, resizeElement,'false',widgetbox);
   goog.events.listen(resizeelem, goog.ui.Resizable.EventType.END_RESIZE, endResizeElement,'false',widgetbox);

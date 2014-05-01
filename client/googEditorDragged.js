@@ -76,6 +76,14 @@ makeEditableCallback = function(e) {
     if (updateWithLocksControler.apply(Elements.findOne({
         _id: this._id
     }))) {
+        //super listener jQuery qui s'auto off et permet de desactiver les editor lorqu'on clique ailleurs
+        //quit editor anywhere except iframe
+        $("#modalCurrentEditing *:not('iframe')").on('mousedown.editText', function(e) {
+            $("#modalCurrentEditing *:not('iframe')").off('mousedown.editText');
+            $("#quitEditTexteButton").trigger("click");
+        });
+
+
         //cancel all other editor (if exists)
         $("#quitEditTexteButton").trigger("click");
         console.log("makeEditableCallback", this._id);
@@ -159,37 +167,37 @@ setEditor = function(idElement) {
 
 
 startDragSlide = function(e) {
-    if(isResizing.call(this))return;
+
     e.stopPropagation();
     $("#" + this._id).toggleClass('dragged');
     console.log("slide start drag");
 }
-startDragElement = function(e) {    
-    if(isResizing.call(this))return;
+startDragElement = function(e) {
+
     e.stopPropagation();
     $("#" + this._id).toggleClass('dragged');
     $("#" + this._id + '-currentEditing-wrapper').toggleClass('currentlyEditingByMe');
     e.stopPropagation();
     console.log("elment start drag")
 }
-endDragSlide = function(e) {    
-    if(isResizing.call(this))return;
+endDragSlide = function(e) {
+
     $("#" + this._id).toggleClass('dragged');
     updateSlidePos.call(this);
 }
 
 dragSlide = function(e) {
-    if(isResizing.call(this))return;
+
     updateSlidePos.call(this);
 }
 endDragElement = function(e) {
-    if(isResizing.call(this))return;
+
     $("#" + this._id).toggleClass('dragged');
     $("#" + this._id + '-currentEditing-wrapper').toggleClass('currentlyEditingByMe');
     console.log("endDragElement");
     updateElementPos.call(this);
 }
 dragElement = function(e) {
-    if(isResizing.call(this))return;
+
     updateElementPos.call(this);
 }

@@ -46,15 +46,22 @@ Template.elementsAreaTimeline.elements = function() {
  */
 Template.elementCurrentEditing.rendered = function() {
     console.log("render element for currentEditing", this.data._id);
-    setEditor(this.data._id + '-currentEditing');
 
     this.data.id = this.data._id + '-currentEditing';
-    var dragger = new goog.fx.Dragger(goog.dom.getElement(this.data._id + '-currentEditing-wrapper'));
+    setEditor(this.data.id);
+
+     //set resize and draggable on wrapper
+    this.data.id = this.data.id +'-wrapper';
+    
+    var dragged = goog.dom.getElement(this.data._id + '-currentEditing-wrapper');
+    var dr = goog.dom.getElement(this.data._id+'-dragMe');
+   var dragger = new goog.fx.Dragger(dragged,dr);
     goog.events.listen(dragger, 'start', startDragElement, 'false', this.data);
     if (Session.get("heavyRefresh")) goog.events.listen(dragger, goog.fx.Dragger.EventType.DRAG, dragElement, 'false', this.data);
     goog.events.listen(dragger, 'end', endDragElement, 'false', this.data);
 
-    setResize(this.data._id);
+   
+    setResize.call(this.data);
 }
 
 /**
