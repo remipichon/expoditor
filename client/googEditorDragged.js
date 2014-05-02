@@ -12,7 +12,7 @@ setToolbar = function() {
 
 
 
-    // Specify the buttons to add to the toolbar, using built in default buttons.
+    // Specify the buttons to add to the using, toolbar built in default buttons.
     var buttons = [
         goog.editor.Command.BOLD,
         goog.editor.Command.ITALIC,

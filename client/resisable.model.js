@@ -28,6 +28,11 @@ resizeModel = function(){
 		}
 	}
 
+	var updatePos = updateElementPos.apply(this,[true]);
+	console.log("resizeModel updatepos",updatePos);
+	jQuery.extend(update.$set,updatePos.$set);
+
+
 	console.log("resizeModel",update.$set);
 
 
@@ -35,11 +40,9 @@ resizeModel = function(){
 	 * Il faut absolument que 
 	 */
 	if(goog.dom.classes.has(component,'slide')){
-		Slides.update(id,update);		
-		updateSlidePos.call(this);
+		Slides.update(id,update);			
 	} else if(goog.dom.classes.has(component,'element')){		
 		Elements.update(id,update);
-		updateElementPos.call(this);
 	}
 
 }

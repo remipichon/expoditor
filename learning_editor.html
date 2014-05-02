@@ -68,6 +68,34 @@
     s.src = 'http://192.168.1.6:2438/goog.ui.resizable.js';
     $('head').append(s);
 
+
+    //slideshow toolbar
+    goog.require('goog.array');
+    goog.require('goog.debug.DivConsole');
+    goog.require('goog.debug.LogManager');
+    goog.require('goog.dom');
+    goog.require('goog.events');
+    goog.require('goog.events.EventType');
+    goog.require('goog.log');
+    goog.require('goog.object');
+    goog.require('goog.style');
+    goog.require('goog.ui.Button');
+    goog.require('goog.ui.ButtonSide');
+    goog.require('goog.ui.Component.EventType');
+    goog.require('goog.ui.Component.State');
+    goog.require('goog.ui.Menu');
+    goog.require('goog.ui.MenuItem');
+    goog.require('goog.ui.Option');
+    goog.require('goog.ui.SelectionModel');
+    goog.require('goog.ui.Separator');
+    goog.require('goog.ui.Toolbar');
+    goog.require('goog.ui.ToolbarButton');
+    goog.require('goog.ui.ToolbarMenuButton');
+    goog.require('goog.ui.ToolbarRenderer');
+    goog.require('goog.ui.ToolbarSelect');
+    goog.require('goog.ui.ToolbarSeparator');
+    goog.require('goog.ui.ToolbarToggleButton');
+
   </script>
 
 
@@ -89,6 +117,7 @@
   <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/editor/dialog.css' />
   <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/editor/linkdialog.css' />
   <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/editortoolbar.css' />
+
 
 
     
@@ -124,20 +153,32 @@
 </template>  
 
 <template name='buttons'>
-    <div id='buttons'>
-        <!-- <p> -->
-            {{> createSlideshow}}
-            {{> updateSlideshow}}
-            {{> deleteSlideshow}}
-            {{> loadSlideshow}}
-        <!-- </p>     -->
-        <!-- <p> -->
-            {{> createSlide}}
-            {{> loadEditor}}
-            {{> loadDeck}}
-            {{> loadJmpress}}
-        <!-- </p> -->
+    <div id="buttons" class="goog-toolbar goog-toolbar">
+      <div id="loadSlideshow" class="goog-toolbar-button">Load Slideshow</div>
+      <div id="createSlideshow" class="goog-toolbar-button">Create Slideshow</div>
+      <div id="updateSlideshow" class="goog-toolbar-button">Update Slideshow</div>
+      <div id="deleteSlideshow" class="goog-toolbar-button">Delete Slideshow</div>
+      <hr>
+      <div id="launchSlideshow" class="goog-toolbar-menu-button">
+        Launch Slideshow
+        <div id="decoratedMenuLaunch" class="goog-menu">
+          <div id="launchJmpress" class="goog-menuitem">jmpressjs</div>
+          <div id="launchDeck" class="goog-menuitem">deckjs</div>
+        </div>
+      </div>
+      <div dir='rtl' id="backToEditor" class="goog-toolbar-button goog-toolbar-button-disabled">
+        Back to editor
+      </div>
+      <br>
+      <div id="createSlide" class="goog-toolbar-button">Create Slide</div>
+
+
+
+      <div id="showTimeline" class="goog-toolbar-toggle-button goog-toolbar-button-checked">
+        Show Timeline
+      </div>
     </div>
+
 </template>
 
  
@@ -266,16 +307,13 @@
 <!---------------------------- element   ---------------------------->
 
 <template name='element'>
-    <div id='{{_id}}-wrapper' class='wrapper-element element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px; top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px ;transform:scale({{getEditorData 'scaleX'}},{{getEditorData 'scaleY'}})' >
-        <div id='{{_id}}' class='editor {{type}}'>
-
-
-        </div>       
+    <div id='{{_id}}-wrapper' class='wrapper-element element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px; top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px ;transform:scale({{getEditorData 'scaleX'}},{{getEditorData 'scaleY'}}); font-size:{{getFontSize}}px' >
+        <div id='{{_id}}' class='editor {{type}}'></div>       
     </div>
 </template> 
 
 <template name='elementCurrentEditing'>
-   <div id='{{_id}}-currentEditing-wrapper' class='wrapper-element-currentEditing element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px;top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px '>
+   <div id='{{_id}}-currentEditing-wrapper' class='wrapper-element-currentEditing element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px;top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px; '>
       {{>editTexteContent}}
       {{>deleteElement}}
       <div id='{{_id}}-dragMe' class='dragMe'>dragMe</div>
@@ -286,17 +324,17 @@
 </template> 
 
 <template name='elementTimeline'>
-    <div id='{{_id}}-wrapper-timeline' class='wrapper-element-timeline element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px; top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px ;transform:scale({{getEditorData 'scaleX'}},{{getEditorData 'scaleY'}})' >
-        <div id='{{_id}}-timeline' class='{{type}}'>
-
-
-        </div>       
+    <div id='{{_id}}-wrapper-timeline' class='wrapper-element-timeline element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px; top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px ;transform:scale({{getEditorData 'scaleX'}},{{getEditorData 'scaleY'}}); font-size:{{getFontSize}}px' >
+        <div id='{{_id}}-timeline' class='{{type}}'></div>       
     </div>
 </template> 
 
 <!---------------------------- button   ---------------------------->
 
-<template name='createSlide'><input id='createSlide' class='button' type='button' value='createSlide'/></template>
+<template name='createSlide'>
+  <input id='createSlide' class='button' type='button' value='createSlide'/>
+</template>
+
 <template name='loadEditor'><input id='loadEditor' class='button' type='button' value='loadEditor' /></template>
 <template name='loadJmpress'><input id='loadJmpress' class='button' type='button' value='loadJmpress'/></template>
 <template name='loadDeck'><input id='loadDeck' class='button' type='button' value='loadDeck'/></template>

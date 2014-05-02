@@ -48,7 +48,7 @@ createElementTexte = function(options) {
  * update a element pos by this._id. Read CSS left/top in DOM and convert into real pos accordind to
  * slide size and ratioContentMode *
  */
-updateElementPos = function() {
+updateElementPos = function(getUpdateData) {
     console.log("updateElementPos", this._id, this.id);
 
     var $element = $("#" + this.id)
@@ -93,12 +93,20 @@ updateElementPos = function() {
         return;
     }
 
-    return Elements.update(this._id, {
+    var update = {
         $set: {
             "displayOptions.editor.positions": pos,
             "displayOptions.jmpress.positions": pos
         }
-    });
+    }
+    console.log("elementModel.updateElementPos",update);
+
+    if(typeof getUpdateData !== 'undefined' && getUpdateData){
+        return update;
+    }
+
+
+    return Elements.update(this._id, update);
 };
 
 

@@ -25,7 +25,7 @@ Template.loadSlideshow.events({
 
 
 createSlideshowControler = function(callbackReturn) {
-    if (typeof callbackReturn !== "undefined") { //is it the callback ?
+    if (typeof callbackReturn === "function") { //is it the callback ?
         if (callbackReturn !== 1) { //there was an error
             alert("an error occured when creating slideshow : " + callbackReturn.reason);
         } else {

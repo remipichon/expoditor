@@ -24,7 +24,9 @@ subscriptionRemote = null;
 subscriptionLocks = null;
 
 Slideshow = new Meteor.Collection("slideshow");
-Slides = new Meteor.Collection("slides",{idGeneration : 'MONGO'});
+Slides = new Meteor.Collection("slides", {
+    idGeneration: 'MONGO'
+});
 Elements = new Meteor.Collection("elements");
 Locks = new Meteor.Collection("lock");
 Remote = new Meteor.Collection("remoteSlides");
@@ -43,10 +45,6 @@ Session.set("heavyRefresh", false); //false to update positions and content less
 
 
 
-
-
-
-
 /**********************************************************
  * manage live Remote
  **********************************************************/
@@ -54,6 +52,7 @@ Meteor.startup(function() {
     //init toolbar, global pour l'init des editeurs de textes
     toolbar = setToolbar();
     goog.style.setOpacity(goog.dom.getElement('toolbar'), '0');
+    var toolbarButton = initButtons();
 
 
 
@@ -151,42 +150,62 @@ setActive = function(activeSlide) {
  * buttons to switch between editor and presentator technos
  **********************************************************/
 
-Template.loadEditor.events({
-    'click input': function() {
-        Session.set("clientMode", "editor");
-    }
-});
+launchEditorControler = function() {
+    //this.setEnabled(true/false)
+    this.getChild('backToEditor').setEnabled(false);
+    Session.set("clientMode", "editor");
+}
 
-Template.loadJmpress.events({
-    'click input': function() {
-        Session.set("clientMode", "jmpress");
-        setTimeout(initJmpress, 200);
+launchJmpressControler = function() {
+    truc = this;
+    this.getChild('backToEditor').setEnabled(true);
+    Session.set("clientMode", "jmpress");
+    setTimeout(initJmpress, 200);
 
-    }
-});
+}
 
-Template.loadDeck.events({
-    'click input': function() {
-        Session.set("clientMode", "deck");
-        setTimeout(initDeck, 200);
+launchDeckControler = function() {
+    this.getChild('backToEditor').setEnabled(true);
+    Session.set("clientMode", "deck");
+    setTimeout(initDeck, 200);
 
-    }
-});
+}
+showTimelineControler = function() {
+    goog.style.showElement(goog.dom.getElement("timeline"), (goog.dom.getElement('showTimeline').getAttribute("aria-pressed") === "true") ? true : false);
+}
 
+/**
+ * magouille mais on s'en fout, ca va disparaitre avec le merge avec expo.remote
+ */
+getSlideshowControlerCaller = function() {
+    getSlideshowControler();
+}
 
+initButtons = function() {
+    var t2 = new goog.ui.Toolbar();
+    t2.decorate(goog.dom.getElement('buttons'));
 
+    //handler slideshow
+    goog.events.listen(goog.dom.getElement('loadSlideshow'),
+        goog.events.EventType.CLICK, getSlideshowControlerCaller, false, t2);
+    goog.events.listen(goog.dom.getElement('createSlideshow'),
+        goog.events.EventType.CLICK, createSlideshowControler, false, t2);
+    goog.events.listen(goog.dom.getElement('updateSlideshow'),
+        goog.events.EventType.CLICK, updateSlideshowControler, false, t2);
+    goog.events.listen(goog.dom.getElement('deleteSlideshow'),
+        goog.events.EventType.CLICK, deleteSlideshowControler, false, t2);
 
+    //handler editor
+    goog.events.listen(goog.dom.getElement('launchJmpress'),
+        goog.events.EventType.CLICK, launchJmpressControler, false, t2);
+    goog.events.listen(goog.dom.getElement('launchDeck'),
+        goog.events.EventType.CLICK, launchDeckControler, false, t2);
+    goog.events.listen(goog.dom.getElement('backToEditor'),
+        goog.events.EventType.CLICK, launchEditorControler, false, t2);
+    goog.events.listen(goog.dom.getElement('createSlide'),
+        goog.events.EventType.CLICK, createSlideControler, false, t2);
+    goog.events.listen(goog.dom.getElement('showTimeline'),
+        goog.events.EventType.CLICK, showTimelineControler, false, t2);
+    return t2;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+}

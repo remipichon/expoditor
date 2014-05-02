@@ -93,7 +93,7 @@ updateSlideTitleModel = function(slide) {
  * slide size and ratioSlideshowMode
  * 
  */
-updateSlidePos = function() {
+updateSlidePos = function(getUpdateData) {
     console.log("updateSlidePos", this._id);
 
 
@@ -146,10 +146,16 @@ updateSlidePos = function() {
     //        return;
     //    }
 
-    return Slides.update(slide._id, {
+    var update = {
         $set: {
             "displayOptions.editor.positions": pos,
             "displayOptions.jmpress.positions": pos
         }
-    });
+    };
+
+    if(typeof getUpdateData !== 'undefined' && getUpdateData){
+        return update;
+    }
+
+    return Slides.update(slide._id, update);
 };

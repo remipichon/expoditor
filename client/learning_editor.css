@@ -1,5 +1,9 @@
 
-
+.goog-inline-block {
+  position: relative;
+  display: -moz-inline-box; /* Ignored by FF3 and later. */
+  display: inline-block;
+}
 
 
 #toolbar {

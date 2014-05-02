@@ -232,3 +232,13 @@ Template.elementTimeline.getEditorData = function(axis) {
 
     return coord;
 };
+
+
+
+Template.element.getFontSize = function(){
+    return 16/ratioSlideshowMode; //16 est un peu au pif via le debugger
+}
+
+Template.elementTimeline.getFontSize = function(){
+    return 16/ratioTimeline;
+}
