@@ -1,95 +1,9 @@
-
-.goog-inline-block {
-  position: relative;
-  display: -moz-inline-box; /* Ignored by FF3 and later. */
-  display: inline-block;
-}
-
-
-#toolbar {
-    width: 90%;
-}
-
-/*#toolbar{
-    position: relative;
-    top: 10px;
-}*/
-
-
+  
 
 #toolbar > > {
-    display: inline-block;
+    /*display: inline-block;*/
 }
-
-#editor-container >.slide{
-    width: 180px;
-    height: 140px;
-    border : dashed black 1px;
-    position: absolute;
-}
-
-
-#editor-container .slide.dragged{
-    border: dashed red;
-}
-
-#editor-container .slide .wrapper-element{
-    position: absolute;
-}
-
-
-
-#modalCurrentEditing .wrapper-element-currentEditing{
-    position: absolute;
-}
-
-#buttons{
-    position: absolute;
-    top:30px; 
-    display: inline-block;
-}
-
-#modalCurrentEditing {
-    /*background-color: gray;*/
-   position: absolute;
-    top: 70px;
-}
-
-.elementsAreaCurrentEditing{
-    background-color: gray;
-     position: absolute;
-     top: 10px;
-}
-
-.addElement{
-     position: absolute;
-}
-
-#editor-container >.active {
-    border : dashed red 2px;
-}
-
-
-.element p {
-    display: inline-block;
-}
-
 .element{
     border : dashed 1px blue;
 }
 
-#buttons{
-    z-index: 2000;
-}
-
-
-#modalSelectSlideshow{
-    /*width : 50%;
-    height: 70%;
-    position : absolute;
-    top : 10%;
-    left: 20%;
-    background-color: #ff9999;*/
-    
-   
-}

@@ -4,19 +4,19 @@
   background: #E3E7ED;
   counter-reset: slides;
   position: absolute;
-  top: 0;
+  top: 30px;  
   left: 0;
-  width: 150px;
+  width: 100px;
   padding: 3rem 1rem 1rem 2rem;
-  height: 80%;
+  /*height: 80%;*/
   overflow: auto;
 }
 
 .timeline-slides-title {
-  position: fixed;
+  /*position: fixed;*/
   background: #E3E7ED;
   z-index: 8;
-  width: 150px;
+  width: 100%;
   text-align: center;
   top: 0;
   left: 0;
@@ -25,6 +25,7 @@
   color: #8585A2;
   padding: 0.5rem 0.25rem;
   font-size: 1rem;
+  position: absolute;
 }
 
 .timeline-slide {

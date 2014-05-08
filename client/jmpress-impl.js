@@ -1,18 +1,36 @@
-
 Template.jmpressContainer.slides = function() {
     if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'jmpress') {
         console.log("jmpressContainer empty");
         return [];
     }
     console.log("jmpressContainer inject data");
-    return Slides.find({},{sort:{order:1}});    
+    return Slides.find({}, {
+        sort: {
+            order: 1
+        }
+    });
 };
 
+
+cloneJmpressSlide = function(sl) {
+    var slide = $(sl);
+    var clone = slide.clone();
+    slide.removeClass("step").removeClass("slide");
+    $("#jmpress-container").append(clone);
+}
 
 
 initJmpress = function() {
     // console.log("init jmpress desactivé");
     // return;
+
+    //test : clone des slides pour maintenir la gestion via Spacebars
+    $('#jmpress-container').children('.slide').each(function() {
+        cloneJmpressSlide(this);
+    });
+
+
+
     console.log("init jmpress");
     //launch jmpress first time
     $('#jmpress-container').jmpress({
@@ -26,9 +44,8 @@ initJmpress = function() {
 
 
 
-
 Template.jmpressSlide.getJmpressData = function(axis) {
-
+    console.log("jmpressSlide getJmpressData", axis);
     switch (axis) {
         case "x":
             var coord = parseFloat(this.displayOptions.jmpress.positions.x);
@@ -44,9 +61,8 @@ Template.jmpressSlide.getJmpressData = function(axis) {
 
     }
     //            console.log(coord, parseFloat(this.displayOptions.jmpress.positions.y));
-    return 'data-' + axis + '=' + coord + '';
+    return coord;
 };
-
 
 
 
@@ -77,6 +93,7 @@ Template.jmpressSlide.rendered = function() {
         if ($slideToMaj.length === 0) {
             console.log("create slide ", this.data._id, " jmpress to ", posX * ratio, posY * ratio);
             var $newSlide = $("#jmpress-container > #" + this.data._id);
+            createJmpressClone($newSlide);
             $("#jmpress-container > div").append($newSlide);
             $("#jmpress-container").jmpress('init', $newSlide);
             setTimeout(function() { ///WOUW SUCH MAGIC ! 

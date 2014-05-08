@@ -1,27 +1,3 @@
-Template.createSlideshow.events({
-    "click input": function() {
-        createSlideshowControler();
-    }
-});
-
-Template.updateSlideshow.events({
-    "click input": function() {
-        updateSlideshowControler();
-    }
-});
-
-Template.deleteSlideshow.events({
-    "click input": function() {
-        deleteSlideshowControler();
-    }
-});
-
-Template.loadSlideshow.events({
-    "click input": function() {
-        getSlideshowControler();
-    }
-});
-
 
 
 createSlideshowControler = function(callbackReturn) {

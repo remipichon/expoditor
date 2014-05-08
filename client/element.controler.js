@@ -1,13 +1,3 @@
-Template.createElementTexte.events({
-    'click': function(event) {
-        event.stopPropagation();
-        createElementTexte({
-            slideId: this._id
-        });
-    }
-});
-
-
 
 Template.deleteElement.events({
     'click': function(event) {

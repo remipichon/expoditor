@@ -64,10 +64,12 @@ quitEditSlide = function() {
     Session.set("modalCurrentEditing", false);
     CurrentEditing.remove({});
 
-    goog.style.setOpacity(goog.dom.getElement('timeline'), '1');
+    /*goog.style.setOpacity(goog.dom.getElement('timeline'), '1');
     // goog.style.setOpacity(goog.dom.getElement('buttons'), '1');
     goog.style.setStyle(goog.dom.getElement('buttons'), 'display', 'block');
-    goog.style.setOpacity(goog.dom.getElement('toolbar'), '0');
+    goog.style.setOpacity(goog.dom.getElement('toolbar'), '0');*/
+
+    displayBlockAccordingToEditorMode("slideshowMode");
 
 }
 

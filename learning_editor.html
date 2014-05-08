@@ -1,6 +1,6 @@
 <head>
     <title>learning_editor</title>
-     <script src='http://192.168.1.6:2438/closure-library/closure/goog/base.js'></script> 
+     <script src='http://192.168.1.5:2438/closure-library/closure/goog/base.js'></script> 
     
 
      
@@ -19,7 +19,7 @@
     //add goog.dom.query (jQuery like)
     s = document.createElement('script');
     s.type = 'text/javascript';
-    s.src = 'http://192.168.1.6:2438/query.js';
+    s.src = 'http://192.168.1.5:2438/query.js';
     $('head').append(s);
 
     //editor  
@@ -65,7 +65,7 @@
     //add goog.ui.resizable 
     s = document.createElement('script');
     s.type = 'text/javascript';
-    s.src = 'http://192.168.1.6:2438/goog.ui.resizable.js';
+    s.src = 'http://192.168.1.5:2438/goog.ui.resizable.js';
     $('head').append(s);
 
 
@@ -100,23 +100,23 @@
 
 
 
-   <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/common.css'>
-  <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/button.css' />
-  <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/dialog.css' />
-  <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/linkbutton.css' />
-  <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/menu.css'>
-  <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/menuitem.css'>
-  <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/menuseparator.css'>
-  <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/tab.css' />
-  <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/tabbar.css' />
-  <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/toolbar.css' />
-  <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/colormenubutton.css' />
-  <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/palette.css' />
-  <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/colorpalette.css' />
-  <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/editor/bubble.css' />
-  <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/editor/dialog.css' />
-  <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/editor/linkdialog.css' />
-  <link rel='stylesheet' href='http://192.168.1.6:2438/closure-library/closure/goog/css/editortoolbar.css' />
+   <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/common.css'>
+  <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/button.css' />
+  <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/dialog.css' />
+  <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/linkbutton.css' />
+  <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/menu.css'>
+  <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/menuitem.css'>
+  <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/menuseparator.css'>
+  <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/tab.css' />
+  <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/tabbar.css' />
+  <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/toolbar.css' />
+  <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/colormenubutton.css' />
+  <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/palette.css' />
+  <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/colorpalette.css' />
+  <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/editor/bubble.css' />
+  <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/editor/dialog.css' />
+  <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/editor/linkdialog.css' />
+  <link rel='stylesheet' href='http://192.168.1.5:2438/closure-library/closure/goog/css/editortoolbar.css' />
 
 
 
@@ -241,7 +241,7 @@
 
 <template name='jmpressSlide'>
     <div id='{{_id}}' class='step slide' 
-         {{getJmpressData 'x'}} {{getJmpressData 'y'}} {{getJmpressData 'z'}}>        
+         data-x='{{getJmpressData 'x'}}' data-y='{{getJmpressData 'y'}}' data-z='{{getJmpressData 'z'}}' >        
          <p class='title'> {{informations.title}} </p>         
       {{> elementsArea}}        
     </div>    
@@ -256,10 +256,7 @@
 
 <template name='editorSlideCurrentEditingT'>
     <div id='{{_id}}'> 
-         {{> createElementTexte }}
-
-         <p class='title'> {{informations.title}} </p>
-    
+         <p class='title'> {{informations.title}} </p>    
         {{> elementsAreaCurrentEditing}}
     </div>      
 </template> 
@@ -331,23 +328,9 @@
 
 <!---------------------------- button   ---------------------------->
 
-<template name='createSlide'>
-  <input id='createSlide' class='button' type='button' value='createSlide'/>
-</template>
-
-<template name='loadEditor'><input id='loadEditor' class='button' type='button' value='loadEditor' /></template>
-<template name='loadJmpress'><input id='loadJmpress' class='button' type='button' value='loadJmpress'/></template>
-<template name='loadDeck'><input id='loadDeck' class='button' type='button' value='loadDeck'/></template>
-
-<template name='createSlideshow'><input id='createSlideshow' class='button' type='button' value='createSlideshow'/></template>
-<template name='updateSlideshow'><input id='updateSlideshow' class='button' type='button' value='updateSlideshow'/></template>
-<template name='deleteSlideshow'><input id='deleteSlideshow' class='button' type='button' value='deleteSlideshow'/></template>
-<template name='loadSlideshow'><input id='loadSlideshow' class='button' type='button' value='loadSlideshow'/></template>
-
-<template name='quitEdit'><input type='button' class='buttonQuitEdit' value='qui edit'></template>
 <template name='deleteSlide'><input type='button' class='deleteSlide' value='X'></template>
-<template name='createElementTexte'><input type='button' class='addElement' value='+'></template>
 <template name='deleteElement'><input type='button' class='deleteElement' value='X'></template>
+
 <template name='editSlideContent'><input type='button' class='editSlideContent' value='edit'></template>
 <template name='editTexteContent'><input type='button' class='editTextContent' value='edit'></template>
 
@@ -358,16 +341,11 @@
 <template name='modalTemplate'>
     {{#if isVisible}}
         <div id='modalSelectSlideshow'>
-
             <div>
-                <p> Choose a slideshow to load </p>
-                
+                <p> Choose a slideshow to load </p>                
                 {{data}}
                 {{>listSlideshow}}
-                
-                
             </div>
-
            {{>cancel}}
            {{>validate}}
         </div>

@@ -43,6 +43,29 @@ ratio = 5;
 Session.set('modalCurrentEditing', false);
 Session.set("heavyRefresh", false); //false to update positions and content less frequently
 
+//id of block displayed according to editor mode
+modeBlock = {
+    slideshowMode: ['timeline', 'buttons', 'editor-container'],
+    contentMode: ['toolbar', 'modalCurrentEditing']
+};
+
+/**
+ * display block mode params and hide all other block existing in the other mode
+ * @param  {str} mode describe mode which mode to show
+ */
+displayBlockAccordingToEditorMode = function(modeToDisplay) {
+    _.each(modeBlock,function(blockList,mode){
+        if(modeToDisplay === mode){
+            _.each(blockList,function(block){
+                goog.style.showElement(goog.dom.getElement(block),true);
+            });
+        } else{
+             _.each(blockList,function(block){
+                goog.style.showElement(goog.dom.getElement(block),false);
+            });
+        }
+    });
+}
 
 
 /**********************************************************
@@ -51,8 +74,10 @@ Session.set("heavyRefresh", false); //false to update positions and content less
 Meteor.startup(function() {
     //init toolbar, global pour l'init des editeurs de textes
     toolbar = setToolbar();
-    goog.style.setOpacity(goog.dom.getElement('toolbar'), '0');
     var toolbarButton = initButtons();
+
+    //affiche les block pour le slideshowMode
+    displayBlockAccordingToEditorMode('slideshowMode');
 
 
 
