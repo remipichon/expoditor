@@ -1,0 +1,32 @@
+#buttons{
+    position: absolute;
+    top:30px; 
+    left: 150px;
+    display: inline-block;
+    z-index: 10;
+}
+
+
+
+#editor-container >.slide{
+    width: 180px;
+    height: 140px;
+    border : dashed black 1px;
+    position: absolute;
+}
+
+
+#editor-container .slide.dragged{
+    border: dashed red;
+}
+
+#editor-container .slide .wrapper-element{
+    position: absolute;
+}
+
+
+#editor-container >.active {
+    border : dashed red 2px;
+}
+
+
