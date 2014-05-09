@@ -6,20 +6,20 @@ first try of expoditor's server core with Meteor.js
 
 Existing functionnalities 
 ===========
-Slideshow : create/load/delete
-Slide : create/rename/move (2D)/delete
-Element texte : create/edit content with concurent access/move (2D)/delete
-Launch : jmpress or deck (but CSS sucks)
+* Slideshow : create/load/delete
+* Slide : create/rename/move (2D)/delete
+* Element texte : create/edit content with concurent access/move (2D)/delete
+* Launch : jmpress or deck (but CSS sucks)
 
 All these take benefits of Meteor super power live updating. 
 
 
 Big next functionnalities 
 ===========
-Global improvement of UI with famo.us (https://famo.us)
-Shapes
-Operationnal Transform with probably Share.js (http://sharejs.org/)
-Intagration with expo remote (https://github.com/ExpoTeam/expo)
+* Global improvement of UI with famo.us (https://famo.us)
+* Shapes
+* Operationnal Transform with probably Share.js (http://sharejs.org/)
+* Intagration with expo remote (https://github.com/ExpoTeam/expo)
 
 
 
