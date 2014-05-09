@@ -125,6 +125,7 @@
 
 <body>
     {{> loginButtons}}
+    {{ > slideshowTitle}}
     {{> toolbar}}
     {{> buttons}}
     {{> timeline}}
@@ -147,6 +148,10 @@
       
 
 </body>
+
+<template name="slideshowTitle">
+      <div id="slideshowTitle"> {{title}} </div>
+</template>  
 
 <template name='toolbar'>
     <div id='toolbar'></div>
