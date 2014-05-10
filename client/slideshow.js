@@ -1,5 +1,3 @@
-
-
 createSlideshowControler = function(callbackReturn) {
     if (typeof callbackReturn === "number") { //is it the callback ?
         if (callbackReturn !== 1) { //there was an error
@@ -106,7 +104,7 @@ getSlideshowControler = function(callbackReturn) {
         getSlideshowList(getSlideshowControler);
         return;
     }
-    if (typeof callbackReturn === "function" && typeof callbackReturn.errorType === "undefined") { //is it the callback && is there an error 
+    if (typeof callbackReturn === "object" && typeof callbackReturn.errorType === "undefined") { //is it the callback && is there an error 
         if (callbackReturn.titlesArray.length == 0) {
             alert("There is no slideshow to load, create a slideshow to start");
             return;
