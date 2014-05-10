@@ -13,3 +13,20 @@ Template.slideshowTitle.slideTitle= function(){
 	}
 	return '>> '+CurrentEditing.findOne({}).informations.title;
 }
+
+
+Slideshow.find({}).observeChanges({
+	added: function(){
+		console.log("slideshow added");
+		_.each(buttonWhenSlideshow,function(id){
+			toolbarButton.getChild(id).setEnabled(true);
+		});
+		
+	},
+	removed: function(){
+		console.log("slideshow removed");
+		_.each(buttonWhenSlideshow,function(id){
+			toolbarButton.getChild(id).setEnabled(false);
+		});
+	}
+})

@@ -49,19 +49,24 @@ modeBlock = {
     contentMode: ['toolbar', 'modalCurrentEditing']
 };
 
+//id of button not enabled when there is no slideshow
+buttonWhenSlideshow = ['createSlide', 'launchSlideshow', 'updateSlideshow', 'deleteSlideshow'];
+
+toolbarButton = null;
+
 /**
  * display block mode params and hide all other block existing in the other mode
  * @param  {str} mode describe mode which mode to show
  */
 displayBlockAccordingToEditorMode = function(modeToDisplay) {
-    _.each(modeBlock,function(blockList,mode){
-        if(modeToDisplay === mode){
-            _.each(blockList,function(block){
-                goog.style.showElement(goog.dom.getElement(block),true);
+    _.each(modeBlock, function(blockList, mode) {
+        if (modeToDisplay === mode) {
+            _.each(blockList, function(block) {
+                goog.style.showElement(goog.dom.getElement(block), true);
             });
-        } else{
-             _.each(blockList,function(block){
-                goog.style.showElement(goog.dom.getElement(block),false);
+        } else {
+            _.each(blockList, function(block) {
+                goog.style.showElement(goog.dom.getElement(block), false);
             });
         }
     });
@@ -74,7 +79,7 @@ displayBlockAccordingToEditorMode = function(modeToDisplay) {
 Meteor.startup(function() {
     //init toolbar, global pour l'init des editeurs de textes
     toolbar = setToolbar();
-    var toolbarButton = initButtons();
+    toolbarButton = initButtons();
 
     //affiche les block pour le slideshowMode
     displayBlockAccordingToEditorMode('slideshowMode');
@@ -207,30 +212,35 @@ getSlideshowControlerCaller = function() {
 }
 
 initButtons = function() {
-    var t2 = new goog.ui.Toolbar();
-    t2.decorate(goog.dom.getElement('buttons'));
+    var buttons = new goog.ui.Toolbar();
+    buttons.decorate(goog.dom.getElement('buttons'));
 
     //handler slideshow
     goog.events.listen(goog.dom.getElement('loadSlideshow'),
-        goog.events.EventType.CLICK, getSlideshowControlerCaller, false, t2);
+        goog.events.EventType.CLICK, getSlideshowControlerCaller, false, buttons);
     goog.events.listen(goog.dom.getElement('createSlideshow'),
-        goog.events.EventType.CLICK, createSlideshowControler, false, t2);
+        goog.events.EventType.CLICK, createSlideshowControler, false, buttons);
     goog.events.listen(goog.dom.getElement('updateSlideshow'),
-        goog.events.EventType.CLICK, updateSlideshowControler, false, t2);
+        goog.events.EventType.CLICK, updateSlideshowControler, false, buttons);
     goog.events.listen(goog.dom.getElement('deleteSlideshow'),
-        goog.events.EventType.CLICK, deleteSlideshowControler, false, t2);
+        goog.events.EventType.CLICK, deleteSlideshowControler, false, buttons);
 
     //handler editor
     goog.events.listen(goog.dom.getElement('launchJmpress'),
-        goog.events.EventType.CLICK, launchJmpressControler, false, t2);
+        goog.events.EventType.CLICK, launchJmpressControler, false, buttons);
     goog.events.listen(goog.dom.getElement('launchDeck'),
-        goog.events.EventType.CLICK, launchDeckControler, false, t2);
+        goog.events.EventType.CLICK, launchDeckControler, false, buttons);
     goog.events.listen(goog.dom.getElement('backToEditor'),
-        goog.events.EventType.CLICK, launchEditorControler, false, t2);
+        goog.events.EventType.CLICK, launchEditorControler, false, buttons);
     goog.events.listen(goog.dom.getElement('createSlide'),
-        goog.events.EventType.CLICK, createSlideControler, false, t2);
+        goog.events.EventType.CLICK, createSlideControler, false, buttons);
     goog.events.listen(goog.dom.getElement('showTimeline'),
-        goog.events.EventType.CLICK, showTimelineControler, false, t2);
-    return t2;
+        goog.events.EventType.CLICK, showTimelineControler, false, buttons);
+
+    //disable button while there is no slideshow
+    _.each(buttonWhenSlideshow, function(id) {
+        buttons.getChild(id).setEnabled(false);
+    });
+    return buttons;
 
 }
