@@ -12,12 +12,24 @@
     position: absolute;
 }
 
+#modalCurrentEditing .wrapper-element-currentEditing .editTextContent,.deleteElement{
+    position: relative;
+    top: -30px;
+}
+
 
 #modalCurrentEditing .wrapper-element-currentEditing .elementsAreaCurrentEditing{
     background-color: gray;
      position: absolute;
      top: 10px;
 }
+
+#modalCurrentEditing .wrapper-element-currentEditing .editor.text {
+    z-index: 10;
+    position: relative;
+}
+
+
 
 
 .elementDragMe {
@@ -32,4 +44,8 @@
 
 .elementsAreaCurrentEditing {
     background-color: cadetblue;
+}
+
+iframe.editor.text {
+    background-color: rgba(0,0,0,0);
 }

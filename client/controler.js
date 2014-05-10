@@ -181,7 +181,6 @@ setActive = function(activeSlide) {
  **********************************************************/
 
 launchEditorControler = function() {
-    //this.setEnabled(true/false)
     this.getChild('backToEditor').setEnabled(false);
     Session.set("clientMode", "editor");
 }

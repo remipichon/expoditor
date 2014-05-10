@@ -92,6 +92,14 @@ makeEditableCallback = function(e) {
         $("#" + this._id + '-currentEditing-wrapper').toggleClass('currentlyEditingByMe');
         this.makeEditable();
 
+        //pas top !
+        // setTimeout(function() {
+            console.log("bricolage ! pour changer le background color et le margin du body del'iframe");
+            $("iframe").css('background-color', 'rgba(0,0,0,0)')
+            $("iframe").contents().find('body').css('margin-top', '0px');
+            $("iframe").contents().find('body').css('margin-left', '0px');
+        // }, 1);
+
         var button = goog.dom.getElement('quitEditTexteButton');
         goog.style.setOpacity(button, '1');
     }
