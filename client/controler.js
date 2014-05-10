@@ -134,7 +134,33 @@ Meteor.startup(function() {
     /*setTimeout(function() {
         $($(".editSlideContent")[0]).trigger('click');
     }, 1000);*/
+
+    //add texte with dbl blick
+    goog.events.listen(goog.dom.getElement('modalCurrentEditing'), goog.events.EventType.DBLCLICK, addElementTexte)
+    goog.events.listen(goog.dom.getElement('editor-container'), goog.events.EventType.DBLCLICK, addSlide)
 });
+
+addElementTexte = function(event) {
+    console.log(event.offsetY, event.offsetX)
+    createElementTexte({
+        pos: {
+            y: event.offsetY*ratioContentMode,
+            x: event.offsetX*ratioContentMode
+        }
+    });
+
+}
+
+addSlide = function(event) {
+    console.log(event.offsetY, event.offsetX)
+    createSlide({
+        pos: {
+            y: event.offsetY*ratioSlideshowMode,
+            x: event.offsetX*ratioSlideshowMode
+        }
+    });
+
+}
 
 /*
  * listen to change on remote

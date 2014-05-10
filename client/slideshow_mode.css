@@ -6,7 +6,10 @@
     z-index: 10;
 }
 
-
+#editor-container{
+    /*degeu !*/
+    height:3000px;
+}
 
 #editor-container >.slide{
     width: 180px;

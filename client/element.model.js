@@ -4,11 +4,20 @@
  * @return {[type]}         [description]
  */
 createElementTexte = function(options) {
-    console.log("create element texte");
+    console.log("create element texte", options);
+    // return;
     var d = new Date;
     var content = "ele:" + d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
-
-
+    if (typeof options === 'undefined') {
+        if (typeof options.pos === "undefined") {
+            options.pos = {
+                x: 200,
+                y: 200
+            };
+            // console.log("create element texte with pos",options.pos.x, options.pox.y);
+        }
+    }
+   
     var slideId = CurrentEditing.findOne({})._id;
 
     return Elements.insert({
@@ -20,20 +29,14 @@ createElementTexte = function(options) {
         type: "text",
         displayOptions: {
             editor: {
-                positions: {
-                    x: 100,
-                    y: 100
-                },
+                positions: options.pos,
                 size: {
                     height: 100,
                     width: 200
                 }
             },
             jmpress: {
-                positions: {
-                    x: 0,
-                    y: 0
-                },
+                positions: options.pos,
                 size: {
                     height: 100,
                     width: 200
@@ -64,7 +67,7 @@ updateElementPos = function(getUpdateData) {
         height: parseFloat(this.displayOptions.editor.size.height)
     };
     //si resize en cours les données dans la bd ne sont pas accurate
-   this.size = {
+    this.size = {
         width: parseFloat($element.css('width')),
         height: parseFloat($element.css('height'))
     };
@@ -99,9 +102,9 @@ updateElementPos = function(getUpdateData) {
             "displayOptions.jmpress.positions": pos
         }
     }
-    console.log("elementModel.updateElementPos",update);
+    console.log("elementModel.updateElementPos", update);
 
-    if(typeof getUpdateData !== 'undefined' && getUpdateData){
+    if (typeof getUpdateData !== 'undefined' && getUpdateData) {
         return update;
     }
 

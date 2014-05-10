@@ -1,6 +1,6 @@
 /**
  * [createSlide description]
- * @param  {object} options given options to set a slide : 
+ * @param  {object} options given options to set a slide :
  *                          * pos.x/y   (default)
  *                          * title     (default)
  *                          * order     (default)
@@ -10,14 +10,23 @@ createSlide = function(options) {
     if (typeof options === "undefined") {
         var options = {};
     }
-    if (typeof options.pos === "undefined") {
-        options.pos = {
-            x: 2000,
-            y: 2000
-        };
-    }
-    if(typeof options.order === "undefined"){
-        options.order = $("#timeline .timeline-slide").length+1;
+    if (typeof options === 'undefined') {
+        if (typeof options.pos === "undefined") {
+            options.pos = {
+                x: 2000,
+                y: 2000
+            };
+            // console.log("create element texte with pos",options.pos.x, options.pox.y);
+        }
+    } else {
+        if (typeof options.order === "undefined") {
+            options.order = $("#timeline .timeline-slide").length + 1;
+        }
+        if (typeof options.title === "undefined") {
+            var d = new Date;
+            options.title = "ele:" + d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
+
+        }
     }
     return Slides.insert({
         _id: Random.id(),
@@ -26,7 +35,7 @@ createSlide = function(options) {
         },
         slideshowReference: [Slideshow.findOne({})._id],
         elements: [],
-        order:options.order,
+        order: options.order,
         displayOptions: {
             editor: {
                 positions: {
@@ -64,7 +73,7 @@ deleteSlide = function() {
 
 
 /*
-* TODO : passer ca en mode this !!!
+ * TODO : passer ca en mode this !!!
  */
 updateSlideTitleModel = function(slide) {
     console.log("update title, model");
@@ -89,9 +98,9 @@ updateSlideTitleModel = function(slide) {
  * TODO : remettre au gout du jour le getCloserSlide
  */
 /**
- * update a slide by this._id. Read CSS left/top in DOM and convert into real pos accordind to 
+ * update a slide by this._id. Read CSS left/top in DOM and convert into real pos accordind to
  * slide size and ratioSlideshowMode
- * 
+ *
  */
 updateSlidePos = function(getUpdateData) {
     console.log("updateSlidePos", this._id);
@@ -101,7 +110,7 @@ updateSlidePos = function(getUpdateData) {
     var $slide = $("#" + this._id);
     var top = parseFloat($slide.css('top'));
     var left = parseFloat($slide.css('left'));
-    
+
 
     this.CSS = {
         top: top,
@@ -118,7 +127,7 @@ updateSlidePos = function(getUpdateData) {
     delete this.center; // pour liberer la place
     CSSToPos.call(this);
 
-    
+
 
     var pos = {
         x: this.center.x,
@@ -153,7 +162,7 @@ updateSlidePos = function(getUpdateData) {
         }
     };
 
-    if(typeof getUpdateData !== 'undefined' && getUpdateData){
+    if (typeof getUpdateData !== 'undefined' && getUpdateData) {
         return update;
     }
 
