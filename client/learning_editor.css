@@ -10,3 +10,7 @@
 #slideshowTitle {
 	display: inline-block;
 }
+
+#slideCurrentEditing {
+	display: inline-block;
+}

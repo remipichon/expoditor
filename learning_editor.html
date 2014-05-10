@@ -150,7 +150,8 @@
 </body>
 
 <template name="slideshowTitle">
-      <div id="slideshowTitle"> {{title}} </div>
+      <div id="slideshowTitle"> >> {{slideshowTitle}} </div>
+      <div id="slideCurrentEditing"> {{slideTitle}} </div>
 </template>  
 
 <template name='toolbar'>
@@ -248,7 +249,7 @@
     <div id='{{_id}}' class='step slide' 
          data-x='{{getJmpressData 'x'}}' data-y='{{getJmpressData 'y'}}' data-z='{{getJmpressData 'z'}}' >        
          <p class='title'> {{informations.title}} </p>         
-      {{> elementsArea}}        
+      {{> elementsAreaJmpress}}        
     </div>    
 </template> 
 
@@ -290,6 +291,14 @@
     </div>   
 </template>
 
+<template name='elementsAreaJmpress'>
+    <div class='elementsAreaJmpress'>        
+        {{#each elements}}              
+          {{> elementJmpress}}
+        {{/each}}         
+    </div>   
+</template>
+
 <template name='elementsAreaCurrentEditing'>
     <div class='elementsAreaCurrentEditing' style="width:900px; height:700px;">        
         {{#each elements}}         
@@ -311,6 +320,12 @@
 <template name='element'>
     <div id='{{_id}}-wrapper' class='wrapper-element element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px; top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px ;transform:scale({{getEditorData 'scaleX'}},{{getEditorData 'scaleY'}}); font-size:{{getFontSize}}px' >
         <div id='{{_id}}' class='editor {{type}}'></div>       
+    </div>
+</template> 
+
+<template name='elementJmpress'>
+    <div id='{{_id}}-wrapper' class='wrapper-element element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px; top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px ;transform:scale({{getEditorData 'scaleX'}},{{getEditorData 'scaleY'}}); font-size:{{getFontSize}}px' >
+        <div id='{{_id}}' class='editor {{type}}'>{{content}}</div>       
     </div>
 </template> 
 

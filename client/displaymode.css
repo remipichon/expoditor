@@ -88,3 +88,12 @@ root {
     border-bottom: 10px dotted white;
 }   
 
+#jmpress-container .elementsAreaJmpress {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+#jmpress-container .elementsAreaJmpress .element {
+    position: absolute;
+}
