@@ -256,6 +256,7 @@ Meteor.methods({
         Elements.remove({});
         Locks.remove({});
         Remotes.remove({});
+        slideshowPublished = {};
     }
 });
 

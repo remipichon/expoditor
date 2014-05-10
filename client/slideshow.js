@@ -1,7 +1,7 @@
 
 
 createSlideshowControler = function(callbackReturn) {
-    if (typeof callbackReturn === "function") { //is it the callback ?
+    if (typeof callbackReturn === "number") { //is it the callback ?
         if (callbackReturn !== 1) { //there was an error
             alert("an error occured when creating slideshow : " + callbackReturn.reason);
         } else {
@@ -86,7 +86,7 @@ deleteSlideshowModel = function() {
 
 
 getSlideshowList = function(callback) {
-    if (typeof callback === "undefined")
+    if (typeof callback !== "function")
         callback = printResult;
 
     Meteor.call('getSlideshowList', {}, Meteor.userId(), function(error, result) {
@@ -106,7 +106,7 @@ getSlideshowControler = function(callbackReturn) {
         getSlideshowList(getSlideshowControler);
         return;
     }
-    if (typeof callbackReturn !== "undefined" && typeof callbackReturn.errorType === "undefined") { //is it the callback && is there an error 
+    if (typeof callbackReturn === "function" && typeof callbackReturn.errorType === "undefined") { //is it the callback && is there an error 
         if (callbackReturn.titlesArray.length == 0) {
             alert("There is no slideshow to load, create a slideshow to start");
             return;

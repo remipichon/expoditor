@@ -18,3 +18,18 @@
      position: absolute;
      top: 10px;
 }
+
+
+.elementDragMe {
+    /*border:  dashed 1px;*/
+    width: 90%;
+    height: 90%;
+    position:  absolute;
+    top: 5%;
+    left: 5%;
+
+}
+
+.elementsAreaCurrentEditing {
+    background-color: cadetblue;
+}

@@ -153,7 +153,7 @@ setEditor = function(idElement) {
 
     //manage event
     //double click pour activer l'édition de texte
-    goog.events.listen(goog.dom.getElement(myField.id), goog.events.EventType.CLICK, makeEditableCallback, 'false', myField);
+    goog.events.listen(goog.dom.getElement(myField.id), goog.events.EventType.DBLCLICK, makeEditableCallback, 'false', myField);
     console.log('#', idElement, '.editTextContent');
     $('#' + idElement + '-wrapper .editTextContent').on('click', function() {
         makeEditableCallback.call(myField);
