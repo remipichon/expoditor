@@ -28,7 +28,6 @@ createSlideshowModel = function(options, callback) {
             console.log("createSlideshow ", result);
             getSlideshowModel({
                 title: options.title,
-                presentationMode: "default"
             });
             callback(1);
         }
@@ -37,23 +36,26 @@ createSlideshowModel = function(options, callback) {
 
 
 updateSlideshowControler = function() {
-    var presentationMode = Slideshow.findOne({}).presentationMode;
-    presentationMode = prompt("Enter a new presentationMode for slideshow (default,hybrid) ", presentationMode);
+    var title = Slideshow.findOne({}).informations.title;
+    title = prompt("Enter a new title for slideshow \n(you also can dblClick on title to edit)", title);
+    if(!title) return;
     updateSlideshowModel({
-        presentationMode: presentationMode
+        title: title
     });
 };
 
 
 updateSlideshowModel = function(options) {
-    if (typeof options.presentationMode === "undefined") {
-        console.log("updateSlideshow : presentationMode undefined");
+    if (typeof options.title === "undefined") {
+        console.log("updateSlideshow : title undefined");
         return;
     }
 
-    Slideshow.update(Slideshow.findOne({})._id, {
-        $set: {
-            'presentationMode': options.presentationMode
+    Meteor.call('updateSlideshow', options, Slideshow.findOne({})._id, Meteor.userId(), function(error, result) {
+        if (typeof error !== "undefined") {
+            console.log(" updateSlideshow : update error ", error);
+        } else {
+            console.log("updateSlideshow : done");
         }
     });
 };
@@ -131,7 +133,7 @@ getSlideshowModel = function(options) {
         if (typeof error !== "undefined") {
             console.log("getSlideshow : get error ", error);
         } else {
-
+            var slideshowId = result;
 
             //arret des precedentes ubscriptions si existante
             if (subscriptionSlideshow !== null)
@@ -146,11 +148,11 @@ getSlideshowModel = function(options) {
                 subscriptionLocks.stop();
 
             //nouvelles sub
-            subscriptionSlideshow = Meteor.subscribe(options.title);
-            subscriptionSlides = Meteor.subscribe("slides" + options.title);
-            subscriptionElements = Meteor.subscribe("elements" + options.title);
-            subscriptionRemote = Meteor.subscribe("remote" + options.title);
-            subscriptionRemote = Meteor.subscribe("locks" + options.title);
+            subscriptionSlideshow = Meteor.subscribe(slideshowId);
+            subscriptionSlides = Meteor.subscribe("slides" + slideshowId);
+            subscriptionElements = Meteor.subscribe("elements" + slideshowId);
+            subscriptionRemote = Meteor.subscribe("remote" + slideshowId);
+            subscriptionRemote = Meteor.subscribe("locks" + slideshowId);
 
             console.log("getSlideshow ", result, ": done with subscribes");
         }

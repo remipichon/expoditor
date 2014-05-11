@@ -1,5 +1,5 @@
 /*
- * key : slideshowTitle
+ * key : slideshowID
  * value : [userIds...]
  * TODO : change key to slideshow._id
  */
@@ -8,7 +8,7 @@ slideshowPublished = {};
 /*
  * TODO : manage group, play_mode, edit_mode, remote_mode
  */
-presentationModeArray = ["default", "hybrid"];   //enum des types de pérsentations
+presentationModeArray = ["default", "hybrid"]; //enum des types de pérsentations
 
 /*
  * see http://titanpad.com/expo
@@ -41,7 +41,7 @@ Remotes = new Meteor.Collection("remoteSlides");
 
 
 Meteor.methods({
-    
+
     /*
      * args :
      * - options : object
@@ -53,7 +53,9 @@ Meteor.methods({
         }
 
 
-        if (Slideshow.find({"informations.title": options.title}).fetch().length != 0) {
+        if (Slideshow.find({
+            "informations.title": options.title
+        }).fetch().length != 0) {
             throw new Meteor.Error(24101, "createSlideshow error : title already exists");
         }
 
@@ -65,10 +67,9 @@ Meteor.methods({
                 date: ""
             },
             presentationMode: options.presentationMode || "default",
-            slides: []  //array of slides's Id
+            slides: [] //array of slides's Id
 
-        }
-        );
+        });
 
         if (typeof slideShow == 'undefined') {
             throw new Meteor.Error(24, "error creating a slideshow");
@@ -116,9 +117,9 @@ Meteor.methods({
      * - options : object
      * - - title : mandatory
      * create all mandatory subscriptions related to a slideshow :
-     * - slideshow : "{title}" 
-     * - all slides link to slideshow : "{slidestitle}" 
-     * - remote of the slideshow : "{remotetitle}" 
+     * - slideshow : "{title}"
+     * - all slides link to slideshow : "{slidestitle}"
+     * - remote of the slideshow : "{remotetitle}"
      * TODO : verifier que le user connecté existe dans la db (accessoirement, qu'il soit connecté)
      * TODO : purge slideshowPublished si jamais un user avait précedement les accès à un slideshow
      * (très utile pour la creation des slides notamment)
@@ -126,60 +127,65 @@ Meteor.methods({
      * TODO : traiter correctement les fin des handlers sur les observeChanges (tableau de handleElement et les handleSlides)
      */
     getSlideshow: function(options, userId) {
+        var slideshowAsked = Slideshow.find({
+            'informations.title': options.title
+        });
+
+        var res = slideshowAsked.fetch();
+        if (res.length === 0) //je  omprends pas pourquoi mais j'ai l'impression que le slideshowAsked n'est lisible qu'une fois...
+            throw new Meteor.Error(24200, "getSlideshow : publish error, seems like slideshow  doesnt exists'", options.title);
+        var slideshowId = res[0]._id;
+
+        var toPublish = Slideshow.find({
+            _id: slideshowId
+        })
+
         //is the slideshow already publish ?
-        if (typeof slideshowPublished[options.title] === "undefined") {
-            console.log("infos : getSlideshow : publish slideshow ", options.title);
+        if (typeof slideshowPublished[slideshowId] === "undefined") {
+            console.log("infos : getSlideshow : publish slideshow ", options.title, slideshowId);
 
-            var toPublish = Slideshow.find({
-                'informations.title': options.title
+
+            Meteor.publish(slideshowId, function() {
+                return toPublish;
             });
 
-            if (toPublish.fetch().length == 0)
-                throw new Meteor.Error(24200, "getSlideshow : publish error, seems like slideshow with title '", options.title, "' doesnt exists");
+            slideshowPublished[slideshowId] = [];
 
-
-            Meteor.publish(options.title, function() {
-                return Slideshow.find({
-                    'informations.title': options.title
-                });
-            });
-
-            slideshowPublished[options.title] = [];
-
-            var newCreatedSlideshow = Slideshow.findOne({
-                'informations.title': options.title
-            });
 
             var remote = Remotes.find({
-                'slideshowId': newCreatedSlideshow._id
+                'slideshowId': slideshowId
             });
             if (remote.fetch().length == 0)
                 throw new Meteor.Error(24200, "getSlideshow : publish error, seems like remote for slideshow with title '", options.title, "' doesnt exists");
 
 
             //publish slides related to the slideshow
-            var strSlidesName = "slides" + options.title;
+            var strSlidesName = "slides" + slideshowId;
             Meteor.publish(strSlidesName, function() {
                 return Slides.find({
-                    slideshowReference: {$in: [newCreatedSlideshow._id]} //get all slides which are linked to the slideshow
-                  // , {slideshowReference: 0 } //TODO gerer le fait que le client ne recoive pas cette donnée
+                    slideshowReference: {
+                        $in: [slideshowId]
+                    }
                 });
             });
 
             //publish elements related to all slides of the slideshow           
-            var strElementsName = "elements" + options.title;
-            var newCreatedSlideshowId = newCreatedSlideshow._id; //pour ne pas passer un gros objet à la closure
+            var strElementsName = "elements" + slideshowId;
             Meteor.publish(strElementsName, function() {
                 var self = this;
 
                 var handleSlides = Slides.find({
-                    slideshowReference: {$in: [newCreatedSlideshowId]}
+                    slideshowReference: {
+                        $in: [slideshowId]
+                    } //[newCreatedSlideshowId]}
                 }).observeChanges({
                     added: function(slideId, slide) {
                         //slide ajouté, il faut ajouter ses elements à la publication
                         console.log("element pusblish : added slide ", slideId);
                         var handleElement = Elements.find({
-                            slideReference: {$in: [slideId]}//get all slides which are linked to the slideshow
+                            slideReference: {
+                                $in: [slideId]
+                            } //get all slides which are linked to the slideshow
                         }).observeChanges({
                             added: function(eleId, ele) {
                                 self.added("elements", eleId, ele);
@@ -204,37 +210,58 @@ Meteor.methods({
 
 
             //publish remote of slideshow
-            var strRemoteName = "remote" + options.title;
+            var strRemoteName = "remote" + slideshowId;
             Meteor.publish(strRemoteName, function() {
                 return Remotes.find({
-                    'slideshowId': newCreatedSlideshow._id
+                    'slideshowId': slideshowId
                 });
             });
-            
-            
+
+
             //publish components locks
-            var strLocksName = "locks" + options.title;
+            var strLocksName = "locks" + slideshowId;
             Meteor.publish(strLocksName, function() {
                 return Locks
-                        .find({
-                    'slideshowId': newCreatedSlideshow._id
-                });
+                    .find({
+                        'slideshowId': slideshowId
+                    });
             });
-            
-        
+
+
         }
 
         //add user to the list of current editors
-        if (slideshowPublished[options.title].indexOf(userId) === -1)
-            slideshowPublished[options.title].push(userId);
+        if (slideshowPublished[slideshowId].indexOf(userId) === -1)
+            slideshowPublished[slideshowId].push(userId);
 
-        return 1;
+        return slideshowId;
+    },
+    updateSlideshow: function(options, slideshowId, userId) {
+        console.log('pdateSlideshow', options, slideshowId, userId);
+        if (!hasAccessSlideshow(slideshowId, userId)) {
+            throw new Meteor.Error(24300, "updateSlideshow, you are not allowed to perform this action");
+        }
+        if (Slideshow.find({
+            "informations.title": options.title
+        }).fetch().length != 0) {
+            throw new Meteor.Error(24101, "updateSlideshow error : title already exists");
+        }
+        if (typeof options.title !== 'undefined') {
+            Slideshow.update({
+                _id: slideshowId
+            }, {
+                $set: {
+                    'informations.title': options.title
+                }
+            });
+        }
+
     },
     /*
      * also remove slides
      * TODO : remove only slides linked only to the slideshow (if a slide is in different slideshow...)
      * NOT TODO : remove elements linkend to the slideshow => sera fait lorsque sera implementé
-     * le liveLoadToEdit 
+     * le liveLoadToEdit
      */
     removeSlideshow: function(slideshowId, userId) {
         if (!hasAccessSlideshow(slideshowId, userId)) {
@@ -243,12 +270,16 @@ Meteor.methods({
 
         //delete all slides linked to the slideshow
         Slides.remove({
-            slideshowReference: {$in: [slideshowId]} //get all slides which are linked to the slideshow
+            slideshowReference: {
+                $in: [slideshowId]
+            } //get all slides which are linked to the slideshow
         });
 
-        Slideshow.remove({_id: slideshowId});
+        Slideshow.remove({
+            _id: slideshowId
+        });
     },
-            
+
     clearServerData: function() {
         console.log("dev : clear all db's data");
         Slideshow.remove({});
@@ -264,35 +295,33 @@ Meteor.methods({
  * verifier dans slideshowPublished si userId est dans l'array des user allowed de slideshowId
  * @param {type} slideshowId
  * @param {type} userId
- * @returns {Array} 
+ * @returns {Array}
  * TODO : manage group, play_mode, edit_mode, remote_mode
- * 
+ *
  */
 hasAccessSlideshow = function(slideshowId, userId) {
-    var slideshow = Slideshow.findOne({_id: slideshowId});
-    if( typeof slideshow === "undefined") 
-        throw new Meteor.Error("24","slideshow does not exist " + slideshowId);
-    
-    var slideshowTitle = slideshow.informations.title;
+    var slideshow = Slideshow.findOne({
+        _id: slideshowId
+    });
+    if (typeof slideshow === "undefined")
+        throw new Meteor.Error("24", "slideshow does not exist " + slideshowId);
+
+    //var slideshowTitle = slideshow.informations.title;
 
 
-    if (typeof slideshowPublished[slideshowTitle] === "undefined") {
+    if (typeof slideshowPublished[slideshowId] === "undefined") {
         console.log("error : hasAccessSlideshow : slideshow not present in slideshowPublished");
         return false;
     }
 
-    if (slideshowPublished[slideshowTitle].indexOf(userId) === -1) {
-        console.log("hasAccessSlideshow not contains");
+    if (slideshowPublished[slideshowId].indexOf(userId) === -1) {
+        console.log("infos : hasAccessSlideshow : user ", userId, " access denied to ", slideshowId);
         return false;
     }
-    console.log("infos : hasAccessSlideshow : user ", userId, " granted access to ", slideshowPublished[slideshowTitle]);
+    console.log("infos : hasAccessSlideshow : user ", userId, " access granted to ", slideshowId);
 
     return true;
 };
-
-
-
-
 
 
 
@@ -310,7 +339,7 @@ Slideshow.allow({
 
         if (!hasAccessSlideshow(slideshow._id, userId)) {
             console.log("info : slideshow.update : user not allowed to update slideshow slidehow : ", slideshow._id, " userid :", userId);
-            throw new Meteor.Error("24","Slideshow.allow.update : you are not allowed to update this slideshow");
+            throw new Meteor.Error("24", "Slideshow.allow.update : you are not allowed to update this slideshow");
             return false;
         }
 
@@ -358,11 +387,11 @@ Slides.allow({
      */
     update: function(userId, slide, fields, modifier) {
         console.log("slides.allow.update : ", slide._id);
-        
+
         //lock control
-        if( !userHasAccessToComponent(slide, fields)){
-            console.log("slides.allow.update : user does not have access to update fiels "+fields);
-            throw new Meteor.Error("slides.allow.update : user does not have access to update fiels "+fields);
+        if (!userHasAccessToComponent(slide, fields)) {
+            console.log("slides.allow.update : user does not have access to update fiels " + fields);
+            throw new Meteor.Error("slides.allow.update : user does not have access to update fiels " + fields);
         }
 
         //display options
@@ -382,9 +411,13 @@ Slides.allow({
         if (_.contains(fields, 'informations')) {
             if (modifier.toString().indexOf("title") !== -1) { //pas funky ca
 
-                var lock = Locks.findOne({$and: [
-                        {componentId: slide._id}, {userId: userId}
-                    ]});
+                var lock = Locks.findOne({
+                    $and: [{
+                        componentId: slide._id
+                    }, {
+                        userId: userId
+                    }]
+                });
 
                 if (typeof lock == 'undefined') {
                     console.log("info : slides.allow.update : client trying to update without lock slide : ", slide._id, "client :", userId);
@@ -396,7 +429,7 @@ Slides.allow({
         }
 
         //order
-         if (_.contains(fields, 'order')) {
+        if (_.contains(fields, 'order')) {
             //TODO
             return true;
         }
@@ -406,9 +439,9 @@ Slides.allow({
         return false;
 
     },
-   /*
-    * delete relating elements
-    */
+    /*
+     * delete relating elements
+     */
     remove: function() {
         return true;
     }
@@ -417,7 +450,7 @@ Slides.allow({
 Elements.allow({
     /*
      * TODO
-     * 
+     *
      */
     insert: function() {
         return true;
@@ -441,7 +474,9 @@ Remotes.allow({
     update: function(userId, newActiveSlide, fields, modifier) {
         return true;
         //si le client veut ajouter une slide active, le server refuse s'il y deja une slide active
-        if (modifier.$set.state === "active" && typeof Remotes.findOne({state: "active"}) != "undefined") { //query must take care of the slidewhos of the remote
+        if (modifier.$set.state === "active" && typeof Remotes.findOne({
+            state: "active"
+        }) != "undefined") { //query must take care of the slidewhos of the remote
             console.log("RemoteSides.allow.update : try to add an active with one alreay set");
             return false;
         }
@@ -456,28 +491,30 @@ Locks.allow({
     insert: function(userId, lock, fields, modifier) {
         //check slideshow
         if (typeof lock.slideshowId === "undefined")
-            throw new Meteor.Error("24","lock.insert : lock does not contain a slideshowId");
+            throw new Meteor.Error("24", "lock.insert : lock does not contain a slideshowId");
         if (!hasAccessSlideshow(lock.slideshowId, userId))
-            throw new Meteor.Error("24","lock.insert : user has not access to slideshow ", lock.slideshowId);
-        
-        
+            throw new Meteor.Error("24", "lock.insert : user has not access to slideshow ", lock.slideshowId);
+
+
         //check component
         if (typeof lock.componentId === "undefined")
-            throw new Meteor.Error("24","lock.insert : lock does not contain a componentId");
-        if (Locks.findOne({componentId: lock.componentId}))
-            throw new Meteor.Error("24","lock.insert : a lock already exists for the component ", lock.componentId);
-       
+            throw new Meteor.Error("24", "lock.insert : lock does not contain a componentId");
+        if (Locks.findOne({
+            componentId: lock.componentId
+        }))
+            throw new Meteor.Error("24", "lock.insert : a lock already exists for the component ", lock.componentId);
+
         //check userId
         if (typeof lock.userId === "undefined")
-            throw new Meteor.Error("24","lock.insert : lock does not contain a userId");
-        if(userId !== lock.userId)
-            throw new Meteor.Error("24","lock.insert : lock's userId ",lock.userId," does not correspond to client's userId ",userId);
-        
-         //check userId
-        if (typeof lock.properties === "undefined" || !Array.isArray(lock.properties) )
-            throw new Meteor.Error("24","lock.insert : lock does not contain a properties array");
-       
-        
+            throw new Meteor.Error("24", "lock.insert : lock does not contain a userId");
+        if (userId !== lock.userId)
+            throw new Meteor.Error("24", "lock.insert : lock's userId ", lock.userId, " does not correspond to client's userId ", userId);
+
+        //check userId
+        if (typeof lock.properties === "undefined" || !Array.isArray(lock.properties))
+            throw new Meteor.Error("24", "lock.insert : lock does not contain a properties array");
+
+
         console.log("infos : Locks.allow : insert : true");
         return true;
     },
@@ -485,10 +522,12 @@ Locks.allow({
         console.log("infos : slidesLock.update ", modifier);
 
         //verifie si le lock existe bel et bien
-        var lock = Locks.findOne({_id: newLock._id});
+        var lock = Locks.findOne({
+            _id: newLock._id
+        });
         if (typeof lock == 'undefined') {
             console.log("info : lock.update : lock doesn't exist ", newLock._id);
-            throw new Meteor.Error("24","lock.update : lock doesn't exist ", newLock._id);
+            throw new Meteor.Error("24", "lock.update : lock doesn't exist ", newLock._id);
             return false;
         }
 
@@ -521,9 +560,6 @@ Locks.allow({
         return false;
     }
 });
-
-
-
 
 
 
@@ -592,5 +628,3 @@ Locks.allow({
  //            }
  //            });
  *****************************/
-
-

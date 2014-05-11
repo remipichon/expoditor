@@ -10,24 +10,24 @@ createSlide = function(options) {
     if (typeof options === "undefined") {
         var options = {};
     }
-    if (typeof options === 'undefined') {
-        if (typeof options.pos === "undefined") {
-            options.pos = {
-                x: 2000,
-                y: 2000
-            };
-            // console.log("create element texte with pos",options.pos.x, options.pox.y);
-        }
-    } else {
-        if (typeof options.order === "undefined") {
-            options.order = $("#timeline .timeline-slide").length + 1;
-        }
-        if (typeof options.title === "undefined") {
-            var d = new Date;
-            options.title = "ele:" + d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
 
-        }
+    if (typeof options.pos === "undefined") {
+        options.pos = {
+            x: 2000,
+            y: 2000
+        };
+        // console.log("create element texte with pos",options.pos.x, options.pox.y);
     }
+
+    if (typeof options.order === "undefined") {
+        options.order = $("#timeline .timeline-slide").length + 1;
+    }
+    if (typeof options.title === "undefined") {
+        var d = new Date;
+        options.title = "ele:" + d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
+
+    }
+
     return Slides.insert({
         _id: Random.id(),
         informations: {

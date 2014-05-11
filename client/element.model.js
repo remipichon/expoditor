@@ -8,16 +8,18 @@ createElementTexte = function(options) {
     // return;
     var d = new Date;
     var content = "ele:" + d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
-    if (typeof options === 'undefined') {
-        if (typeof options.pos === "undefined") {
-            options.pos = {
-                x: 200,
-                y: 200
-            };
-            // console.log("create element texte with pos",options.pos.x, options.pox.y);
-        }
+    if (typeof options === "undefined") {
+        var options = {};
     }
-   
+    if (typeof options.pos === "undefined") {
+        options.pos = {
+            x: 200,
+            y: 200
+        };
+        // console.log("create element texte with pos",options.pos.x, options.pox.y);
+    }
+
+
     var slideId = CurrentEditing.findOne({})._id;
 
     return Elements.insert({
