@@ -24,11 +24,20 @@ Template.elementsAreaJmpress.elements = function() {
 };
 
 
+
 cloneJmpressSlide = function(sl) {
     var slide = $(sl);
     var clone = slide.clone();
-    slide.removeClass("step").removeClass("slide");
+    clone.addClass("clone");
+    slide.removeClass("step").removeClass("slide").addClass("lymbe");
+    if ($("#jmpress-container").jmpress('initialized')) {
+    $("#jmpress-container >  div:not(.lymbe)").append(clone);
+    } else {
     $("#jmpress-container").append(clone);
+    }
+    console.log('cloneJmpressSlide',sl,clone)
+    // alert();
+    return clone;
 }
 
 
@@ -80,7 +89,7 @@ Template.jmpressSlide.getJmpressData = function(axis) {
 /**
  * calculate position and size of an element in slide content editor mode according to ratioSlideshowMode
  * @param  {string} axis which CSS style is needed
- * @return {int}      value of the CSS style 
+ * @return {int}      value of the CSS style
  */
 Template.elementJmpress.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
 
@@ -107,19 +116,19 @@ Template.elementJmpress.getEditorData = function(axis) { //pas encore utilisé �
 
     switch (axis) {
         case "x":
-            var coord = this.CSS.left; 
+            var coord = this.CSS.left;
             break;
         case "y":
-            var coord = this.CSS.top; 
+            var coord = this.CSS.top;
             break;
         case "z":
             var coord = 0;
             break;
         case "scaleX":
-            var coord = 1; 
+            var coord = 1;
             break;
         case "scaleY":
-            var coord = 1; 
+            var coord = 1;
             break;
         case "h":
             var coord = this.displayOptions.editor.size.height / 1;
@@ -143,6 +152,9 @@ Template.elementJmpress.getEditorData = function(axis) { //pas encore utilisé �
  * callback of render to move jmpress slide
  */
 Template.jmpressSlide.rendered = function() {
+    if ($("#jmpress-container").jmpress('initialized')) {
+        console.log('jmpressSlide desactivate when jmpress is init')
+    }
 
     console.log("slide.rendered for jmpress", this.data._id);
 
@@ -155,29 +167,29 @@ Template.jmpressSlide.rendered = function() {
      * Si jmpress est init
      * il faut mettre à jour les jmpress data de la slide jmpress (celle contenue
      * dans le #jmpress-contaner > div et l'init avec jmpress à partir de la slide
-     * ajoutée par Handelbars puis supprimer le DOM de cette slide là
+     * ajoutée par Handelbars
      */
-    if ($("#jmpress-container").jmpress('initialized')) {
-        var $slideToMaj = $("#jmpress-container >div #" + this.data._id);
+    // if ($("#jmpress-container").jmpress('initialized')) {
+    // var $slideToMaj = $("#jmpress-container >div #" + this.data._id);
 
-        if ($slideToMaj.length === 0) {
-            console.log("create slide ", this.data._id, " jmpress to ", posX * ratio, posY * ratio);
-            var $newSlide = $("#jmpress-container > #" + this.data._id);
-            createJmpressClone($newSlide);
-            $("#jmpress-container > div").append($newSlide);
-            $("#jmpress-container").jmpress('init', $newSlide);
-            setTimeout(function() { ///WOUW SUCH MAGIC ! 
-                //je ne comprends vraiment pas pourquoi il faut un timeout qui reappend la slide...
-                $("#jmpress-container > div").append($newSlide);
-            }, 500);
-        } else {
-            console.log("update de la slide ", this.data._id, " jmpress to ", posX * ratio, posY * ratio);
-            $slideToMaj.attr("data-x", parseFloat(posX) * ratio).attr("data-y", parseFloat(posY) * ratio);
-            $("#jmpress-container").jmpress('init', $slideToMaj);
-        }
-        //suppression de la slide crée par Handelbars
-        $("#jmpress-container >#" + this.data._id).remove();
-    }
+    // if ($slideToMaj.length === 0) {
+    console.log("create slide ", this.data._id, " jmpress to ", posX, posY);
+    var $templateSlide = $("#jmpress-container > #" + this.data._id);
+    var $jmpressClone = cloneJmpressSlide($templateSlide);
+    //$("#jmpress-container > div").append($newSlide);
+    $("#jmpress-container").jmpress('init', $jmpressClone);
+    // setTimeout(function() { ///WOUW SUCH MAGIC ! 
+    //     //je ne comprends vraiment pas pourquoi il faut un timeout qui reappend la slide...
+    //     $("#jmpress-container > div").append($newSlide);
+    // }, 500);
+    // } else {
+    //     console.log("update de la slide ", this.data._id, " jmpress to ", posX * ratio, posY * ratio);
+    //     $slideToMaj.attr("data-x", parseFloat(posX) * ratio).attr("data-y", parseFloat(posY) * ratio);
+    //     $("#jmpress-container").jmpress('init', $slideToMaj);
+    // }
+    // //suppression de la slide crée par Handelbars
+    // $("#jmpress-container >#" + this.data._id).remove();
+    // }
 };
 
 
@@ -201,9 +213,10 @@ Template.jmpressSlide.destroyed = function() {
     $("#jmpress-container").jmpress("deinit", slideToRemove);
 
     var self = this;
-    setTimeout(function() {
-        $("#jmpress-container #" + self.data._id).addClass("lymbe").css("display", "none");
 
+    $("#jmpress-container #" + self.data._id).addClass("lymbeOldJmpress").css("display", "none");
+    // $("#jmpress-container #" + self.data._id).remove();
+    setTimeout(function() {
         //       s'il n'y a plus de slide et que le client mode n'est plus jmpress, il faut deinit jmpress
         if ($("#jmpress-container >div >:not(.lymbe)").length === 0 && Session.get("clientMode") !== "jmpress") {
             console.log("jmpress-container.jmpress.deinit");

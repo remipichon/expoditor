@@ -46,7 +46,7 @@ Session.set("heavyRefresh", false); //false to update positions and content less
 //id of block displayed according to editor mode
 modeBlock = {
     slideshowMode: ['timeline', 'buttons', 'editor-container'],
-    contentMode: ['toolbar', 'modalCurrentEditing']
+    contentMode: ['toolbar', 'modalCurrentEditing'],
 };
 
 //id of button not enabled when there is no slideshow
@@ -212,10 +212,11 @@ setActive = function(activeSlide) {
 launchEditorControler = function() {
     this.getChild('backToEditor').setEnabled(false);
     Session.set("clientMode", "editor");
+    alert('it will reload page, because of Jmpress is not an easy beast to manage...');
+    window.location.reload();
 }
 
 launchJmpressControler = function() {
-    truc = this;
     this.getChild('backToEditor').setEnabled(true);
     Session.set("clientMode", "jmpress");
     setTimeout(initJmpress, 200);

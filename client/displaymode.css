@@ -25,7 +25,10 @@ root {
  * Pour debug
  * ====================================================================================== */
 
-
+#jmpress-container .lymbe{
+    position: absolute;
+    display: none;
+}
 
  #jmpress-container div .slide{
     display: block;
