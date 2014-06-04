@@ -31,12 +31,10 @@ cloneJmpressSlide = function(sl) {
     clone.addClass("clone");
     slide.removeClass("step").removeClass("slide").addClass("lymbe");
     if ($("#jmpress-container").jmpress('initialized')) {
-    $("#jmpress-container >  div:not(.lymbe)").append(clone);
+        $("#jmpress-container >  div:not(.lymbe)").append(clone);
     } else {
-    $("#jmpress-container").append(clone);
+        $("#jmpress-container").append(clone);
     }
-    console.log('cloneJmpressSlide',sl,clone)
-    // alert();
     return clone;
 }
 
@@ -154,6 +152,7 @@ Template.elementJmpress.getEditorData = function(axis) { //pas encore utilisÃ© Ã
 Template.jmpressSlide.rendered = function() {
     if ($("#jmpress-container").jmpress('initialized')) {
         console.log('jmpressSlide desactivate when jmpress is init')
+        return;
     }
 
     console.log("slide.rendered for jmpress", this.data._id);
@@ -178,10 +177,10 @@ Template.jmpressSlide.rendered = function() {
     var $jmpressClone = cloneJmpressSlide($templateSlide);
     //$("#jmpress-container > div").append($newSlide);
     $("#jmpress-container").jmpress('init', $jmpressClone);
-    // setTimeout(function() { ///WOUW SUCH MAGIC ! 
-    //     //je ne comprends vraiment pas pourquoi il faut un timeout qui reappend la slide...
-    //     $("#jmpress-container > div").append($newSlide);
-    // }, 500);
+    setTimeout(function() { ///WOUW SUCH MAGIC ! 
+        //je ne comprends vraiment pas pourquoi il faut un timeout qui reappend la slide...
+        $("#jmpress-container > div").append($newSlide);
+    }, 200);
     // } else {
     //     console.log("update de la slide ", this.data._id, " jmpress to ", posX * ratio, posY * ratio);
     //     $slideToMaj.attr("data-x", parseFloat(posX) * ratio).attr("data-y", parseFloat(posY) * ratio);

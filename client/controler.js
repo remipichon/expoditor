@@ -141,6 +141,9 @@ Meteor.startup(function() {
     //edit slideshowTitle
     goog.events.listen(goog.dom.getElement('slideshowTitle'),goog.events.EventType.DBLCLICK,updateSlideshowControler);
 
+    //test famous
+    //startUpFamous();
+
 });
 
 addElementTexte = function(event) {
