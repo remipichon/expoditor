@@ -1,6 +1,6 @@
 /***********************
  * Manage locks
- * 
+ *
  ***********************/
 
 
@@ -21,20 +21,26 @@ updateWithLocksControler = function(field, callback) {
     var slideshowId = Slideshow.findOne({})._id;
 
     if (userHasAccessToComponent.call(this)) {
-        var userId = Meteor.userId();
+        var user = Meteor.user();
 
         if (typeof lock == 'undefined') {
             Locks.insert({
                 slideshowId: slideshowId,
                 componentId: this._id,
-                userId: userId,
+                user: {
+                    userId: user._id,
+                    emails: user.emails[0].address
+                },
                 properties: []
             });
         } else {
             Locks.update(
                 lock._id, {
                     $set: {
-                        userId: userId,
+                        user: {
+                            userId: user._id,
+                            emails: user.emails[0].address
+                        },
                         type: 'title'
                     }
                 });
@@ -45,7 +51,7 @@ updateWithLocksControler = function(field, callback) {
         return true;
     } else {
         if (typeof lock !== "undefined")
-            alert("lock set by " + lock.userId);
+            alert("lock set by " + lock.user.emails);
         else
             alert("you cannot edit this component");
         return false;
@@ -64,16 +70,10 @@ removeLocksControler = function() {
     Locks.update(
         lock._id, {
             $set: {
-                userId: null
+                user: null
             }
         });
 };
-
-
-
-
-
-
 
 
 
@@ -83,7 +83,3 @@ clearServerData = function(str) {
         console.log("clearServerData : server answered with ", result);
     });
 };
-
-
-
-

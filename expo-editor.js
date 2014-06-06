@@ -42,7 +42,7 @@ isCloseTo = function(self, slide) {
 userHasAccessToComponent = function(property) {
     var userId = Meteor.userId();
     var lock = Locks.findOne({componentId: this._id});
-    if (typeof lock == 'undefined' || lock.userId == Meteor.userId() || lock.userId === null)
+    if (typeof lock == 'undefined' || lock.user === null || lock.user.userId == Meteor.userId() )
         return true;
     
      //lock are not be set by user

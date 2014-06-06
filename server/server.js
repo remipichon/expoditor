@@ -505,9 +505,9 @@ Locks.allow({
             throw new Meteor.Error("24", "lock.insert : a lock already exists for the component ", lock.componentId);
 
         //check userId
-        if (typeof lock.userId === "undefined")
+        if (typeof lock.user.userId === "undefined")
             throw new Meteor.Error("24", "lock.insert : lock does not contain a userId");
-        if (userId !== lock.userId)
+        if (userId !== lock.user.userId)
             throw new Meteor.Error("24", "lock.insert : lock's userId ", lock.userId, " does not correspond to client's userId ", userId);
 
         //check userId
@@ -532,9 +532,9 @@ Locks.allow({
         }
 
         //si ajout d'un lock
-        if (modifier.$set.userId != null) {
+        if (modifier.$set.user != null) {
             //verification que le lock n'écrase pas un lock
-            if (lock.userId != null) {
+            if (lock.user != null) {
                 console.log("info : lock.update : a lock is already set : db : ", lock._id, "new : ", newLock._id);
                 return false;
             }
@@ -543,9 +543,9 @@ Locks.allow({
         }
 
         //si suppresion d'un lock
-        if (userId != lock.userId) {
+        if (userId != lock.user.userId) {
             //verification que le lock est bien celui du user
-            console.log("info : slidesLock.update : client try to remove a lock not set by him : robber ", userId, " locker : ", lock.userId);
+            console.log("info : slidesLock.update : client try to remove a lock not set by him : robber ", userId, " locker : ", lock.user.userId);
             return false;
         } else {
             console.log("info : slidesLock.update : remove lock OK");

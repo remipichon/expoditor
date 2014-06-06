@@ -83,7 +83,7 @@ Template.editorSlide.isActive = function() {
 Template.editorSlide.isLocked = function() {
     var component = Locks.findOne({
         componentId: this._id,
-        userId: {
+        user: {
             $not: null
         }
     });

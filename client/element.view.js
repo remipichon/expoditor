@@ -246,7 +246,7 @@ Template.elementTimeline.getFontSize = function(){
 Template.elementCurrentEditing.isLocked = function() {
     var component = Locks.findOne({
         componentId: this._id,
-        userId: {
+        user: {
             $not: null
         }
     });
