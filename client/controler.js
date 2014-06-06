@@ -136,7 +136,7 @@ Meteor.startup(function() {
     }, 1000);*/
 
     //add texte with dbl blick
-    goog.events.listen(goog.dom.getElement('modalCurrentEditing'), goog.events.EventType.DBLCLICK, addElementTexte)
+   // goog.events.listen(goog.dom.getElement('modalCurrentEditing'), goog.events.EventType.DBLCLICK, addElementTexte)
     goog.events.listen(goog.dom.getElement('editor-container'), goog.events.EventType.DBLCLICK, addSlide)
     //edit slideshowTitle
     goog.events.listen(goog.dom.getElement('slideshowTitle'),goog.events.EventType.DBLCLICK,updateSlideshowControler);

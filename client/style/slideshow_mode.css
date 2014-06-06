@@ -37,4 +37,7 @@
     border : dashed red 2px;
 }
 
+#editor-container .locked {
+    border : dashed blue 2px;
+}
 

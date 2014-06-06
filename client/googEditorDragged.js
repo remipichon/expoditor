@@ -59,7 +59,7 @@ setToolbar = function() {
 
 quitEditSlide = function() {
     //cancel all remaining editor (if exists)
-    $(".expo-toolbar-quitEdit").trigger("click");
+    $(".expo-toolbar-quitEdit-texte").trigger("click"); //TODO y'aurait pas un meilleur moyen ?
 
     Session.set("modalCurrentEditing", false);
     CurrentEditing.remove({});
@@ -68,6 +68,8 @@ quitEditSlide = function() {
     // goog.style.setOpacity(goog.dom.getElement('buttons'), '1');
     goog.style.setStyle(goog.dom.getElement('buttons'), 'display', 'block');
     goog.style.setOpacity(goog.dom.getElement('toolbar'), '0');*/
+
+    //
 
     displayBlockAccordingToEditorMode("slideshowMode");
 

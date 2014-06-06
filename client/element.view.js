@@ -242,3 +242,20 @@ Template.element.getFontSize = function(){
 Template.elementTimeline.getFontSize = function(){
     return 16/ratioTimeline;
 }
+
+Template.elementCurrentEditing.isLocked = function() {
+    var component = Locks.findOne({
+        componentId: this._id,
+        userId: {
+            $not: null
+        }
+    });
+
+    console.log("isLocked", this, this._id)
+
+    if (typeof component !== "undefined") {
+        return "locked";
+    }
+
+    return "";
+}

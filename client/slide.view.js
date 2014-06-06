@@ -80,6 +80,23 @@ Template.editorSlide.isActive = function() {
     }
 };
 
+Template.editorSlide.isLocked = function() {
+    var component = Locks.findOne({
+        componentId: this._id,
+        userId: {
+            $not: null
+        }
+    });
+
+    console.log("isLocked", this, this._id)
+
+    if (typeof component !== "undefined") {
+        return "locked";
+    }
+
+    return "";
+};
+
 
 /**
  * calculate position and size of a slide in slideshow editor mode according to ratioSlideshowMode
