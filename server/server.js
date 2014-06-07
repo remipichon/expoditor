@@ -253,7 +253,7 @@ Meteor.methods({
     },
     /*
      * also remove slides
-     * TODO : remove only slides linked only to the slideshow (if a slide is in different slideshow...)
+     * TODO : remove only slides linked only to the slideshow (if a slide is in different slideshow...)  ==> s'inspirer de ce qui est fait pour les elements dans les slides
      * NOT TODO : remove elements linkend to the slideshow => sera fait lorsque sera implementé
      * le liveLoadToEdit
      */
@@ -323,10 +323,6 @@ Slideshow.allow({
         //create via Meteor.method.createSlideshow
         return false;
     },
-    /*
-     * TODO : traiter le cas ou le client met à jour plusieurs fields
-     * TODO : update de slides (array de slides._id
-     */
     update: function(userId, slideshow, fields, modifier) {
         console.log("info : slideshiow.update");
 
@@ -334,11 +330,6 @@ Slideshow.allow({
             console.log("info : slideshow.update : user not allowed to update slideshow slidehow : ", slideshow._id, " userid :", userId);
             throw new Meteor.Error("24", "Slideshow.allow.update : you are not allowed to update this slideshow");
             return false;
-        }
-
-
-        if (_.contains(fields, 'slides')) {
-            console.log("slideshow.update : update slides : TODO");
         }
 
         console.log("Slideshow.allow.update : default allow, true");
@@ -463,9 +454,27 @@ Slides.allow({
             toReturn = true;
         }
 
-        //order
+        //order, only check if order index is N
         if (_.contains(fields, 'order')) {
-            //TODO
+            //get all slide of the slideshow HUMHUM, which one slideshow ?!?! TODO
+            var allSlides = Slides.find({
+                slideshowReference: {
+                    $in: [slide.slideshowReference[0]]
+                }
+            }, {
+                sort: {
+                    order: 1
+                }
+            }).fetch();
+
+            var cpt = 1;
+            _.each(allSlides,function(slide){
+                if(slide.order != cpt++){
+                    toReturn =  false;
+                    return;
+                }
+            });   
+
             toReturn = true;
         }
 
@@ -614,7 +623,7 @@ Locks.allow({
         return false;
     },
     remove: function() {
-        //uniquement coté server lors du unload
+        //uniquement coté server lors du unload TODO
         return false;
     }
 });
