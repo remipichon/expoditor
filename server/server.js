@@ -381,27 +381,49 @@ Slides.after.remove(function(userId, slide) {
 
     });
 
+    //delete reference in slideReference of each of the element 
+    Elements.update({
+        slideReference: {
+            $in: [slide._id]
+        }
+    }, {
+        $pull: {
+            slideReference: slide._id
+        }
+    }, {
+        multi: true
+    });
 
 });
 
 
 
 /*
- * TODO : each action doit verifier que le user hasAccessSlideshow
- * TODO : traitement factorisé pour la gestion du lock à l'image du coté client
+ * TOTEST : each action doit verifier que le user hasAccessSlideshow
+ * TOTEST : traitement factorisé pour la gestion du lock à l'image du coté client
  */
 Slides.allow({
     insert: function(userId, slide, fields, modifier) {
+        //slideshow access control
+        _.each(slide.slideshowReference, function(slideshowId) {
+            if (!hasAccessSlideshow(slideshowId, userId))
+                throw new Meteor.Error("24", "slides.insert : user has not access to slideshow ", lock.slideshowId);
+        });
+
         console.log("info : slides.allow.insert : true ", slide);
         return true;
     },
-    /*   
-     * TODO : traiter le cas ou le client met à jour plusieurs fields
-     * TODO : une méthode qui decomposer le modifier dans un tableau [subdoc, subsubdoc, subsubsubdoc] si modifier : {subdoc.subsubdoc.subsubsubdoc : value}
-     * afin de faciliter le traitement sur un update de nested document
-     */
     update: function(userId, slide, fields, modifier) {
         console.log("slides.allow.update : ", slide._id);
+
+        var toReturn = false;
+
+        //slideshow access control
+        _.each(slide.slideshowReference, function(slideshowId) {
+            if (!hasAccessSlideshow(slideshowId, userId))
+                throw new Meteor.Error("24", "slides.update : user has not access to slideshow ", lock.slideshowId);
+        });
+
 
         //lock control
         if (!userHasAccessToComponent(slide, fields)) {
@@ -417,10 +439,8 @@ Slides.allow({
                 console.log("slides.allow.update.pos : ", position, " _id : ", slide._id);
             }
 
-            return true;
+            toReturn = true;
         }
-
-        //update de title et position en exclusivité avec priorité au title
 
         //metadata
         if (_.contains(fields, 'informations')) {
@@ -440,12 +460,16 @@ Slides.allow({
                 }
                 console.log("info : slides.allow.update : allow title update");
             }
-            return true;
+            toReturn = true;
         }
 
         //order
         if (_.contains(fields, 'order')) {
             //TODO
+            toReturn = true;
+        }
+
+        if (toReturn) {
             return true;
         }
 
@@ -454,13 +478,33 @@ Slides.allow({
         return false;
 
     },
-    /*
-     * delete relating elements
-     */
-    remove: function() {
+    remove: function(userId, slide) {
+        //slideshow access control
+        _.each(slide.slideshowReference, function(slideshowId) {
+            if (!hasAccessSlideshow(slideshowId, userId))
+                throw new Meteor.Error("24", "slides.delete : user has not access to slideshow ", lock.slideshowId);
+        });
         return true;
     }
 });
+
+
+
+// when updating element, if slideReference is empty, delete element
+Elements.after.update(function(userId, element, fields, modifier, options) {
+    console.log("elements.update.after");
+    //slide reference, if empty : delete element
+    if (_.contains(fields, 'slideReference')) {
+        if (_.isEmpty(element.slideReference)) {
+            console.log("element removed ", element._id);
+            Elements.remove({
+                _id: element._id
+            });
+        }
+
+    }
+});
+
 
 Elements.allow({
     /*
