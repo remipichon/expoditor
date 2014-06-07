@@ -57,14 +57,7 @@ editSlideContent = function() {
 		_id: this._id
 	}));
 
-	// goog.style.setOpacity(goog.dom.getElement('toolbar'), '1');
-	// // goog.style.setOpacity(goog.dom.getElement('buttons'), '0');
-	// goog.style.setStyle(goog.dom.getElement('buttons'), 'display', 'none');
-	// goog.style.setOpacity(goog.dom.getElement('timeline'), '0');
 	displayBlockAccordingToEditorMode('contentMode');
-
-	//TODO pas propre cela, call this ailleurs
-	//setTimeout(resizeModalCurrentEditing, 100);
 
 }
 

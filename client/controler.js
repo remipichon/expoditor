@@ -167,8 +167,7 @@ addSlide = function(event) {
 
 /*
  * listen to change on remote
- * TODO : manage remoteMode
- * TODO : l'autorun ne doit recompute qu'au changement de Remote.findOne
+ * ==> projet de ClaireZed 
  */
 Remote.find({}).observeChanges({
     changed: function(id, fields) {

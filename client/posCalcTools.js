@@ -4,10 +4,7 @@ ratioContentMode = 1;
 ratioTimeline = 10;
 
 
-/*
- * TODO : rendre generique les selecteurs CSS pour les container
- * How to do it properly ?
- */
+
 
 resizeModalCurrentEditing = function() {
     var $modal = $("#modalCurrentEditing");

@@ -1,4 +1,4 @@
-/**
+    /**
  * create an element texte in the slide currently editing (_id get from CurrentEditing)
  * @param  {[object]} options nothing by now
  * @return {[type]}         [description]

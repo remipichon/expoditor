@@ -694,7 +694,7 @@
 	 *
 	 * @return Object element which properties were set
 	 *
-	 * TODO: Consider bypassing pfx and blindly set as jQuery
+	 *  : Consider bypassing pfx and blindly set as jQuery
 	 * already checks for support
 	 */
 	function css( el, props ) {
@@ -959,7 +959,7 @@
 						anitarget.top = Math.round(item[2] || 0) + "px";
 					}
 				});
-				el.animate(anitarget, 1000); // TODO: Use animation duration
+				el.animate(anitarget, 1000); //  : Use animation duration
 			}
 		}
 	};
@@ -1462,7 +1462,7 @@
 	function getElementFromUrl(settings) {
 		// get id from url # by removing `#` or `#/` from the beginning,
 		// so both "fallback" `#slide-id` and "enhanced" `#/slide-id` will work
-		// TODO SECURITY check user input to be valid!
+		//   SECURITY check user input to be valid!
 		try {
 			var el = $( '#' + window.location.hash.replace(/^#\/?/,"") );
 			return el.length > 0 && el.is(settings.stepSelector) ? el : undefined;
@@ -1830,7 +1830,7 @@
 		x = x ? x - halfWidth : x;
 		y = y ? y - halfHeight : y;
 
-		// TODO this is not perfect... too much math... :(
+		//   this is not perfect... too much math... :(
 		current.userTranslateX =
 			maxAbs(current.userTranslateX - direction * x / current.zoomOriginWindowScale / zoomableSteps,
 			halfWidth * current.userZoom * current.userZoom / zoomableSteps);
@@ -2068,7 +2068,7 @@
 				addUndefined(tmpl, templateChildren(idx, child, children));
 				child.data(templateFromParentIdent, tmpl);
 			});
-		} // TODO: else if(object)
+		} //  : else if(object)
 	}
 	function applyTemplate( data, element, template, eventData ) {
 		if (template.children) {
@@ -2130,7 +2130,7 @@
 	});
 	$jmpress("register", "apply", function( selector, tmpl ) {
 		if( !tmpl ) {
-			// TODO ERROR because settings not found
+			//   ERROR because settings not found
 			var stepSelector = $(this).jmpress("settings").stepSelector;
 			applyChildrenTemplates( $(this).find(stepSelector).filter(function() {
 				return !$(this).parent().is(stepSelector);

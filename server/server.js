@@ -1,14 +1,8 @@
 /*
  * key : slideshowID
  * value : [userIds...]
- * TODO : change key to slideshow._id
  */
 slideshowPublished = {};
-
-/*
- * TODO : manage group, play_mode, edit_mode, remote_mode
- */
-presentationModeArray = ["default", "hybrid"]; //enum des types de pérsentations
 
 /*
  * see http://titanpad.com/expo
@@ -296,7 +290,6 @@ Meteor.methods({
  * @param {type} slideshowId
  * @param {type} userId
  * @returns {Array}
- * TODO : manage group, play_mode, edit_mode, remote_mode
  *
  */
 hasAccessSlideshow = function(slideshowId, userId) {
@@ -343,14 +336,6 @@ Slideshow.allow({
             return false;
         }
 
-        if (_.contains(fields, "presentationMode")) {
-            if (presentationModeArray.indexOf(modifier.$set.presentationMode) === -1) {
-                console.log("Slideshow.allow.update : presentationMode not allow ", modifier.$set.presentationMode);
-                return false;
-            }
-            console.log("slideshow.allow.update : presentationMode ok");
-        }
-
 
         if (_.contains(fields, 'slides')) {
             console.log("slideshow.update : update slides : TODO");
@@ -367,15 +352,45 @@ Slideshow.allow({
 
 });
 
+
+Slides.after.insert(function(userId, slide, fields, modifier, options) {
+    //add slide reference in arraySlide of each slideshow
+    _.each(slide.slideshowReference, function(slideshowId) {
+        Slideshow.update({
+            _id: slideshowId
+        }, {
+            $push: {
+                slides: slide._id
+            }
+
+        });
+    });
+
+});
+
+Slides.after.remove(function(userId, slide) {
+    //remove slide reference in arraySlide of each slideshow
+    _.each(slide.slideshowReference, function(slideshowId) {
+        Slideshow.update({
+            _id: slideshowId
+        }, {
+            $pull: {
+                slides: slide._id
+            }
+        });
+
+    });
+
+
+});
+
+
+
 /*
  * TODO : each action doit verifier que le user hasAccessSlideshow
  * TODO : traitement factorisé pour la gestion du lock à l'image du coté client
  */
 Slides.allow({
-    /*
-     * TODO : add slideId dans array slide du slideshow (get id from slideshowPublished)
-     * (en s'assurant qu'on ajoute la slide qu'à un seul slideshow)
-     */
     insert: function(userId, slide, fields, modifier) {
         console.log("info : slides.allow.insert : true ", slide);
         return true;
@@ -463,14 +478,13 @@ Elements.allow({
     }
 
 });
-
+/*
+ *  Project de ClaireZed
+ */
 Remotes.allow({
     insert: function() {
         return false;
     },
-    /*
-     * TODO : prendre en compte l'architecture (avec ca on peut avoir qu'une seule remote à la fois)
-     */
     update: function(userId, newActiveSlide, fields, modifier) {
         return true;
         //si le client veut ajouter une slide active, le server refuse s'il y deja une slide active
@@ -536,7 +550,7 @@ Locks.allow({
             //verification que le lock n'écrase pas un lock
             if (lock.user != null) {
                 console.log("info : lock.update : a lock is already set : db : ", lock._id, "new : ", newLock._id);
-                return false;
+                return falsel;
             }
             console.log("info : lock.update : add lock OK");
             return true;
