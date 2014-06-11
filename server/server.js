@@ -1,3 +1,6 @@
+//Users = new Meteor.Collection('users');
+
+
 /*
  * key : slideshowID
  * value : [userIds...]
@@ -114,13 +117,15 @@ Meteor.methods({
      * - slideshow : "{title}"
      * - all slides link to slideshow : "{slidestitle}"
      * - remote of the slideshow : "{remotetitle}"
-     * TODO : verifier que le user connecté existe dans la db (accessoirement, qu'il soit connecté)
-     * TODO : purge slideshowPublished si jamais un user avait précedement les accès à un slideshow
      * (très utile pour la creation des slides notamment)
-     * TODO : les clients ne recoivent pas la liste des slideshows dont la slide fait partie ?
-     * TODO : traiter correctement les fin des handlers sur les observeChanges (tableau de handleElement et les handleSlides)
      */
     getSlideshow: function(options, userId) {
+        if (userId === null) {
+            throw new Meteor.Error(24200, "getSlideshow : publish error, you have to be connected'");
+        }
+        //TODO check if userId is legitamely connected (see gdoc)
+        //https://github.com/mizzao/meteor-user-status
+
         var slideshowAsked = Slideshow.find({
             'informations.title': options.title
         });
@@ -134,7 +139,7 @@ Meteor.methods({
             _id: slideshowId
         })
 
-        //is the slideshow already publish ?
+        //is the slideshow already publish ? if not, publish slideshow, linked slides an related elements
         if (typeof slideshowPublished[slideshowId] === "undefined") {
             console.log("infos : getSlideshow : publish slideshow ", options.title, slideshowId);
 
@@ -196,10 +201,18 @@ Meteor.methods({
                         //nothing to do
                     },
                     removed: function(slideId, slide) {
-                        //TODO
+                        //TODO je sais pas comment faire 
                         //arreter tous les handleElement créer dans les added
+                        //handleElement.stop();
+                        //il faut stopun handle par slide, comment les stocker jusq'ici
                     }
                 });
+
+                self.onStop(function() {
+                    console.log("handleSlides.stop()");
+                    handleSlides.stop();
+                });
+
             });
 
 
@@ -223,6 +236,15 @@ Meteor.methods({
 
 
         }
+
+        // purge slideshowPublished si jamais un user avait précedement les accès à un slideshow
+        _.each(slideshowPublished, function(userArray, slideshowId) {
+            var index = userArray.indexOf(userId);
+            if( index !== -1){
+                console.log("getSlideshox",userId,"lost access to ",slideshowId);
+                 userArray.splice(index, 1);
+            }           
+        });
 
         //add user to the list of current editors
         if (slideshowPublished[slideshowId].indexOf(userId) === -1)
@@ -251,12 +273,6 @@ Meteor.methods({
         }
 
     },
-    /*
-     * also remove slides
-     * TODO : remove only slides linked only to the slideshow (if a slide is in different slideshow...)  ==> s'inspirer de ce qui est fait pour les elements dans les slides
-     * NOT TODO : remove elements linkend to the slideshow => sera fait lorsque sera implementé
-     * le liveLoadToEdit
-     */
     removeSlideshow: function(slideshowId, userId) {
         if (!hasAccessSlideshow(slideshowId, userId)) {
             throw new Meteor.Error(24300, "removeSlideshow, you are not allowed to perform this action");
@@ -388,6 +404,13 @@ Slides.after.remove(function(userId, slide) {
 });
 
 
+Slides.after.remove(function(userId, element) {
+    Locks.remove({
+        componentId: element._id
+    });
+});
+
+
 
 /*
  * TOTEST : each action doit verifier que le user hasAccessSlideshow
@@ -412,7 +435,7 @@ Slides.allow({
         //slideshow access control
         _.each(slide.slideshowReference, function(slideshowId) {
             if (!hasAccessSlideshow(slideshowId, userId))
-                throw new Meteor.Error("24", "slides.update : user has not access to slideshow ", lock.slideshowId);
+                throw new Meteor.Error("24", "slides.update : user has not access to slideshow ", slideshowId);
         });
 
 
@@ -456,7 +479,6 @@ Slides.allow({
 
         //order, only check if order index is N
         if (_.contains(fields, 'order')) {
-            //get all slide of the slideshow HUMHUM, which one slideshow ?!?! TODO
             var allSlides = Slides.find({
                 slideshowReference: {
                     $in: [slide.slideshowReference[0]]
@@ -468,12 +490,12 @@ Slides.allow({
             }).fetch();
 
             var cpt = 1;
-            _.each(allSlides,function(slide){
-                if(slide.order != cpt++){
-                    toReturn =  false;
+            _.each(allSlides, function(slide) {
+                if (slide.order != cpt++) {
+                    toReturn = false;
                     return;
                 }
-            });   
+            });
 
             toReturn = true;
         }
@@ -512,6 +534,12 @@ Elements.after.update(function(userId, element, fields, modifier, options) {
         }
 
     }
+});
+
+Elements.after.remove(function(userId, element) {
+    Locks.remove({
+        componentId: element._id
+    });
 });
 
 
@@ -623,7 +651,6 @@ Locks.allow({
         return false;
     },
     remove: function() {
-        //uniquement coté server lors du unload TODO
         return false;
     }
 });

@@ -136,7 +136,7 @@ Meteor.startup(function() {
     }, 1000);*/
 
     //add texte with dbl blick
-   // goog.events.listen(goog.dom.getElement('modalCurrentEditing'), goog.events.EventType.DBLCLICK, addElementTexte)
+    goog.events.listen(goog.dom.getElement('modalCurrentEditing'), goog.events.EventType.DBLCLICK, addElementTexte)
     goog.events.listen(goog.dom.getElement('editor-container'), goog.events.EventType.DBLCLICK, addSlide)
     //edit slideshowTitle
     goog.events.listen(goog.dom.getElement('slideshowTitle'),goog.events.EventType.DBLCLICK,updateSlideshowControler);
@@ -272,3 +272,71 @@ initButtons = function() {
     return buttons;
 
 }
+
+setToolbar = function() {
+    // if(typeof toolbar !== 'undefined'){
+    //     throw new Meteor.Error("500","A toolbar is alredy set",toolbar);
+    // }
+
+    var quitEditTexteButton = goog.ui.editor.ToolbarFactory
+        .makeButton('quitEditTexteButton', 'Quit edit texte', 'Quit Edit Texte', goog.getCssName('expo-toolbar-quitEdit-texte'));
+    var quitEditSlideButton = goog.ui.editor.ToolbarFactory
+        .makeButton('quitEditSlideButton', 'Quit edit slide', 'Quit Edit Slide', goog.getCssName('expo-toolbar-quitEdit-slide'));
+    var addElementTextButton = goog.ui.editor.ToolbarFactory
+        .makeButton('addElementTextButton', 'Add texte field', 'Add tex field', goog.getCssName('expo-toolbar-add-element'));
+
+
+
+    // Specify the buttons to add to the using, toolbar built in default buttons.
+    var buttons = [
+        goog.editor.Command.BOLD,
+        goog.editor.Command.ITALIC,
+        goog.editor.Command.UNDERLINE,
+        goog.editor.Command.FONT_COLOR,
+        goog.editor.Command.BACKGROUND_COLOR,
+        goog.editor.Command.FONT_FACE,
+        goog.editor.Command.FONT_SIZE,
+        goog.editor.Command.LINK,
+        goog.editor.Command.UNDO,
+        goog.editor.Command.REDO,
+        goog.editor.Command.UNORDERED_LIST,
+        goog.editor.Command.ORDERED_LIST,
+        goog.editor.Command.INDENT,
+        goog.editor.Command.OUTDENT,
+        goog.editor.Command.JUSTIFY_LEFT,
+        goog.editor.Command.JUSTIFY_CENTER,
+        goog.editor.Command.JUSTIFY_RIGHT,
+        goog.editor.Command.SUBSCRIPT,
+        goog.editor.Command.SUPERSCRIPT,
+        goog.editor.Command.STRIKE_THROUGH,
+        goog.editor.Command.REMOVE_FORMAT,
+
+        quitEditSlideButton,
+        quitEditTexteButton,  //WARNING : ne pas enlever ou alors le mettre en hidden. Tous les editor bind ce button pour etre désactivé et certain traitement trigger
+        //ce button pour s'arrurer qu'il ne reste aucuns texte editable (quitEditSlide notamment)
+        addElementTextButton
+    ];
+    var myToolbar = goog.ui.editor.DefaultToolbar.makeToolbar(buttons,
+        goog.dom.getElement('toolbar'));
+
+    goog.events.listen(goog.dom.getElement("quitEditSlideButton"), goog.events.EventType.CLICK, quitEditSlide);
+    goog.events.listen(goog.dom.getElement("addElementTextButton"), goog.events.EventType.CLICK, createElementTexte);
+
+
+    var button = goog.dom.getElement('quitEditTexteButton');
+    goog.style.setOpacity(button, '0');
+
+    return myToolbar;
+}
+
+
+quitEditSlide = function() {
+    //cancel all remaining editor (if exists)
+    $(".expo-toolbar-quitEdit-texte").trigger("click"); //TODO y'aurait pas un meilleur moyen ?
+
+    Session.set("modalCurrentEditing", false);
+    CurrentEditing.remove({});
+
+    displayBlockAccordingToEditorMode("slideshowMode");
+}
+
