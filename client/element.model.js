@@ -4,7 +4,7 @@
  * @return {[type]}         [description]
  */
 createElementTexte = function(options) {
-    console.log("create element texte", options);
+    console.info("createElementTexte", options);
     // return;
     var d = new Date;
     var content = "ele:" + d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
@@ -54,7 +54,7 @@ createElementTexte = function(options) {
  * slide size and ratioContentMode *
  */
 updateElementPos = function(getUpdateData) {
-    console.log("updateElementPos", this._id, this.id);
+    console.info("updateElementPos", getUpdateData,this._id);
 
     var $element = $("#" + this.id)
     var top = parseFloat($element.css('top'));
@@ -104,7 +104,6 @@ updateElementPos = function(getUpdateData) {
             "displayOptions.jmpress.positions": pos
         }
     }
-    console.log("elementModel.updateElementPos", update);
 
     if (typeof getUpdateData !== 'undefined' && getUpdateData) {
         return update;
@@ -121,7 +120,7 @@ updateElementPos = function(getUpdateData) {
  * @return {[type]}         [description]
  */
 updateSlideElementModel = function(content) {
-    console.log("update element model");
+    console.info("updateSlideElementModel",this._id);
 
     Elements.update(this._id, {
         $set: {
@@ -136,7 +135,7 @@ updateSlideElementModel = function(content) {
  * @return {[type]} [description]
  */
 deleteSlideElement = function() {
-    console.log("delete element ", this._id);
+    console.info("deleteSlideElement", this._id);
     if (!userHasAccessToComponent.call(this)) {
         throw new Meteor.Error('500', 'deleteSlideElement : cannot remove an element locked');
     }

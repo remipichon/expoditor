@@ -6,6 +6,7 @@
  * slideshow editor mode
  */
 Template.elementsArea.elements = function() {
+    console.info("Template.elementsArea.elements");
     return Elements.find({
         slideReference: {
             $in: [this._id]
@@ -17,6 +18,7 @@ Template.elementsArea.elements = function() {
  * content slide editor mode
  */
 Template.elementsAreaCurrentEditing.elements = function() {
+    console.info("Template.elementsAreaCurrentEditing.elements");
     return Elements.find({
         slideReference: {
             $in: [this._id]
@@ -28,6 +30,7 @@ Template.elementsAreaCurrentEditing.elements = function() {
  * timeline
  */
 Template.elementsAreaTimeline.elements = function() {
+    console.info("Template.elementsAreaTimeline.elements");
     return Elements.find({
         slideReference: {
             $in: [this._id]
@@ -45,7 +48,7 @@ Template.elementsAreaTimeline.elements = function() {
  * add editor and dragger and resize on an element in slide content editor mode
  */
 Template.elementCurrentEditing.rendered = function() {
-    console.log("render element for currentEditing", this.data._id);
+    console.log("Template.elementCurrentEditing.rendered", this.data._id);
 
     this.data.id = this.data._id + '-currentEditing';
     setEditor(this.data.id);
@@ -59,9 +62,14 @@ Template.elementCurrentEditing.rendered = function() {
     goog.events.listen(dragger, 'start', startDragElement, 'false', this.data);
     if (Session.get("heavyRefresh")) goog.events.listen(dragger, goog.fx.Dragger.EventType.DRAG, dragElement, 'false', this.data);
     goog.events.listen(dragger, 'end', endDragElement, 'false', this.data);
-
    
     setResize.call(this.data);
+
+    //prevent doublclick    
+    //goog.events.listen(goog.dom.getElement(this.data.id), goog.events.EventType.DBLCLICK, doubleClickElement, 'false');
+    
+
+
 }
 
 /**
@@ -71,7 +79,7 @@ Template.elementCurrentEditing.rendered = function() {
  */
 Template.element.getEditorData = function(axis) {
    // if (typeof this.CSS === 'undefined') {
-    console.log("element.getEditorData", this._id);
+    console.log("Template.element.getEditorData", this._id);
 
     this.center = {
         x: parseFloat(this.displayOptions.editor.positions.x),
@@ -127,7 +135,7 @@ Template.element.getEditorData = function(axis) {
 Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
 
     if (typeof this.CSS === 'undefined') { //works here because elementCurrendEditing are #constant
-        console.log("elementCurrentEditing.getEditorData", this._id);
+        console.info("Template.elementCurrentEditing.getEditorData", this._id);
 
         //a a factoriser avec l'observeChanges
         this.center = {
@@ -185,7 +193,7 @@ Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore uti
  */
 Template.elementTimeline.getEditorData = function(axis) {
    // if (typeof this.CSS === 'undefined') {
-    console.log("elementTimeline.getEditorData", this._id);
+    console.info("Template.elementTimeline.getEditorData", this._id);
 
     this.center = {
         x: parseFloat(this.displayOptions.editor.positions.x),
@@ -244,6 +252,7 @@ Template.elementTimeline.getFontSize = function(){
 }
 
 Template.elementCurrentEditing.isLocked = function() {
+    console.info("Template.elementCurrentEditing.isLocked");
     var component = Locks.findOne({
         componentId: this._id,
         user: {
@@ -251,9 +260,10 @@ Template.elementCurrentEditing.isLocked = function() {
         }
     });
 
-    console.log("isLocked", this, this._id)
+    
 
     if (typeof component !== "undefined") {
+        console.info("Template.elementCurrentEditing.isLocked","element is locked");
         return "locked";
     }
 

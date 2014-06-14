@@ -1,4 +1,5 @@
 Template.timeline.slides = function() {
+	console.info("Template.timeline.slides");
 	return Slides.find({}, {
 		sort: {
 			order: 1
@@ -7,6 +8,7 @@ Template.timeline.slides = function() {
 }
 
 Template.clonedTimeline.slides = function() {
+	console.info("Template.clonedTimeline.slides");
 	return Slides.find({}, {
 		sort: {
 			order: 1
@@ -47,14 +49,14 @@ Slides.find({}).observeChanges({
 */
 
 Template.timelineSlide.destroyed = function() {
-    console.log("timelineSlide.destroyed");
+    console.info("emplate.timelineSlide.destroyed");
     updateOrderControler();
 
 }
 
 
 Template.timelineSlide.rendered = function() {
-
+	console.info("Template.timelineSlide.rendered");
 	// settimelineOnSlide = function() {
 	// console.log("render timelineslide");
 	// var setToTimeline = false;
@@ -72,7 +74,7 @@ Template.timelineSlide.rendered = function() {
 
 
 	if (setToTimeline) {
-		console.log("render timelineslide for editor", this.data._id);
+		console.info("render timelineslide for editor", this.data._id);
 
 		//ajout à la timeline
 		//c'est pas top parce que la premiere fois on setSortable pour chaque slide 
@@ -83,7 +85,7 @@ Template.timelineSlide.rendered = function() {
 		$("#" + this.data._id).data("timelineIsSet", true);
 		$("#timeline").data("timelineSlide", $("#timeline").data("timelineSlide") + "-" + this.data._id);
 	} else {
-		console.log("render timelineslide for editor SKIPPED", this.data._id);
+		console.warn("render timelineslide for editor SKIPPED", this.data._id);
 	}
 }
 

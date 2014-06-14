@@ -6,7 +6,7 @@
  *                          * order     (default)
  */
 createSlide = function(options) {
-    console.log("create slide", options.type);
+    console.info("create slide", options.type);
     if (typeof options === "undefined") {
         var options = {};
     }
@@ -67,28 +67,26 @@ createSlide = function(options) {
 
 
 deleteSlide = function() {
-    console.log("delete slide : ", this._id);
+    console.info("delete slide : ", this._id);
     Slides.remove(this._id);
 };
 
 
-/*
- * TODO : passer ca en mode this !!!
- */
-updateSlideTitleModel = function(slide) {
-    console.log("update title, model");
-    var title = prompt("new title", slide.informations.title);
+
+updateSlideTitleModel = function() {
+    console.info("updateSlideTitleModel");
+    var title = prompt("new title", this.informations.title);
 
     if (title != null) {
-        Slides.update(slide._id, {
+        Slides.update(this._id, {
             $set: {
                 "informations.title": title
             }
         });
     }
 
-    console.log("update title : remove lock of slide", slide._id);
-    removeLocksControler.call(slide);
+    console.info("update title : remove lock of slide", this._id);
+    removeLocksControler.call(this);
 
 };
 
@@ -103,7 +101,7 @@ updateSlideTitleModel = function(slide) {
  *
  */
 updateSlidePos = function(getUpdateData) {
-    console.log("updateSlidePos", this._id);
+    console.info("updateSlidePos", this._id);
 
 
 

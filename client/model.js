@@ -13,7 +13,7 @@ updateWithLocksControler = function(field, callback) {
         callback = field;
         field = null;
     }
-    console.log("updateWithLocksControler");
+    console.info("updateWithLocksControler");
 
     var lock = Locks.findOne({
         componentId: this._id
@@ -45,9 +45,9 @@ updateWithLocksControler = function(field, callback) {
                     }
                 });
         }
-        console.log("update component, add lock to component", this._id);
+        console.info("update component, add lock to component", this._id);
         if (typeof callback === "function")
-            callback(this);
+            callback.call(this);
         return true;
     } else {
         if (typeof lock !== "undefined")
@@ -60,6 +60,7 @@ updateWithLocksControler = function(field, callback) {
 };
 
 removeLocksControler = function() {
+    console.info("removeLocksControler");
     var lock = Locks.findOne({
         componentId: this._id
     });
@@ -78,7 +79,7 @@ removeLocksControler = function() {
 
 
 clearServerData = function(str) {
-    console.log("clearServerData");
+    console.info("clearServerData");
     Meteor.call('clearServerData', function(error, result) {
         console.log("clearServerData : server answered with ", result);
     });

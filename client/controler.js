@@ -59,6 +59,7 @@ toolbarButton = null;
  * @param  {str} mode describe mode which mode to show
  */
 displayBlockAccordingToEditorMode = function(modeToDisplay) {
+    console.info("displayBlockAccordingToEditorMode", modeToDisplay)
     _.each(modeBlock, function(blockList, mode) {
         if (modeToDisplay === mode) {
             _.each(blockList, function(block) {
@@ -139,27 +140,27 @@ Meteor.startup(function() {
     goog.events.listen(goog.dom.getElement('modalCurrentEditing'), goog.events.EventType.DBLCLICK, addElementTexte)
     goog.events.listen(goog.dom.getElement('editor-container'), goog.events.EventType.DBLCLICK, addSlide)
     //edit slideshowTitle
-    goog.events.listen(goog.dom.getElement('slideshowTitle'),goog.events.EventType.DBLCLICK,updateSlideshowControler);
+    goog.events.listen(goog.dom.getElement('slideshowTitle'), goog.events.EventType.DBLCLICK, updateSlideshowControler);
 
 });
 
 addElementTexte = function(event) {
-    console.log(event.offsetY, event.offsetX)
+    console.info("addElementTexte", event.offsetY, event.offsetX)
     createElementTexte({
         pos: {
-            y: event.offsetY*ratioContentMode,
-            x: event.offsetX*ratioContentMode
+            y: event.offsetY * ratioContentMode,
+            x: event.offsetX * ratioContentMode
         }
     });
 
 }
 
 addSlide = function(event) {
-    console.log(event.offsetY, event.offsetX)
+    console.info("addSlide", event.offsetY, event.offsetX)
     createSlide({
         pos: {
-            y: event.offsetY*ratioSlideshowMode,
-            x: event.offsetX*ratioSlideshowMode
+            y: event.offsetY * ratioSlideshowMode,
+            x: event.offsetX * ratioSlideshowMode
         }
     });
 
@@ -167,22 +168,21 @@ addSlide = function(event) {
 
 /*
  * listen to change on remote
- * ==> projet de ClaireZed 
+ * ==> projet de ClaireZed
  */
 Remote.find({}).observeChanges({
     changed: function(id, fields) {
-        console.log("remote changed !!")
+        console.info("Remote.find({}).observeChanges.changed");
         var remote = Remote.findOne({});
-
         if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
+            console.info("Remote.find({}).observeChanges.changed", "follow slide", remote.activeSlideId);
             var type = Session.get("clientMode");
             if (type === "jmpress") {
-                console.log("follow slide !");
                 $("#jmpress-container").jmpress("goTo", "#" + remote.activeSlideId);
             } else if (type === "deck") {
                 $.deck("go", remote.activeSlideId);
             } else {
-                console.log("remote slide active state changed to ", remote.activeSlideId);
+
             }
         }
     }
@@ -191,7 +191,7 @@ Remote.find({}).observeChanges({
 
 
 setActive = function(activeSlide) {
-    console.log("setActive in remote", activeSlide);
+    console.info("setActive in remote", activeSlide);
     var remote = Remote.findOne();
 
     Remote.update(remote._id, {
@@ -209,6 +209,7 @@ setActive = function(activeSlide) {
  **********************************************************/
 
 launchEditorControler = function() {
+    console.info("launchEditorControler");
     this.getChild('backToEditor').setEnabled(false);
     Session.set("clientMode", "editor");
     alert('it will reload page, because of Jmpress is not an easy beast to manage...');
@@ -216,6 +217,7 @@ launchEditorControler = function() {
 }
 
 launchJmpressControler = function() {
+    console.info("launchJmpressControler");
     this.getChild('backToEditor').setEnabled(true);
     Session.set("clientMode", "jmpress");
     setTimeout(initJmpress, 200);
@@ -223,12 +225,14 @@ launchJmpressControler = function() {
 }
 
 launchDeckControler = function() {
+    console.info("launchDeckControler");
     this.getChild('backToEditor').setEnabled(true);
     Session.set("clientMode", "deck");
     setTimeout(initDeck, 200);
 
 }
 showTimelineControler = function() {
+    console.info("showTimelineControler");
     goog.style.showElement(goog.dom.getElement("timeline"), (goog.dom.getElement('showTimeline').getAttribute("aria-pressed") === "true") ? true : false);
 }
 
@@ -236,10 +240,12 @@ showTimelineControler = function() {
  * magouille mais on s'en fout, ca va disparaitre avec le merge avec expo.remote
  */
 getSlideshowControlerCaller = function() {
+    console.info("getSlideshowControlerCaller");
     getSlideshowControler();
 }
 
 initButtons = function() {
+    console.info("initButtons");
     var buttons = new goog.ui.Toolbar();
     buttons.decorate(goog.dom.getElement('buttons'));
 
@@ -274,6 +280,7 @@ initButtons = function() {
 }
 
 setToolbar = function() {
+    console.info("setToolbar");
     // if(typeof toolbar !== 'undefined'){
     //     throw new Meteor.Error("500","A toolbar is alredy set",toolbar);
     // }
@@ -312,7 +319,7 @@ setToolbar = function() {
         goog.editor.Command.REMOVE_FORMAT,
 
         quitEditSlideButton,
-        quitEditTexteButton,  //WARNING : ne pas enlever ou alors le mettre en hidden. Tous les editor bind ce button pour etre désactivé et certain traitement trigger
+        quitEditTexteButton, //WARNING : ne pas enlever ou alors le mettre en hidden. Tous les editor bind ce button pour etre désactivé et certain traitement trigger
         //ce button pour s'arrurer qu'il ne reste aucuns texte editable (quitEditSlide notamment)
         addElementTextButton
     ];
@@ -331,12 +338,12 @@ setToolbar = function() {
 
 
 quitEditSlide = function() {
+    console.info("quitEditSlide");
     //cancel all remaining editor (if exists)
-    $(".expo-toolbar-quitEdit-texte").trigger("click"); //TODO y'aurait pas un meilleur moyen ?
+    $(".expo-toolbar-quitEdit-texte").trigger("click"); //TODO fire event perso
 
     Session.set("modalCurrentEditing", false);
     CurrentEditing.remove({});
 
     displayBlockAccordingToEditorMode("slideshowMode");
 }
-

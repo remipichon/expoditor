@@ -12,6 +12,14 @@
   overflow: auto;
 }
 
+
+
+#cloned-slides {
+  position: absolute;
+  top: 30px;  
+  left: 0;
+}
+
 .timeline-slides-title {
   /*position: fixed;*/
   background: #E3E7ED;

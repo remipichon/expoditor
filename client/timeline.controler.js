@@ -1,6 +1,6 @@
 cloneSlide = function(i, doSetSortable) {
 
-  console.log("cloneSlide", this.id, i);
+  console.info("cloneSlide", this.id, i);
 
   var item = $("#" + this.id + "");
   var item_clone = $("#" + this.id + "-cloned"); //hohoho c'est pas beau cela
@@ -15,7 +15,7 @@ cloneSlide = function(i, doSetSortable) {
     .attr("data-pos", i); //.attr("id", $(this).attr('id') + "-cloned");
 
   item.attr("data-pos", i);
-  console.log("cloneSlide", this.id, i);
+  console.info("cloneSlide", this.id, i);
 
   if (typeof doSetSortable !== 'undefined' && doSetSortable) {
     setSortable();
@@ -26,7 +26,7 @@ cloneSlide = function(i, doSetSortable) {
 
 
 setSortable = function() {
-  console.log("setSortable");
+  console.info("setSortable");
   $("#timeline").sortable({
 
     axis: "y",
@@ -86,12 +86,13 @@ setSortable = function() {
 }
 
 updateOrderControler = function() {
+  console.info("updateOrderControler");
   //met à jour les data-pos des clones
   $("#timeline .timeline-slide").each(function() {
     var item = $(this);
     var clone = item.data("clone");
 
-    console.log("sortable.stop", item.attr("id"), item.attr("data-pos"), item.index());
+    console.info("sortable.stop", item.attr("id"), item.attr("data-pos"), item.index());
 
 
     clone.attr("data-pos", item.index());
@@ -103,6 +104,7 @@ updateOrderControler = function() {
 }
 
 updateOrderControlerVersModel = function() {
+  console.info("updateOrderControlerVersModel");
   $("#timeline .timeline-slide").each(function() {
     var item = $(this);
     //if (parseInt(item.attr("data-pos")) !== item.index()) { //if update needed

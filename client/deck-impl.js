@@ -1,17 +1,18 @@
 
 Template.deckContainer.slides = function() {
+	console.info("Template.deckContainer.slides");
     if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'deck') {
         console.log("deckContainer empty");
         return [];
     }
-    console.log("deckContainer inject data");
+    console.info("Template.deckContainer.slides","deckContainer inject data");
    return Slides.find({},{sort:{order:1}});
 };
 
 
 
 initDeck = function() {
-    console.log("init deck");
+    console.info("initDeck");
     $.deck('.slide');
 };
 

@@ -8,10 +8,14 @@ Template.deleteElement.events({
 
 
 updateSlideElementControler = function() {
+    console.info("updateSlideElementControler");
     updateWithLocksControler.apply(this, updateSlideElementModel);
 };
 
-
+doubleClickElement = function(event){
+    console.info("doubleClickElement");
+    event.stopPropagation();
+}
 
 
 

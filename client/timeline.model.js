@@ -6,7 +6,7 @@ updateOrder = function(newPos) {
 	if (this instanceof jQuery) {
 		var _id = this.attr("id").split('-')[0];
 		var title = this.children('.title').html();
-		console.log("updateOrder",_id,title,'to',newPos);
+		console.info("updateOrder",_id,title,'to',newPos);
 		Slides.update({_id:_id},{$set:{order:parseInt(newPos)}});
 
 	}

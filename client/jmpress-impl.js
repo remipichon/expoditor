@@ -1,9 +1,9 @@
 Template.jmpressContainer.slides = function() {
     if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'jmpress') {
-        console.log("jmpressContainer empty");
+        console.log("Template.jmpressContainer.slides  empty");
         return [];
     }
-    console.log("jmpressContainer inject data");
+    console.log("Template.jmpressContainer.slides  inject data");
     return Slides.find({}, {
         sort: {
             order: 1
@@ -16,6 +16,7 @@ Template.jmpressContainer.slides = function() {
  * jmpress mode
  */
 Template.elementsAreaJmpress.elements = function() {
+    console.info("Template.elementsAreaJmpress.elements");
     return Elements.find({
         slideReference: {
             $in: [this._id]
@@ -35,7 +36,7 @@ cloneJmpressSlide = function(sl) {
     } else {
     $("#jmpress-container").append(clone);
     }
-    console.log('cloneJmpressSlide',sl,clone)
+    console.info('cloneJmpressSlide',sl,clone)
     // alert();
     return clone;
 }
@@ -52,7 +53,7 @@ initJmpress = function() {
 
 
 
-    console.log("init jmpress");
+    console.info("initJmpress");
     //launch jmpress first time
     $('#jmpress-container').jmpress({
         viewPort: {
@@ -66,7 +67,7 @@ initJmpress = function() {
 
 
 Template.jmpressSlide.getJmpressData = function(axis) {
-    console.log("jmpressSlide getJmpressData", axis);
+    console.info("Template.jmpressSlide.getJmpressData", axis);
     switch (axis) {
         case "x":
             var coord = parseFloat(this.displayOptions.jmpress.positions.x);
@@ -94,7 +95,7 @@ Template.jmpressSlide.getJmpressData = function(axis) {
 Template.elementJmpress.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
 
     if (typeof this.CSS === 'undefined') { //works here because elementCurrendEditing are #constant
-        console.log("elementJmpress.getEditorData", this._id);
+        console.info("Template.elementJmpress.getEditorData", this._id);
 
         //a a factoriser avec l'observeChanges
         this.center = {
@@ -156,7 +157,7 @@ Template.jmpressSlide.rendered = function() {
         console.log('jmpressSlide desactivate when jmpress is init')
     }
 
-    console.log("slide.rendered for jmpress", this.data._id);
+    console.info("Template.jmpressSlide.rendered", this.data._id);
 
     var posX = this.data.displayOptions.jmpress.positions.x;
     var posY = this.data.displayOptions.jmpress.positions.y;
@@ -207,7 +208,7 @@ Template.jmpressSlide.rendered = function() {
  * pas altérer.
  */
 Template.jmpressSlide.destroyed = function() {
-    console.log("slidejmpress destroyed", this.data._id);
+    console.info("Template.jmpressSlide.destroyed", this.data._id);
 
     var slideToRemove = $("#jmpress-container >div #" + this.data._id);
     $("#jmpress-container").jmpress("deinit", slideToRemove);
@@ -219,10 +220,10 @@ Template.jmpressSlide.destroyed = function() {
     setTimeout(function() {
         //       s'il n'y a plus de slide et que le client mode n'est plus jmpress, il faut deinit jmpress
         if ($("#jmpress-container >div >:not(.lymbe)").length === 0 && Session.get("clientMode") !== "jmpress") {
-            console.log("jmpress-container.jmpress.deinit");
+            console.info("jmpress-container.jmpress.deinit");
             $("#jmpress-container").jmpress("deinit"); //la slide n'existe déja plus dans le DOM, il faut un before destroyed !!!
             setTimeout(function() {
-                console.log("jmpress-container.children.remove (cleaning after jmpress deinit");
+                console.info("jmpress-container.children.remove (cleaning after jmpress deinit");
                 $("#jmpress-container").children().remove();
             }, 500);
         }

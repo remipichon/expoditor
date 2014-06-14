@@ -1,9 +1,10 @@
-
-
 makeEditableCallback = function(e) {
+    e.stopPropagation();
     if (updateWithLocksControler.apply(Elements.findOne({
         _id: this._id
     }))) {
+
+
         //super listener jQuery qui s'auto off et permet de desactiver les editor lorqu'on clique ailleurs
         //quit editor anywhere except iframe
         $("#modalCurrentEditing *:not('iframe')").on('mousedown.editText', function(e) {
@@ -14,12 +15,12 @@ makeEditableCallback = function(e) {
 
         //cancel all other editor (if exists)
         $("#quitEditTexteButton").trigger("click");
-        console.log("makeEditableCallback", this._id);
+        console.info("makeEditableCallback", this._id);
         $("#" + this._id + '-currentEditing-wrapper').toggleClass('currentlyEditingByMe');
         this.makeEditable();
 
         //pas top !
-        console.log("bricolage ! pour changer le background color et le margin du body del'iframe");
+        console.warn("bricolage ! pour changer le background color et le margin du body del'iframe");
         $("iframe").css('background-color', 'rgba(0,0,0,0)')
         $("iframe").contents().find('body').css('margin-top', '0px');
         $("iframe").contents().find('body').css('margin-left', '0px');
@@ -31,13 +32,13 @@ makeEditableCallback = function(e) {
 
 makeUneditableCallback = function(e) {
     e.stopPropagation();
-    
+
     if (this.isUneditable()) return;
 
     removeLocksControler.call(Elements.findOne({
         _id: this._id
     }));
-    console.log("makeUneditableCallback", this._id);
+    console.info("makeUneditableCallback", this._id);
     $("#" + this._id + '-currentEditing-wrapper').toggleClass('currentlyEditingByMe');
     this.makeUneditable();
 
@@ -50,13 +51,13 @@ makeUneditableCallback = function(e) {
 
 updateFieldContents = function(e) {
     var content = this.getCleanContents();
-    console.log('content chanded : ', content);
+    console.info('makeUneditableCallback', content);
     if (Session.get("heavyRefresh")) updateSlideElementModel.apply(this, [content]);
 }
 
 setEditor = function(idElement) {
     if (typeof idElement === "undefined") return;
-    console.log("setEditor ", idElement);
+    console.info("setEditor ", idElement);
 
     var myField = new goog.editor.Field(idElement);
     myField.id = idElement;
@@ -96,6 +97,7 @@ setEditor = function(idElement) {
     // click on button to disable editor
     var button = goog.dom.getElement('quitEditTexteButton');
     goog.events.listen(goog.dom.getElement(button), goog.events.EventType.CLICK, makeUneditableCallback, 'false', myField);
+    //TODO handle an event fired instead of trigger click
 
     return myField;
 }

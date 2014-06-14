@@ -1,5 +1,5 @@
 resizeModel = function(){
-	console.log("resizeModel",this._id,this.id);
+	console.info("resizeModel",this._id,this.id);
 
 	var component = goog.dom.getElement(this.id);
 	// console.log("resizeModel",component);
@@ -29,11 +29,11 @@ resizeModel = function(){
 	}
 
 	var updatePos = updateElementPos.apply(this,[true]);
-	console.log("resizeModel updatepos",updatePos);
+	console.info("resizeModel updatepos",updatePos);
 	jQuery.extend(update.$set,updatePos.$set);
 
 
-	console.log("resizeModel",update.$set);
+	console.info("resizeModel",update.$set);
 
 
 	/**
