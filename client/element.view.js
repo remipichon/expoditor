@@ -44,10 +44,10 @@ Template.elementsAreaTimeline.elements = function() {
 Elements.find({}).observeChanges({
     changed: function(elemenId, fields) {
         console.info("Elements.obsverveChanges.changed",elemenId);
-        if(typeof fields.content !== "unndefined"){
-             console.info("Elements.obsverveChanges.changed.content");
+       if(typeof fields.content !== "undefined"){
+             console.info("Elements.obsverveChanges.changed.content",fields.content);
             var editor = $("#"+elemenId+"-currentEditing").data("editorInstance");
-            editor.setHtml(false,fields.content,true,false)
+            editor.setHtml(false,fields.content,true,true)
         }
     },
 });

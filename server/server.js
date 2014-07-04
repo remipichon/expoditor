@@ -240,10 +240,10 @@ Meteor.methods({
         // purge slideshowPublished si jamais un user avait précedement les accès à un slideshow
         _.each(slideshowPublished, function(userArray, slideshowId) {
             var index = userArray.indexOf(userId);
-            if( index !== -1){
-                console.log("getSlideshox",userId,"lost access to ",slideshowId);
-                 userArray.splice(index, 1);
-            }           
+            if (index !== -1) {
+                console.log("getSlideshox", userId, "lost access to ", slideshowId);
+                userArray.splice(index, 1);
+            }
         });
 
         //add user to the list of current editors
@@ -413,7 +413,6 @@ Slides.after.remove(function(userId, element) {
 
 
 /*
- * TOTEST : each action doit verifier que le user hasAccessSlideshow
  * TOTEST : traitement factorisé pour la gestion du lock à l'image du coté client
  */
 Slides.allow({
@@ -464,7 +463,7 @@ Slides.allow({
                     $and: [{
                         componentId: slide._id
                     }, {
-                        userId: userId
+                        'user.userId': userId
                     }]
                 });
 
@@ -544,21 +543,99 @@ Elements.after.remove(function(userId, element) {
 
 
 Elements.allow({
-    /*
-     * TODO
-     *
-     */
-    insert: function() {
+    insert: function(userId, element, fields, modifier) {
+        //slideshow access controll
+        var slide = Slides.findOne({
+            _id: element.slideReference[0]
+        });
+        console.log("info : elements.allow.insert : slide", slide._id);
+        if (!hasAccessSlideshow(slide.slideshowReference[0], userId))
+            throw new Meteor.Error("24", "elements.insert : user has not access to slideshow ", lock.slide.slideshowReference);
+
+
+        console.log("info : elements.allow.insert : true ", element);
         return true;
     },
-    update: function() {
-        return true;
+    update: function(userId, element, fields, modifier) {
+        console.log("elements.allow.update : ", element._id);
+
+        var toReturn = false;
+
+        //slideshow access controll
+        var slide = Slides.findOne({
+            _id: element.slideReference[0]
+        });
+        console.log("info : elements.allow.insert : slide", slide._id);
+        if (!hasAccessSlideshow(slide.slideshowReference[0], userId))
+            throw new Meteor.Error("24", "elements.insert : user has not access to slideshow ", lock.slide.slideshowReference);
+
+
+
+        //lock control
+        if (!userHasAccessToComponent(element, fields)) {
+            console.log("elements.allow.update : user does not have access to update fiels " + fields);
+            throw new Meteor.Error("elements.allow.update : user does not have access to update fiels " + fields);
+        }
+
+        //display options
+        if (_.contains(fields, 'displayOptions')) {
+            //position
+            if (modifier.toString().indexOf("positions") !== -1) { //pas funky ca
+                var position = element.displayOptions.jmpress.positions;
+                console.log("elements.allow.update.pos : ", position, " _id : ", element._id);
+            }
+
+            toReturn = true;
+        }
+
+      
+
+        //content
+        if (_.contains(fields, 'content')) {
+            //            if (modifier.toString().indexOf("title") !== -1) { //pas funky ca
+                console.log("elements.allow.update elementId",element._id);
+            var lock = Locks.findOne({
+                $and: [{
+                    componentId: element._id
+                }, {
+                    'user.userId': userId
+                }]
+            });
+            console.log("elements.allow.updat lock",lock);
+            if (typeof lock == 'undefined') {
+                console.log("info : elements.allow.update : client trying to update without lock element : ", element._id, "client :", userId);
+                return false;
+            }
+            console.log("info : elements.allow.update : allow content update");
+
+            toReturn = true;
+        }
+
+
+
+        if (toReturn) {
+            return true;
+        }
+
+
+        console.log("info : elementsLock.allow.update pos : case not expected, return false");
+        return false;
+
     },
-    remove: function() {
+    remove: function(userId, element) {
+        //slideshow access controll
+        var slide = Slides.findOne({
+            _id: element.slideReference[0]
+        });
+        console.log("info : elements.allow.insert : slide", slide._id);
+        if (!hasAccessSlideshow(slide.slideshowReference[0], userId))
+            throw new Meteor.Error("24", "elements.insert : user has not access to slideshow ", lock.slide.slideshowReference);
+
+
         return true;
     }
-
 });
+
 /*
  *  Project de ClaireZed
  */

@@ -35,9 +35,6 @@ makeUneditableCallback = function(e) {
 
     if (this.isUneditable()) return;
 
-    removeLocksControler.call(Elements.findOne({
-        _id: this._id
-    }));
     console.info("makeUneditableCallback", this._id);
     $("#" + this._id + '-currentEditing-wrapper').toggleClass('currentlyEditingByMe');
     this.makeUneditable();
@@ -47,6 +44,11 @@ makeUneditableCallback = function(e) {
 
     var button = goog.dom.getElement('quitEditTexteButton');
     goog.style.setOpacity(button, '0');
+
+    
+    removeLocksControler.call(Elements.findOne({
+        _id: this._id
+    }));
 }
 
 updateFieldContents = function(e) {
