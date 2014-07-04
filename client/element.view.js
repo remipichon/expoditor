@@ -41,7 +41,16 @@ Template.elementsAreaTimeline.elements = function() {
 
 /******* render *****/
 
-
+Elements.find({}).observeChanges({
+    changed: function(elemenId, fields) {
+        console.info("Elements.obsverveChanges.changed",elemenId);
+        if(typeof fields.content !== "unndefined"){
+             console.info("Elements.obsverveChanges.changed.content");
+            var editor = $("#"+elemenId+"-currentEditing").data("editorInstance");
+            editor.setHtml(false,fields.content,true,false)
+        }
+    },
+});
 
 
 /**
@@ -53,21 +62,17 @@ Template.elementCurrentEditing.rendered = function() {
     this.data.id = this.data._id + '-currentEditing';
     setEditor(this.data.id);
 
-     //set resize and draggable on wrapper
-    this.data.id = this.data.id +'-wrapper';
-    
+    //set resize and draggable on wrapper
+    this.data.id = this.data.id + '-wrapper';
+
     var dragged = goog.dom.getElement(this.data._id + '-currentEditing-wrapper');
-    var dr = goog.dom.getElement(this.data._id+'-dragMe');
-   var dragger = new goog.fx.Dragger(dragged,dr);
+    var dr = goog.dom.getElement(this.data._id + '-dragMe');
+    var dragger = new goog.fx.Dragger(dragged, dr);
     goog.events.listen(dragger, 'start', startDragElement, 'false', this.data);
     if (Session.get("heavyRefresh")) goog.events.listen(dragger, goog.fx.Dragger.EventType.DRAG, dragElement, 'false', this.data);
     goog.events.listen(dragger, 'end', endDragElement, 'false', this.data);
-   
-    setResize.call(this.data);
 
-    //prevent doublclick    
-    //goog.events.listen(goog.dom.getElement(this.data.id), goog.events.EventType.DBLCLICK, doubleClickElement, 'false');
-    
+    setResize.call(this.data);
 
 
 }
@@ -75,10 +80,10 @@ Template.elementCurrentEditing.rendered = function() {
 /**
  * calculate position and size of an element in slideshow editor mode according to ratioSlideshowMode
  * @param  {string} axis which CSS style is needed
- * @return {int}      value of the CSS style 
+ * @return {int}      value of the CSS style
  */
 Template.element.getEditorData = function(axis) {
-   // if (typeof this.CSS === 'undefined') {
+    // if (typeof this.CSS === 'undefined') {
     console.log("Template.element.getEditorData", this._id);
 
     this.center = {
@@ -102,19 +107,19 @@ Template.element.getEditorData = function(axis) {
             var coord = this.CSS.left;
             break;
         case "y":
-            var coord = this.CSS.top; 
+            var coord = this.CSS.top;
             break;
         case "z":
             var coord = 0;
             break;
         case "scaleX":
-            var coord = 1; 
+            var coord = 1;
             break;
         case "scaleY":
             var coord = 1;
             break;
         case "h":
-            var coord = this.displayOptions.editor.size.height / ratioSlideshowMode; 
+            var coord = this.displayOptions.editor.size.height / ratioSlideshowMode;
             break;
         case "w":
             var coord = this.displayOptions.editor.size.width / ratioSlideshowMode;;
@@ -130,7 +135,7 @@ Template.element.getEditorData = function(axis) {
 /**
  * calculate position and size of an element in slide content editor mode according to ratioSlideshowMode
  * @param  {string} axis which CSS style is needed
- * @return {int}      value of the CSS style 
+ * @return {int}      value of the CSS style
  */
 Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
 
@@ -157,19 +162,19 @@ Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore uti
 
     switch (axis) {
         case "x":
-            var coord = this.CSS.left; 
+            var coord = this.CSS.left;
             break;
         case "y":
-            var coord = this.CSS.top; 
+            var coord = this.CSS.top;
             break;
         case "z":
             var coord = 0;
             break;
         case "scaleX":
-            var coord = 1; 
+            var coord = 1;
             break;
         case "scaleY":
-            var coord = 1; 
+            var coord = 1;
             break;
         case "h":
             var coord = this.displayOptions.editor.size.height / ratioContentMode;
@@ -189,10 +194,10 @@ Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore uti
 /**
  * calculate position and size of an element in the timeline according to ratioTimeline
  * @param  {string} axis which CSS style is needed
- * @return {int}      value of the CSS style 
+ * @return {int}      value of the CSS style
  */
 Template.elementTimeline.getEditorData = function(axis) {
-   // if (typeof this.CSS === 'undefined') {
+    // if (typeof this.CSS === 'undefined') {
     console.info("Template.elementTimeline.getEditorData", this._id);
 
     this.center = {
@@ -216,19 +221,19 @@ Template.elementTimeline.getEditorData = function(axis) {
             var coord = this.CSS.left;
             break;
         case "y":
-            var coord = this.CSS.top; 
+            var coord = this.CSS.top;
             break;
         case "z":
             var coord = 0;
             break;
         case "scaleX":
-            var coord = 1; 
+            var coord = 1;
             break;
         case "scaleY":
             var coord = 1;
             break;
         case "h":
-            var coord = this.displayOptions.editor.size.height / ratioTimeline; 
+            var coord = this.displayOptions.editor.size.height / ratioTimeline;
             break;
         case "w":
             var coord = this.displayOptions.editor.size.width / ratioTimeline;;
@@ -243,12 +248,12 @@ Template.elementTimeline.getEditorData = function(axis) {
 
 
 
-Template.element.getFontSize = function(){
-    return 16/ratioSlideshowMode; //16 est un peu au pif via le debugger
+Template.element.getFontSize = function() {
+    return 16 / ratioSlideshowMode; //16 est un peu au pif via le debugger
 }
 
-Template.elementTimeline.getFontSize = function(){
-    return 16/ratioTimeline;
+Template.elementTimeline.getFontSize = function() {
+    return 16 / ratioTimeline;
 }
 
 Template.elementCurrentEditing.isLocked = function() {
@@ -260,10 +265,10 @@ Template.elementCurrentEditing.isLocked = function() {
         }
     });
 
-    
+
 
     if (typeof component !== "undefined") {
-        console.info("Template.elementCurrentEditing.isLocked","element is locked");
+        console.info("Template.elementCurrentEditing.isLocked", "element is locked");
         return "locked";
     }
 

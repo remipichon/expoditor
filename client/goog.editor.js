@@ -98,6 +98,10 @@ setEditor = function(idElement) {
     var button = goog.dom.getElement('quitEditTexteButton');
     goog.events.listen(goog.dom.getElement(button), goog.events.EventType.CLICK, makeUneditableCallback, 'false', myField);
     //TODO handle an event fired instead of trigger click
+    //
+    
+    //try for giving the editor to everyone
+    $("#"+idElement).data("editorInstance",myField);
 
     return myField;
 }

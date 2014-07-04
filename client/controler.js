@@ -145,7 +145,12 @@ Meteor.startup(function() {
 });
 
 addElementTexte = function(event) {
-    console.info("addElementTexte", event.offsetY, event.offsetX)
+    console.info("addElementTexte", event.offsetY, event.offsetX);
+    if( event.target.className !== "elementsAreaCurrentEditing"){
+        console.warn("addElementTexte : magouille pour prevent le dblclick on element to create element");
+        return;
+    }
+   
     createElementTexte({
         pos: {
             y: event.offsetY * ratioContentMode,
