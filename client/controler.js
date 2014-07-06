@@ -73,11 +73,37 @@ displayBlockAccordingToEditorMode = function(modeToDisplay) {
     });
 }
 
+disableLog = function(){
+    console.log("disableLog");
+    console.info("disableLog");
+    console.debug("disableLog");
+
+    console.log2 = console.log;
+    console.log = function() {};    
+    console.debug2 = console.debug;
+    console.debug = function() {};    
+    console.info2 = console.info;
+    console.info = function() {};
+}
+enableLog = function() {
+    console.log = console.log2;
+    console.log2 = function() {};    
+    console.debug = console.debug2;
+    console.debug2 = function() {};    
+    console.info = console.info2;
+    console.info2 = function() {};
+
+   console.log("enableLog");
+   console.info("enableLog");
+   console.debug("enableLog");
+
+}
 
 /**********************************************************
  * manage live Remote
  **********************************************************/
 Meteor.startup(function() {
+    // disableLog();
     //init toolbar, global pour l'init des editeurs de textes
     toolbar = setToolbar();
     toolbarButton = initButtons();
@@ -146,11 +172,11 @@ Meteor.startup(function() {
 
 addElementTexte = function(event) {
     console.info("addElementTexte", event.offsetY, event.offsetX);
-    if( event.target.className !== "elementsAreaCurrentEditing"){
+    if (event.target.className !== "elementsAreaCurrentEditing") {
         console.warn("addElementTexte : magouille pour prevent le dblclick on element to create element");
         return;
     }
-   
+
     createElementTexte({
         pos: {
             y: event.offsetY * ratioContentMode,

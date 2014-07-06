@@ -393,7 +393,7 @@ unloadToStore = function(slideshowId) {
                 }
             });
         });
-        console.log("unloadToStore elementToStore ", elementToStore);
+        console.log("unloadToStore elementToStore ", elementToStore.length);
         //add elements into the slide
         nb = Slides.update(slideId, {
             $set: {

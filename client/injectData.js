@@ -1,10 +1,26 @@
 //create a slideshow named <slidehoswName>, some slides with element inside
-injectData = function(slidehoswName) {
+injectData = function(slidehoswName, options) {
+
+			console.debug("you can specify : string:<slideshowname> , object:<nbSlide:int, nbElementPerSlide:int>");
+	if (typeof options === "object") {
+		if (typeof options.nbSlide !== "number") {
+			nbSlide = 5;
+		} else {
+			nbSlide = options.nbSlide;
+		}
+		if (typeof options.nbElementPerSlide !== "number") {
+			nbElementPerSlide = 5;
+		} else {
+			nbElementPerSlide = options.nbElementPerSlide;
+		}
+	}
+
+	//disableLog();
 
 	//create slide and elements 
 	var callbackCreateSlidesow = function() {
 		var options, optionsTxt, idSlide;
-		for (var i = 0; i < 2; i++) {
+		for (var i = 0; i < nbSlide; i++) {
 			options = {
 				pos: {
 					x: 1000 + i * 200,
@@ -15,7 +31,7 @@ injectData = function(slidehoswName) {
 			idSlide = createSlide(options);
 
 			//add element inside
-			for (var j = 0; j < 3; j++) {
+			for (var j = 0; j < nbElementPerSlide; j++) {
 				optionsTxt = {
 					pos: {
 						x: 100 + j * 30,
@@ -26,6 +42,8 @@ injectData = function(slidehoswName) {
 				createElementTexte(optionsTxt);
 			}
 		}
+
+		//enableLog();
 
 	};
 
@@ -51,7 +69,3 @@ injectData = function(slidehoswName) {
 
 
 }
-
-
-
-
