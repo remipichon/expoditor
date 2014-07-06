@@ -130,7 +130,7 @@ Meteor.startup(function() {
     console.log("init pres pour test");
     Session.set("clientMode", "editor");
     getSlideshowModel({
-        title: 'test1'
+        title: 'test'
     });
     /*setTimeout(function() {
         $($(".editSlideContent")[0]).trigger('click');

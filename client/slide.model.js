@@ -6,7 +6,7 @@
  *                          * order     (default)
  */
 createSlide = function(options) {
-    console.info("create slide", options.type);
+    console.info("createSlide", options);
     if (typeof options === "undefined") {
         var options = {};
     }
@@ -138,20 +138,19 @@ updateSlidePos = function(getUpdateData) {
     });
 
     //petite verif que la slide a effectivement bougée
-    if (slide.displayOptions.editor.positions.x == left && slide.displayOptions.editor.positions.y == top) {
+    if (slide.displayOptions.editor.positions.x == pos.x && slide.displayOptions.editor.positions.y == pos.y) {
         console.log("updateSlidePosMove : slide didn't really move");
         return;
     }
 
     //petite verif qu'on se superpose pas avec une slide
-    //    var closer = getCloserSlide(slide._id, {x: left + "px", y: top});
-    //    console.log(closer.length);
-    //    console.log(slide._id,  newTop, newLeft, closer);
-    //    console.log(getCloserSlide(slide._id, {x: newTop, y: newLeft}));
-    //    if (closer.length != 0) {
-    //        console.log("updateSlidePosMove : trop proche d'une slide")
-    //        return;
-    //    }
+       var closer = getCloserSlide(slide._id, {x: pos.x + "px", y: pos.y});
+       console.debug(closer.length);
+       console.debug(slide._id,  newTop, newLeft, closer);
+       if (closer.length != 0) {
+           console.debug("updateSlidePosMove : trop proche d'une slide")
+           return;
+       }
 
     var update = {
         $set: {

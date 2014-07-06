@@ -19,8 +19,14 @@ createElementTexte = function(options) {
         // console.log("create element texte with pos",options.pos.x, options.pox.y);
     }
 
-
-    var slideId = CurrentEditing.findOne({})._id;
+    if(typeof options.targetSlide === 'undefined'){
+        if(typeof CurrentEditing.findOne({}) === 'undefined'){
+            throw new Meteor.Error('500','createElementTexte : CurrentEditing.findOne({}) or targetSlide missing')
+        }
+        var slideId = CurrentEditing.findOne({})._id;
+    }else{
+        var slideId = options.targetSlide;
+    }
 
     return Elements.insert({
         _id: Random.id(),
@@ -139,5 +145,6 @@ deleteSlideElement = function() {
     if (!userHasAccessToComponent.call(this)) {
         throw new Meteor.Error('500', 'deleteSlideElement : cannot remove an element locked');
     }
+    //TODO ne pas supprimer l'element et seueleent sa reference
     Elements.remove(this._id);
 };

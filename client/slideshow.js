@@ -40,7 +40,7 @@ updateSlideshowControler = function() {
     console.info("updateSlideshowControler");
     var title = Slideshow.findOne({}).informations.title;
     title = prompt("Enter a new title for slideshow \n(you also can dblClick on title to edit)", title);
-    if(!title) return;
+    if (!title) return;
     updateSlideshowModel({
         title: title
     });
@@ -129,8 +129,8 @@ getSlideshowControler = function(callbackReturn) {
 
 
 
-getSlideshowModel = function(options) {
-    console.info("getSlideshowModel",options);
+getSlideshowModel = function(options, callback) {
+    console.info("getSlideshowModel", options);
     if (Meteor.userId() === null) {
         alert("you have to be connected as a user \nlogin : user1@yopmail.com \npswd : user1user1");
         return;
@@ -155,13 +155,19 @@ getSlideshowModel = function(options) {
                 subscriptionLocks.stop();
 
             //nouvelles sub
-            subscriptionSlideshow = Meteor.subscribe(slideshowId);
+            if (typeof callback === 'function') {
+                subscriptionSlideshow = Meteor.subscribe(slideshowId, callback);
+            } else {
+                subscriptionSlideshow = Meteor.subscribe(slideshowId);
+            }
             subscriptionSlides = Meteor.subscribe("slides" + slideshowId);
             subscriptionElements = Meteor.subscribe("elements" + slideshowId);
             subscriptionRemote = Meteor.subscribe("remote" + slideshowId);
             subscriptionRemote = Meteor.subscribe("locks" + slideshowId);
 
             console.info("getSlideshow ", result, ": done with subscribes");
+
+
         }
     });
 };

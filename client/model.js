@@ -78,9 +78,23 @@ removeLocksControler = function() {
 
 
 
-clearServerData = function(str) {
+_clearServerData = function(str) {
     console.info("clearServerData");
     Meteor.call('clearServerData', function(error, result) {
         console.log("clearServerData : server answered with ", result);
+    });
+};
+
+_unloadToStore = function(str) {
+    console.info("_unloadToStore");
+    Meteor.call('_unloadToStore', str, function(error, result) {
+        console.log("_unloadToStore : server answered with ", result);
+    });
+};
+
+_loadToEdit = function(str) {
+    console.info("_loadToEdit");
+    Meteor.call('_loadToEdit', str, function(error, result) {
+        console.log("_loadToEdit : server answered with ", result);
     });
 };

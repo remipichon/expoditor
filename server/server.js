@@ -290,7 +290,7 @@ Meteor.methods({
         });
     },
 
-    clearServerData: function() {
+    _clearServerData: function() {
         console.log("dev : clear all db's data");
         Slideshow.remove({});
         Slides.remove({});
@@ -298,7 +298,18 @@ Meteor.methods({
         Locks.remove({});
         Remotes.remove({});
         slideshowPublished = {};
+    },
+
+    _unloadToStore: function(slideshowId) {
+        console.log("dev : _unloadToStore");
+        unloadToStore(slideshowId);
+    },
+
+     _loadToEdit: function(slideshowId) {
+        console.log("dev : _loadToEdit");
+        loadToEdit(slideshowId);
     }
+
 });
 
 /**
@@ -332,6 +343,148 @@ hasAccessSlideshow = function(slideshowId, userId) {
     return true;
 };
 
+/**
+ * live load to edit
+ */
+test_liveLoadToEdit = function() {
+   clearServerData();
+    injectData();
+    _unloadToStore(Slideshow.findOne({})._id);
+    loadToEdit(Slideshow.findOne({})._id);
+    //TODO verifier que les connlecions sont vide et que slideshow est plein
+}
+
+unloadToStore = function(slideshowId) {
+    console.log("unloadToStore ", slideshowId);
+    var slideshow = Slideshow.findOne({
+        _id: slideshowId
+    });
+    var slides = slideshow.slides;
+
+    var slide, slideElements, nb;
+    _.each(slides, function(slideId) {
+        console.log("unloadToStore slide ", slideId);
+        if (typeof slideId === 'object') {
+            console.log("unloadToStore : error");
+        }
+
+
+        //get all elements and the slide
+        slideElements = Elements.find({
+            slideReference: {
+                $in: [slideId]
+            } //get all elements which are linked to the slide
+        }).fetch();
+        slide = Slides.findOne({
+            _id: slideId
+        });
+
+        console.log("unloadToStore elements ", slideElements);
+        var elementToStore = [];
+        _.each(slideElements, function(element) {
+            console.log("unloadToStore element ", element._id);
+            //add elements into the slide
+            elementToStore.push(element);
+
+            //purge collection.elements
+            Elements.update(element._id, {
+                $pull: {
+                    slideReference: slideId
+                }
+            });
+        });
+        console.log("unloadToStore elementToStore ", elementToStore);
+        //add elements into the slide
+        nb = Slides.update(slideId, {
+            $set: {
+                elements: elementToStore
+            }
+        });
+
+        slide = Slides.findOne({
+            _id: slideId
+        });
+
+        //add the slide into slideshow
+        Slideshow.update(slideshowId, {
+            $push: {
+                slides: slide
+            }
+        });
+        Slideshow.update(slideshowId, {
+            $pull: {
+                slides: slideId
+            }
+        });
+
+        //purge collection.slides
+        Slides.remove({
+            _id: slideId
+        });
+
+    });
+    console.log("unloadToStore done");
+};
+
+
+loadToEdit = function(slideshowId) {
+    console.log("loadToEdit ", slideshowId);
+    var slideshow = Slideshow.findOne({
+        _id: slideshowId
+    });
+    var slides = slideshow.slides;
+
+    var slide, slideElements, nb;
+    _.each(slides, function(slide) {
+        console.log("loadToEdit slide ",slide._id); 
+
+        // insert slide in collection.slides
+        Slides.insert(slide);
+
+        // replace slide by its id in slideshow.slide
+        Slideshow.update(slideshowId, {
+            $pull: {
+                slides: slide
+            }
+        });
+        Slideshow.update(slideshowId, {
+            $pull: {
+                slides: slide._id
+            }
+        });
+        Slideshow.update(slideshowId, {
+            $push: {
+                slides: slide._id
+            }
+        });
+
+        // foreach element in slide.element
+        _.each(slide.elements, function(element) {
+            console.log("loadToEdit element", element._id); 
+            //  if element already in collection.elements
+            if (typeof Elements.findOne({
+                _id: element._id
+            }) !== 'undefined') {
+                //      add slide reference in element.slideReferences
+                //      ==> déja le cas avant le unload donc c'est bon
+            } else {
+                Elements.insert(element);
+                //      insert element in collection.elements
+
+            }
+        })
+        // remove slide.element
+        Slides.update(slide._id, {
+            $set: {
+                elements: []
+            }
+        })
+
+
+    });
+    console.log("loadToEdit done");
+
+}
 
 
 Slideshow.allow({
@@ -417,6 +570,7 @@ Slides.after.remove(function(userId, element) {
  */
 Slides.allow({
     insert: function(userId, slide, fields, modifier) {
+        return true;
         //slideshow access control
         _.each(slide.slideshowReference, function(slideshowId) {
             if (!hasAccessSlideshow(slideshowId, userId))
@@ -427,6 +581,7 @@ Slides.allow({
         return true;
     },
     update: function(userId, slide, fields, modifier) {
+        return true;
         console.log("slides.allow.update : ", slide._id);
 
         var toReturn = false;
@@ -509,6 +664,7 @@ Slides.allow({
 
     },
     remove: function(userId, slide) {
+        return true;
         //slideshow access control
         _.each(slide.slideshowReference, function(slideshowId) {
             if (!hasAccessSlideshow(slideshowId, userId))
@@ -544,6 +700,7 @@ Elements.after.remove(function(userId, element) {
 
 Elements.allow({
     insert: function(userId, element, fields, modifier) {
+        return true;
         //slideshow access controll
         var slide = Slides.findOne({
             _id: element.slideReference[0]
@@ -557,6 +714,7 @@ Elements.allow({
         return true;
     },
     update: function(userId, element, fields, modifier) {
+        return true;
         console.log("elements.allow.update : ", element._id);
 
         var toReturn = false;
@@ -588,12 +746,12 @@ Elements.allow({
             toReturn = true;
         }
 
-      
+
 
         //content
         if (_.contains(fields, 'content')) {
             //            if (modifier.toString().indexOf("title") !== -1) { //pas funky ca
-                console.log("elements.allow.update elementId",element._id);
+            console.log("elements.allow.update elementId", element._id);
             var lock = Locks.findOne({
                 $and: [{
                     componentId: element._id
@@ -601,7 +759,7 @@ Elements.allow({
                     'user.userId': userId
                 }]
             });
-            console.log("elements.allow.updat lock",lock);
+            console.log("elements.allow.updat lock", lock);
             if (typeof lock == 'undefined') {
                 console.log("info : elements.allow.update : client trying to update without lock element : ", element._id, "client :", userId);
                 return false;
@@ -623,6 +781,7 @@ Elements.allow({
 
     },
     remove: function(userId, element) {
+        return true;
         //slideshow access controll
         var slide = Slides.findOne({
             _id: element.slideReference[0]

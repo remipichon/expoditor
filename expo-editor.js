@@ -1,18 +1,24 @@
 
-
-getCloserSlide = function(slideID, pos) {
+//client slide only
+getCloserSlide = function(slideId, pos) {
     //connecter cela au ratio et au css
-    var H = 70; //height
-    var W = 90; //width
+    var H = 700; //height
+    var W = 900; //width
+    var pos = Slides.findOne({
+        _id: slideId
+    }).displayOptions.editor.positions;
 
     //pour retourner uniquement les slides proche de la slide dont la pos est passée en parametre
     return Slides.find({
         $where: function() {
-            return this._id !== slideID && (Math.pow(W, 2) + Math.pow(H, 2) > Math.pow(parseInt(pos.x) - parseInt(this.left), 2) + Math.pow(parseInt(pos.y) - parseInt(this.top), 2));
+            var selfPos = this.displayOptions.editor.positions;
+            return this._id !== slideID && 
+            Math.abs(pos.x - selfPos.x) < W &&
+            Math.abs(pos.y - selfPos.y) < H;
         }
     }).fetch();
 };
-
+    
 /*
  * je ne suis pas fiere de moi, le code est copié collé !
  * Mais je ne comrpends pas pourquoi le server execute mal ma super requete
