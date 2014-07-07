@@ -79,9 +79,16 @@ removeLocksControler = function() {
 
 
 _clearServerData = function(str) {
-    console.info("clearServerData");
-    Meteor.call('clearServerData', function(error, result) {
-        console.log("clearServerData : server answered with ", result);
+    console.info("_clearServerData");
+    Meteor.call('_clearServerData', function(error, result) {
+        console.log("_clearServerData : server answered with ", result);
+    });
+};
+
+_clearDynamiqueServerData = function(str) {
+    console.info("_clearDynamiqueServerData");
+    Meteor.call('_clearDynamiqueServerData', function(error, result) {
+        console.log("_clearDynamiqueServerData : server answered with ", result);
     });
 };
 
@@ -96,5 +103,25 @@ _loadToEdit = function(str) {
     console.info("_loadToEdit");
     Meteor.call('_loadToEdit', str, function(error, result) {
         console.log("_loadToEdit : server answered with ", result);
+    });
+};
+
+_getInfos = function(str) {
+    console.info("_getInfos");
+    Meteor.call('_getInfos', str, function(error, result) {
+        console.log(error,result)
+        slideshows = result.slideshows;
+        slides = result.slides;
+        elements = result.elements;
+        locks = result.locks;
+        slideshowPublished = result.slideshowPublished;
+
+        console.log("***get infos***")
+        console.log("nb slideshow :", slideshows);
+        console.log("nb slides :", slides);
+        console.log("nb elements :", elements);
+        console.log("nb locks :", locks);
+        console.log("slideshowPublished :", slideshowPublished);
+         console.log("***all are set in global variable***")
     });
 };

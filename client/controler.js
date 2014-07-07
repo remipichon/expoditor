@@ -103,6 +103,7 @@ enableLog = function() {
  * manage live Remote
  **********************************************************/
 Meteor.startup(function() {
+    Hooks.init();
     // disableLog();
     //init toolbar, global pour l'init des editeurs de textes
     toolbar = setToolbar();
@@ -378,3 +379,5 @@ quitEditSlide = function() {
 
     displayBlockAccordingToEditorMode("slideshowMode");
 }
+
+

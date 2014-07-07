@@ -1,16 +1,14 @@
 //create a slideshow named <slidehoswName>, some slides with element inside
 injectData = function(slidehoswName, options) {
 
-			console.debug("you can specify : string:<slideshowname> , object:<nbSlide:int, nbElementPerSlide:int>");
+	nbSlide = 5;
+	nbElementPerSlide = 3;
+	console.debug("you can specify : string:<slideshowname> , object:<nbSlide:int, nbElementPerSlide:int>");
 	if (typeof options === "object") {
-		if (typeof options.nbSlide !== "number") {
-			nbSlide = 5;
-		} else {
+		if (typeof options.nbSlide === "number") {
 			nbSlide = options.nbSlide;
 		}
-		if (typeof options.nbElementPerSlide !== "number") {
-			nbElementPerSlide = 5;
-		} else {
+		if (typeof options.nbElementPerSlide === "number") {
 			nbElementPerSlide = options.nbElementPerSlide;
 		}
 	}
