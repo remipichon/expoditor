@@ -1,17 +1,53 @@
+PROCESS_ENV = ""; //variable d'environnement
+
+Meteor.startup(function() {
+    console.log(Meteor.exports);
 
 
-
-
-Meteor.startup(function(){
-    Locks.remove({});
-    Remotes.remove({});
-    var slides = Slides.find({}).fetch();
-    if(slides.length !== 0){
-        console.log("warning : startup : there is slides remaining in slides collection (must be empty, something bad appends last shutdonw");
-        console.log("infos : startup : trying to recover data... (not implemented yet)");
-
+    if (typeof process.env._METEOR === 'undefined') {
+        console.log("****** INFOS *****");
+        console.log("You can run this project in several mode");
+        console.log(" $ _METEOR=prod meteor");
+        console.log(" $ _METEOR=dev meteor");
+        console.log("default is prod");
+        console.log("****** / INFOS *****");
+        PROCESS_ENV = "prod";
+    } else {
+        PROCESS_ENV = process.env._METEOR; 
     }
+    console.log("startup : mode ", PROCESS_ENV);
 
+
+    if (PROCESS_ENV === "prod") {
+        Locks.remove({});
+        //belov code are bad but it's not intended to be often use
+        var slides = Slides.find({}).fetch();
+        if (slides.length !== 0) {
+            console.log("warning : startup : there is slides remaining in slides collection (must be empty, something bad appends last shutdown");
+            console.log("infos : startup : trying to recover data...");
+            var slideshowId;
+            var nbShittySlide = slides.length;
+
+            while (slides.length !== 0) {
+                slideshowId = slides[0].slideshowReference[0]; //get first slideshow of the first remaining slide
+                console.log("infos : startup : trying to recover data for slideshow ", slideshowId);
+                unloadToStore(slideshowId);
+                if (--nbShittySlide === 0) {
+                    console.log("infos : startup : recovering didn't success completely, remaining slides are deleted...");
+                    Slides.remove({});
+                    break;
+                }
+                slides = Slides.find({}).fetch();
+            } 
+            var l = Elements.find({}).fetch().length;
+            if (l !== 0) {
+                console.log("warning : startup : there is -", l, "- elements remaining in elements collection (must be empty, something bad appends last shutdonw");
+                console.log("infos : startup : remaining elements are deleted...");
+                Elements.remove({});
+            }
+
+        }
+    }
 
     console.log("Meteor startup sucessfully");
 });
@@ -401,7 +437,8 @@ unloadToStore = function(slideshowId) {
     _.each(slides, function(slideId) {
         console.log("unloadToStore slide ", slideId);
         if (typeof slideId === 'object') {
-            console.log("unloadToStore : error");
+            console.log("unloadToStore : error : a slide is already an object");
+            return;
         }
 
 
