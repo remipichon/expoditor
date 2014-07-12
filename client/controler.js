@@ -113,7 +113,7 @@ Meteor.startup(function() {
     displayBlockAccordingToEditorMode('slideshowMode');
 
 
-
+/*
     //listener jquery pour la remote
     //keypress ne fire pas les arrow sont webkit et IE
     $(document).on("keypress", function(event) {
@@ -153,7 +153,7 @@ Meteor.startup(function() {
         }
 
     });
-
+*/
     console.log("init pres pour test");
     Session.set("clientMode", "editor");
     getSlideshowModel({
@@ -244,13 +244,12 @@ launchEditorControler = function() {
     console.info("launchEditorControler");
     this.getChild('backToEditor').setEnabled(false);
     Session.set("clientMode", "editor");
-    alert('it will reload page, because of Jmpress is not an easy beast to manage...');
-    window.location.reload();
 }
 
 launchJmpressControler = function() {
     console.info("launchJmpressControler");
     this.getChild('backToEditor').setEnabled(true);
+
     Session.set("clientMode", "jmpress");
     setTimeout(initJmpress, 200);
 

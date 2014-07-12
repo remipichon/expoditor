@@ -13,7 +13,7 @@ Meteor.startup(function() {
         console.log("****** / INFOS *****");
         PROCESS_ENV = "prod";
     } else {
-        PROCESS_ENV = process.env._METEOR; 
+        PROCESS_ENV = process.env._METEOR;
     }
     console.log("startup : mode ", PROCESS_ENV);
 
@@ -38,7 +38,7 @@ Meteor.startup(function() {
                     break;
                 }
                 slides = Slides.find({}).fetch();
-            } 
+            }
             var l = Elements.find({}).fetch().length;
             if (l !== 0) {
                 console.log("warning : startup : there is -", l, "- elements remaining in elements collection (must be empty, something bad appends last shutdonw");
@@ -169,7 +169,9 @@ Meteor.methods({
      * (très utile pour la creation des slides notamment)
      */
     getSlideshow: function(options, userId) {
-        if (userId === null) {
+        if (userId === null || typeof Meteor.users.findOne({
+            _id: userId
+        }) === "undefined") { //just check is userId actually exists
             throw new Meteor.Error(24200, "getSlideshow : publish error, you have to be connected'");
         }
         //TODO check if userId is legitamely connected (see gdoc)
@@ -190,9 +192,11 @@ Meteor.methods({
 
         //is the slideshow already publish ? if not, publish slideshow, linked slides an related elements
         if (typeof slideshowPublished[slideshowId] === "undefined") {
-            console.log("infos : getSlideshow : load slideshow");
-            loadToEdit(slideshowId);
-
+            if (PROCESS_ENV !== "dev") {
+                console.log("infos : getSlideshow : load slideshow");
+                loadToEdit(slideshowId);
+            }
+            
             console.log("infos : getSlideshow : publish slideshow ", options.title, slideshowId);
 
 

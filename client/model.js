@@ -29,7 +29,7 @@ updateWithLocksControler = function(field, callback) {
                 componentId: this._id,
                 user: {
                     userId: user._id,
-                    emails: user.emails[0].address
+                    username: user.username
                 },
                 properties: []
             });
@@ -39,7 +39,7 @@ updateWithLocksControler = function(field, callback) {
                     $set: {
                         user: {
                             userId: user._id,
-                            emails: user.emails[0].address
+                            username: user.username
                         },
                         type: 'title'
                     }
@@ -51,7 +51,7 @@ updateWithLocksControler = function(field, callback) {
         return true;
     } else {
         if (typeof lock !== "undefined")
-            alert("lock set by " + lock.user.emails);
+            alert("lock set by " + lock.user.username);
         else
             alert("you cannot edit this component");
         return false;

@@ -1,60 +1,24 @@
 Template.jmpressContainer.slides = function() {
     if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'jmpress') {
-        console.log("Template.jmpressContainer.slides  empty");
+        console.info("Template.jmpressContainer.slides  empty");
+        $("#jmpress-container").jmpress("deinit");
+        $("#jmpress-container >").remove();
         return [];
     }
     console.log("Template.jmpressContainer.slides  inject data");
     return Slides.find({}, {
         sort: {
             order: 1
-        }
+        },
+        reactive: false
     });
 };
 
-
-/**
- * jmpress mode
- */
-Template.elementsAreaJmpress.elements = function() {
-    console.info("Template.elementsAreaJmpress.elements");
-    return Elements.find({
-        slideReference: {
-            $in: [this._id]
-        }
-    });
-};
-
-
-
-cloneJmpressSlide = function(sl) {
-    var slide = $(sl);
-    var clone = slide.clone();
-    clone.addClass("clone");
-    slide.removeClass("step").removeClass("slide").addClass("lymbe");
-    if ($("#jmpress-container").jmpress('initialized')) {
-    $("#jmpress-container >  div:not(.lymbe)").append(clone);
-    } else {
-    $("#jmpress-container").append(clone);
-    }
-    console.info('cloneJmpressSlide',sl,clone)
-    // alert();
-    return clone;
-}
 
 
 initJmpress = function() {
-    // console.log("init jmpress desactivé");
-    // return;
-
-    //test : clone des slides pour maintenir la gestion via Spacebars
-    $('#jmpress-container').children('.slide').each(function() {
-        cloneJmpressSlide(this);
-    });
-
-
-
     console.info("initJmpress");
-    //launch jmpress first time
+
     $('#jmpress-container').jmpress({
         viewPort: {
             height: 400,
@@ -62,7 +26,122 @@ initJmpress = function() {
             maxScale: 1
         }
     });
+
+    //ajout d'une slide pour que le container ne soit jamais vide (sinon jmpress s'affole)
+    createJmpressSlide(null);
 };
+
+function createJmpressSlide(_id) {
+    if (_id === null) {
+        console.debug("createJmpressSLide traitement de la slide invisible");
+        //il s'agit de traiter la slide invisible
+        var newSlide = UI.renderWithData(Template.jmpressSlide, {
+            _id: "invisibleOne",
+            displayOptions: {
+                jmpress: {
+                    positions: {
+                        x: 1555,
+                        y: 1580,
+                        z: 0
+                    }
+                }
+            }
+        });
+
+        console.debug("new slide", newSlide);
+        UI.insert(newSlide, $("#jmpress-container >").get(0));
+        $("#invisibleOne").attr("style", "display:none");
+        $("#invisibleOne").attr("data-scale", 5);
+        //required : dynamic init
+        $("#jmpress-container").jmpress("init", $("#invisibleOne"));
+
+    } else {
+        var newSlide = UI.renderWithData(Template.jmpressSlide, Slides.findOne({
+            _id: _id
+        }));
+        UI.insert(newSlide, $("#jmpress-container >").get(0));
+        //required : dynamic init
+        $("#jmpress-container").jmpress("init", $("#" + _id));
+    }
+
+
+    setTimeout(function() {
+        console.debug("delete remainfin slide if exits");
+        if($("#jmpress-container >.slide").length !== 0) console.error("deleteJmpressSlide slide remaining in a wrong place !")
+        $("#jmpress-container >.slide").remove(); //pour etre sur qu'il ne reste rien de facheux
+    }, 500); //TODO improve
+
+    return newSlide;
+}
+
+function deleteJmpressSlide(_id) {
+    //required : dynamic deinit (only if directly deleting the dom is not a problem)
+    $("#jmpress-container").jmpress("deinit", $("#jmpress-container #" + _id)[0]);
+    $("#" + _id).remove();
+
+   
+
+     setTimeout(function() {
+        console.debug("delete remainfin slide if exits");
+        if($("#jmpress-container >.slide").length !== 0) console.error("deleteJmpressSlide slide remaining in a wrong place !")
+        $("#jmpress-container >.slide").remove(); //pour etre sur qu'il ne reste rien de facheux
+    }, 500); //TODO improve
+}
+
+
+//TODO see what appends when there is several identical observeChanges
+Slides.find({}).observeChanges({
+    added: function(_id, slide) {
+        if (Session.get("clientMode") === "jmpress") {
+            //required : get techno status : is init ?
+            if ($("#jmpress-container").jmpress("initialized")) {
+                console.debug("slides.obsverchanges.added.jmpress.isInit", _id);
+                createJmpressSlide(_id);
+            }
+
+
+
+        }
+    },
+    changed: function(_id, fields) {
+        if (Session.get("clientMode") === "jmpress") {
+            if (typeof fields.displayOptions === "undefined") {
+                return;
+            }
+
+            var activeSlideId = $("#jmpress-container >div .active").attr("id");
+            console.debug("slides.obsverchanges.changed.jmpress", _id, "activeslideId", activeSlideId, "fields", fields);
+
+
+            if (activeSlideId === _id) {
+                console.debug("shit, someone move the where you are and this broke jmpress...");
+                $("#jmpress-container").jmpress("next");
+                deleteJmpressSlide(_id);
+                var newSlide = createJmpressSlide(_id);
+                $("#jmpress-container").jmpress("prev");
+            } else {
+                deleteJmpressSlide(_id);
+                var newSlide = createJmpressSlide(_id);
+            }
+
+
+
+        }
+    },
+    removed: function(_id) {
+        if (Session.get("clientMode") === "jmpress") {
+            console.debug("slides.obsverchanges.removed.jmpress", _id);
+            //required : get active slide (only if deleted current slide is a problem)
+            var activeSlideId = $("#jmpress-container >div .active").attr("id");
+            if (activeSlideId === _id && $("#jmpress-container >div").children().length !== 1) {
+                //if we are on the deleted slide and it's not the last
+                console.debug("slides.obsverchanges.removed.jmpress : next slide");
+                $("#jmpress-container").jmpress("next");
+            }
+            deleteJmpressSlide(_id);
+        }
+    }
+});
 
 
 
@@ -85,6 +164,20 @@ Template.jmpressSlide.getJmpressData = function(axis) {
     //            console.log(coord, parseFloat(this.displayOptions.jmpress.positions.y));
     return coord;
 };
+
+
+/**
+ * jmpress mode
+ */
+Template.elementsAreaJmpress.elements = function() {
+    console.info("Template.elementsAreaJmpress.elements");
+    return Elements.find({
+        slideReference: {
+            $in: [this._id]
+        }
+    });
+};
+
 
 
 /**
@@ -143,90 +236,4 @@ Template.elementJmpress.getEditorData = function(axis) { //pas encore utilisé �
 
 
     return coord;
-};
-
-
-/**** render ****/
-
-
-/*
- * callback of render to move jmpress slide
- */
-Template.jmpressSlide.rendered = function() {
-    if ($("#jmpress-container").jmpress('initialized')) {
-        console.log('jmpressSlide desactivate when jmpress is init')
-    }
-
-    console.info("Template.jmpressSlide.rendered", this.data._id);
-
-    var posX = this.data.displayOptions.jmpress.positions.x;
-    var posY = this.data.displayOptions.jmpress.positions.y;
-
-
-
-    /*
-     * Si jmpress est init
-     * il faut mettre à jour les jmpress data de la slide jmpress (celle contenue
-     * dans le #jmpress-contaner > div et l'init avec jmpress à partir de la slide
-     * ajoutée par Handelbars
-     */
-    // if ($("#jmpress-container").jmpress('initialized')) {
-    // var $slideToMaj = $("#jmpress-container >div #" + this.data._id);
-
-    // if ($slideToMaj.length === 0) {
-    console.log("create slide ", this.data._id, " jmpress to ", posX, posY);
-    var $templateSlide = $("#jmpress-container > #" + this.data._id);
-    var $jmpressClone = cloneJmpressSlide($templateSlide);
-    //$("#jmpress-container > div").append($newSlide);
-    $("#jmpress-container").jmpress('init', $jmpressClone);
-    // setTimeout(function() { ///WOUW SUCH MAGIC ! 
-    //     //je ne comprends vraiment pas pourquoi il faut un timeout qui reappend la slide...
-    //     $("#jmpress-container > div").append($newSlide);
-    // }, 500);
-    // } else {
-    //     console.log("update de la slide ", this.data._id, " jmpress to ", posX * ratio, posY * ratio);
-    //     $slideToMaj.attr("data-x", parseFloat(posX) * ratio).attr("data-y", parseFloat(posY) * ratio);
-    //     $("#jmpress-container").jmpress('init', $slideToMaj);
-    // }
-    // //suppression de la slide crée par Handelbars
-    // $("#jmpress-container >#" + this.data._id).remove();
-    // }
-};
-
-
-/*
- * A la suppression de la slide, jmpress doit deinit la slide mais il laisse
- * le dom dans le jmpress-container>div, on ajoute la classe "lymbe" pour signifier
- * que c'est une slide morte. Il faut laisser le DOM pour que le deinit du container jmpress
- * puisque fonctionner.
- *
- * Lorsqu'il ne reste plus que des slides "lymbe" et que le client n'est pas (plus) en
- * jmpress mode, il faut deinit l'ensemble du container et procéder à la suppression
- * des slides que jmpress déplace dans jmpress-container. On n'en a plus besoin ici.
- *
- * Le traitement n'est pas propre mais Jmpress fait sa petite tambouille qu'on ne peut
- * pas altérer.
- */
-Template.jmpressSlide.destroyed = function() {
-    console.info("Template.jmpressSlide.destroyed", this.data._id);
-
-    var slideToRemove = $("#jmpress-container >div #" + this.data._id);
-    $("#jmpress-container").jmpress("deinit", slideToRemove);
-
-    var self = this;
-
-    $("#jmpress-container #" + self.data._id).addClass("lymbeOldJmpress").css("display", "none");
-    // $("#jmpress-container #" + self.data._id).remove();
-    setTimeout(function() {
-        //       s'il n'y a plus de slide et que le client mode n'est plus jmpress, il faut deinit jmpress
-        if ($("#jmpress-container >div >:not(.lymbe)").length === 0 && Session.get("clientMode") !== "jmpress") {
-            console.info("jmpress-container.jmpress.deinit");
-            $("#jmpress-container").jmpress("deinit"); //la slide n'existe déja plus dans le DOM, il faut un before destroyed !!!
-            setTimeout(function() {
-                console.info("jmpress-container.children.remove (cleaning after jmpress deinit");
-                $("#jmpress-container").children().remove();
-            }, 500);
-        }
-    }, 500);
-
 };

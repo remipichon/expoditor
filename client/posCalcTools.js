@@ -64,7 +64,7 @@ resizeModalCurrentEditing = function() {
  * this.CSS : CSS displayed top/left
  */
 CSSToPos = function(){
-    console.info("CSSToPos");
+    // console.info("CSSToPos");
 
     if (typeof this.size === "undefined") {
         throw new Meteor.Error('500', "recalPos : this.size not defined")
@@ -78,7 +78,7 @@ CSSToPos = function(){
         this.center = {};
         this.center.x = (this.CSS.left  )  * this.ratio.left + this.size.width / 2;
         this.center.y = (this.CSS.top ) * this.ratio.top + this.size.height / 2; 
-        console.info("CSStoPos : convert", this.CSS.left, '', this.CSS.top, 'to center', this.center.x, '', this.center.y);
+        // console.info("CSStoPos : convert", this.CSS.left, '', this.CSS.top, 'to center', this.center.x, '', this.center.y);
         return;
     }
     throw new Meteor.Error('500', "CSStoPos : this.CSS doesn't exists or both exists");
@@ -93,7 +93,7 @@ CSSToPos = function(){
  * this.center :real pos x/y (in db)
  */
 posToCSS = function(){
-    console.info("posToCSS");
+    // console.info("posToCSS");
 
     if (typeof this.size === "undefined") {
         throw new Meteor.Error('500', "recalPos : this.size not defined")
@@ -111,7 +111,7 @@ posToCSS = function(){
         //this.CSS.top = this.center.y / this.ratioTop - this.size.height / 2;
         
 
-        console.info("posToCSS : convert", this.center.x, '', this.center.y, 'to CSS', this.CSS.left, '', this.CSS.top);
+        // console.info("posToCSS : convert", this.center.x, '', this.center.y, 'to CSS', this.CSS.left, '', this.CSS.top);
         return;
     }
     throw new Meteor.Error('500', "posToCSS : this.center doesn't exists or both exists");

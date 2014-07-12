@@ -137,6 +137,7 @@ getSlideshowModel = function(options, callback) {
     }
 
     Meteor.call("getSlideshow", options, Meteor.userId(), function(error, result) {
+        console.debug(error, result);
         if (typeof error !== "undefined") {
             console.error("getSlideshow : get error ", error);
         } else {

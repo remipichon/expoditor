@@ -92,9 +92,6 @@ updateSlideTitleModel = function() {
 
 
 
-/*
- * TODO : remettre au gout du jour le getCloserSlide
- */
 /**
  * update a slide by this._id. Read CSS left/top in DOM and convert into real pos accordind to
  * slide size and ratioSlideshowMode
@@ -142,15 +139,6 @@ updateSlidePos = function(getUpdateData) {
         console.log("updateSlidePosMove : slide didn't really move");
         return;
     }
-
-    //petite verif qu'on se superpose pas avec une slide
-       var closer = getCloserSlide(slide._id, {x: pos.x + "px", y: pos.y});
-       console.debug(closer.length);
-       console.debug(slide._id,  newTop, newLeft, closer);
-       if (closer.length != 0) {
-           console.debug("updateSlidePosMove : trop proche d'une slide")
-           return;
-       }
 
     var update = {
         $set: {
