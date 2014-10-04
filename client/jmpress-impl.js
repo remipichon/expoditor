@@ -35,18 +35,18 @@ function createJmpressSlide(_id) {
     if (_id === null) {
         console.debug("createJmpressSLide traitement de la slide invisible");
         //il s'agit de traiter la slide invisible
-        var newSlide = UI.renderWithData(Template.jmpressSlide, {
-            _id: "invisibleOne",
-            displayOptions: {
-                jmpress: {
-                    positions: {
-                        x: 1555,
-                        y: 1580,
-                        z: 0
+            var newSlide = UI.renderWithData(Template.jmpressSlide, {
+                _id: "invisibleOne",
+                displayOptions: {
+                    jmpress: {
+                        positions: {
+                            x: 1555,
+                            y: 1580,
+                            z: 0
+                        }
                     }
                 }
-            }
-        });
+            });
 
         console.debug("new slide", newSlide);
         UI.insert(newSlide, $("#jmpress-container >").get(0));
@@ -89,7 +89,6 @@ function deleteJmpressSlide(_id) {
 }
 
 
-//TODO see what appends when there is several identical observeChanges
 Slides.find({}).observeChanges({
     added: function(_id, slide) {
         if (Session.get("clientMode") === "jmpress") {

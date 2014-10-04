@@ -1,0 +1,45 @@
+#turn-container{
+	width:800px;
+	height:500px;
+	/*position:absolute;*/
+	top:70px;
+}
+
+
+#turn-container .page-wrapper{
+	background-color:gray;
+}
+
+#turn-container .cover{
+	background:#333;
+}
+
+#turn-container .cover h1{
+	color:gray;
+	text-align:center;
+	font-size:50px;
+	line-height:500px;
+	margin:0px;
+}
+
+
+#turn-container .data{
+	text-align:center;
+	font-size:40px;
+	color:#999;
+	line-height:500px;
+}
+
+#turn-container .odd{
+	background-image:-webkit-linear-gradient(left, #FFF 95%, #ddd 100%);
+	background-image:-moz-linear-gradient(left, #FFF 95%, #ddd 100%);
+	background-image:-o-linear-gradient(left, #FFF 95%, #ddd 100%);
+	background-image:-ms-linear-gradient(left, #FFF 95%, #ddd 100%);
+}
+
+#turn-container .even{
+	background-image:-webkit-linear-gradient(right, #FFF 95%, #ddd 100%);
+	background-image:-moz-linear-gradient(right, #FFF 95%, #ddd 100%);
+	background-image:-o-linear-gradient(right, #FFF 95%, #ddd 100%);
+	background-image:-ms-linear-gradient(right, #FFF 95%, #ddd 100%);
+}

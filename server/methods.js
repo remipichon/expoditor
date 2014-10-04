@@ -169,6 +169,7 @@ Meteor.methods({
      * (très utile pour la creation des slides notamment)
      */
     getSlideshow: function(options, userId) {
+        console.log("getSlideshow");
         if (userId === null || typeof Meteor.users.findOne({
             _id: userId
         }) === "undefined") { //just check is userId actually exists
@@ -192,6 +193,7 @@ Meteor.methods({
 
         //is the slideshow already publish ? if not, publish slideshow, linked slides an related elements
         if (typeof slideshowPublished[slideshowId] === "undefined") {
+            console.log("getSlideshow : loadToEdit");
             if (PROCESS_ENV !== "dev") {
                 console.log("infos : getSlideshow : load slideshow");
                 loadToEdit(slideshowId);
@@ -300,7 +302,7 @@ Meteor.methods({
         //add user to the list of current editors
         if (slideshowPublished[slideshowId].indexOf(userId) === -1)
             slideshowPublished[slideshowId].push(userId);
-
+        console.log("getSlideshow : userId connected",slideshowPublished[slideshowId]);
         return slideshowId;
     },
 
@@ -340,6 +342,10 @@ Meteor.methods({
         Slideshow.remove({
             _id: slideshowId
         });
+
+        //remove all user of the list of current editors
+        if (typeof slideshowPublished[slideshowId] !== "undefined")
+            delete slideshowPublished[slideshowId];
     },
 
     _clearServerData: function() {

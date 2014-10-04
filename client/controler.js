@@ -73,29 +73,29 @@ displayBlockAccordingToEditorMode = function(modeToDisplay) {
     });
 }
 
-disableLog = function(){
+disableLog = function() {
     console.log("disableLog");
     console.info("disableLog");
     console.debug("disableLog");
 
     console.log2 = console.log;
-    console.log = function() {};    
+    console.log = function() {};
     console.debug2 = console.debug;
-    console.debug = function() {};    
+    console.debug = function() {};
     console.info2 = console.info;
     console.info = function() {};
 }
 enableLog = function() {
     console.log = console.log2;
-    console.log2 = function() {};    
+    console.log2 = function() {};
     console.debug = console.debug2;
-    console.debug2 = function() {};    
+    console.debug2 = function() {};
     console.info = console.info2;
     console.info2 = function() {};
 
-   console.log("enableLog");
-   console.info("enableLog");
-   console.debug("enableLog");
+    console.log("enableLog");
+    console.info("enableLog");
+    console.debug("enableLog");
 
 }
 
@@ -113,7 +113,7 @@ Meteor.startup(function() {
     displayBlockAccordingToEditorMode('slideshowMode');
 
 
-/*
+    /*
     //listener jquery pour la remote
     //keypress ne fire pas les arrow sont webkit et IE
     $(document).on("keypress", function(event) {
@@ -260,8 +260,20 @@ launchDeckControler = function() {
     this.getChild('backToEditor').setEnabled(true);
     Session.set("clientMode", "deck");
     setTimeout(initDeck, 200);
+}
+
+launchTurnControler = function() {
+    console.info("launchTurnControler");
+    this.getChild('backToEditor').setEnabled(true);
+    Session.set("clientMode", "turn");
+    setTimeout(initTurn, 1500);
+    // initDeck();
+    // setTimeout(function(){
+    //     Session.set("clientMode", "turn");
+    // },500); //TODO : is it really necessary ?
 
 }
+
 showTimelineControler = function() {
     console.info("showTimelineControler");
     goog.style.showElement(goog.dom.getElement("timeline"), (goog.dom.getElement('showTimeline').getAttribute("aria-pressed") === "true") ? true : false);
@@ -295,6 +307,8 @@ initButtons = function() {
         goog.events.EventType.CLICK, launchJmpressControler, false, buttons);
     goog.events.listen(goog.dom.getElement('launchDeck'),
         goog.events.EventType.CLICK, launchDeckControler, false, buttons);
+    goog.events.listen(goog.dom.getElement('launchTurn'),
+        goog.events.EventType.CLICK, launchTurnControler, false, buttons);
     goog.events.listen(goog.dom.getElement('backToEditor'),
         goog.events.EventType.CLICK, launchEditorControler, false, buttons);
     goog.events.listen(goog.dom.getElement('createSlide'),
@@ -378,5 +392,3 @@ quitEditSlide = function() {
 
     displayBlockAccordingToEditorMode("slideshowMode");
 }
-
-
