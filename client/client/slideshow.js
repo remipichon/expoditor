@@ -1,5 +1,5 @@
 createSlideshowControler = function(callbackReturn) {
-    console.info("createSlideshowControler");
+    logger.info("createSlideshowControler");
     if (typeof callbackReturn === "number") { //is it the callback ?
         if (callbackReturn !== 1) { //there was an error
             alert("an error occured when creating slideshow : " + callbackReturn.reason);
@@ -20,13 +20,13 @@ createSlideshowControler = function(callbackReturn) {
 };
 
 createSlideshowModel = function(options, callback) {
-    console.info("createSlideshowModel ", options);
+    logger.info("createSlideshowModel ", options);
     Meteor.call('createSlideshow', options, function(error, result) {
         if (typeof error !== "undefined") {
-            console.error("createSlideshow : create error ", error);
+            logger.error("createSlideshow : create error ", error);
             callback(error);
         } else {
-            console.info("createSlideshow ", result);
+            logger.info("createSlideshow ", result);
             getSlideshowModel({
                 title: options.title,
             });
@@ -37,7 +37,7 @@ createSlideshowModel = function(options, callback) {
 
 
 updateSlideshowControler = function() {
-    console.info("updateSlideshowControler");
+    logger.info("updateSlideshowControler");
     var title = Slideshow.findOne({}).informations.title;
     title = prompt("Enter a new title for slideshow \n(you also can dblClick on title to edit)", title);
     if (!title) return;
@@ -48,23 +48,23 @@ updateSlideshowControler = function() {
 
 
 updateSlideshowModel = function(options) {
-    console.info("updateSlideshowModel");
+    logger.info("updateSlideshowModel");
     if (typeof options.title === "undefined") {
-        console.warnig("updateSlideshow : title undefined");
+        logger.warnig("updateSlideshow : title undefined");
         return;
     }
 
     Meteor.call('updateSlideshow', options, Slideshow.findOne({})._id, Meteor.userId(), function(error, result) {
         if (typeof error !== "undefined") {
-            console.error(" updateSlideshow : update error ", error);
+            logger.error(" updateSlideshow : update error ", error);
         } else {
-            console.info("updateSlideshow : done");
+            logger.info("updateSlideshow : done");
         }
     });
 };
 
 deleteSlideshowControler = function() {
-    console.info("deleteSlideshowControler");
+    logger.info("deleteSlideshowControler");
     var title = Slideshow.findOne().informations.title;
     var answ = confirm("Do you really want to delete all slideshow " + title + " ? It will affect all users, you should'nt do that...");
     if (answ) {
@@ -74,12 +74,12 @@ deleteSlideshowControler = function() {
 
 
 deleteSlideshowModel = function() {
-    console.info("deleteSlideshowModel");
+    logger.info("deleteSlideshowModel");
     Meteor.call('removeSlideshow', Slideshow.findOne({})._id, Meteor.userId(), function(error, result) {
         if (typeof error !== "undefined") {
-            console.log("removeSlideshow : remove error ", error);
+            logger.log("removeSlideshow : remove error ", error);
         } else {
-            console.log("removeSlideshow : stop all corresponding subscriptions");
+            logger.log("removeSlideshow : stop all corresponding subscriptions");
             //arret de la precedente si existante
             if (subscriptionSlideshow !== null)
                 subscriptionSlideshow.stop();
@@ -91,16 +91,16 @@ deleteSlideshowModel = function() {
 
 
 getSlideshowList = function(callback) {
-    console.info("getSlideshowList");
+    logger.info("getSlideshowList");
     if (typeof callback !== "function")
         callback = printResult;
 
     Meteor.call('getSlideshowList', {}, Meteor.userId(), function(error, result) {
         if (typeof error !== "undefined") {
-            console.error("getSlideshowList : ", error);
+            logger.error("getSlideshowList : ", error);
             callback(error);
         } else {
-            console.info("getSlideshowList : ", result);
+            logger.info("getSlideshowList : ", result);
             callback(result);
         }
     });
@@ -108,7 +108,7 @@ getSlideshowList = function(callback) {
 
 
 getSlideshowControler = function(callbackReturn) {
-    console.info("getSlideshowControler");
+    logger.info("getSlideshowControler");
     if (typeof callbackReturn === "undefined") {
         getSlideshowList(getSlideshowControler);
         return;
@@ -123,23 +123,23 @@ getSlideshowControler = function(callbackReturn) {
             title: title
         });
     } else {
-        console.error("getSlideshowControler : error : ", callbackReturn);
+        logger.error("getSlideshowControler : error : ", callbackReturn);
     }
 };
 
 
 
 getSlideshowModel = function(options, callback) {
-    console.info("getSlideshowModel", options);
+    logger.info("getSlideshowModel", options);
     if (Meteor.userId() === null) {
         alert("you have to be connected as a user \nlogin : user1@yopmail.com \npswd : user1user1");
         return;
     }
 
     Meteor.call("getSlideshow", options, Meteor.userId(), function(error, result) {
-        console.debug(error, result);
+        logger.debug(error, result);
         if (typeof error !== "undefined") {
-            console.error("getSlideshow : get error ", error);
+            logger.error("getSlideshow : get error ", error);
         } else {
             var slideshowId = result;
 
@@ -150,8 +150,8 @@ getSlideshowModel = function(options, callback) {
                 subscriptionSlides.stop();
             if (subscriptionElements !== null)
                 subscriptionElements.stop();
-            if (subscriptionRemote !== null)
-                subscriptionRemote.stop();
+            // if (subscriptionRemote !== null)
+            //     subscriptionRemote.stop();
             if (subscriptionLocks !== null)
                 subscriptionLocks.stop();
 
@@ -166,7 +166,7 @@ getSlideshowModel = function(options, callback) {
             subscriptionRemote = Meteor.subscribe("remote" + slideshowId);
             subscriptionRemote = Meteor.subscribe("locks" + slideshowId);
 
-            console.info("getSlideshow ", result, ": done with subscribes");
+            logger.info("getSlideshow ", result, ": done with subscribes");
 
 
         }

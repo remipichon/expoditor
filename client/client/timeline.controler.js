@@ -1,6 +1,6 @@
 cloneSlide = function(i, doSetSortable) {
 
-  console.info("cloneSlide", this.id, i);
+  logger.info("cloneSlide", this.id, i);
 
   var item = $("#" + this.id + "");
   var item_clone = $("#" + this.id + "-cloned"); //hohoho c'est pas beau cela
@@ -15,7 +15,7 @@ cloneSlide = function(i, doSetSortable) {
     .attr("data-pos", i); //.attr("id", $(this).attr('id') + "-cloned");
 
   item.attr("data-pos", i);
-  console.info("cloneSlide", this.id, i);
+  logger.info("cloneSlide", this.id, i);
 
   if (typeof doSetSortable !== 'undefined' && doSetSortable) {
     setSortable();
@@ -26,7 +26,7 @@ cloneSlide = function(i, doSetSortable) {
 
 
 setSortable = function() {
-  console.info("setSortable");
+  logger.info("setSortable");
   $("#timeline").sortable({
 
     axis: "y",
@@ -73,7 +73,7 @@ setSortable = function() {
         var clone = item.data("clone");
         clone.stop(true, false);
         var position = item.position();
-        console.log("sortable.change", position.left, position.top);
+        logger.log("sortable.change", position.left, position.top);
         clone.animate({
           left: position.left,
           top: position.top
@@ -86,13 +86,13 @@ setSortable = function() {
 }
 
 updateOrderControler = function() {
-  console.info("updateOrderControler");
+  logger.info("updateOrderControler");
   //met à jour les data-pos des clones
   $("#timeline .timeline-slide").each(function() {
     var item = $(this);
     var clone = item.data("clone");
 
-    console.info("sortable.stop", item.attr("id"), item.attr("data-pos"), item.index());
+    logger.info("sortable.stop", item.attr("id"), item.attr("data-pos"), item.index());
 
 
     clone.attr("data-pos", item.index());
@@ -104,7 +104,7 @@ updateOrderControler = function() {
 }
 
 updateOrderControlerVersModel = function() {
-  console.info("updateOrderControlerVersModel");
+  logger.info("updateOrderControlerVersModel");
   $("#timeline .timeline-slide").each(function() {
     var item = $(this);
     //if (parseInt(item.attr("data-pos")) !== item.index()) { //if update needed

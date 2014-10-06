@@ -1,23 +1,23 @@
 // Set up a logger.
 
 startResizeElement = function() {
-  console.info("startResizeElement", this._id,this.id);
+  logger.info("startResizeElement", this._id,this.id);
   $("#"+this.id).data("isResizabling",true);
 }
 resizeElement = function() {
-  console.warn("resizeElement DO NOTHING", this._id,this.id);
+  logger.warn("resizeElement DO NOTHING", this._id,this.id);
   //resizeModel.call(this)
 
 }
 endResizeElement = function() {
-  console.info("endResizeElement", this._id, this.id);
+  logger.info("endResizeElement", this._id, this.id);
   resizeModel.call(this);
    $("#"+this.id).data("isResizabling",false);
 }
 
 
 setResize = function() {
-  console.info("setResize",this.id);
+  logger.info("setResize",this.id);
 
 
   // var EVENTS = goog.object.getValues(goog.ui.Component.EventType);
@@ -56,9 +56,9 @@ setResize = function() {
  */
 isResizing = function() {
     if ($("#" + this._id).data("isResizabling") === true) {
-        console.log("action prevent because of resize")
+        logger.log("action prevent because of resize")
         return false;
     }
-    console.info('isResizing',true);
+    logger.info('isResizing',true);
     return true;
 }

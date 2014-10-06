@@ -1,6 +1,6 @@
 
 Template.slideshowTitle.slideshowTitle= function(){
-	console.info("Template.slideshowTitle.slideshowTitle");
+	//log.info("Template.slideshowTitle.slideshowTitle");
 	if(typeof Slideshow.findOne({}) === 'undefined'){
 		return 'no slideshow loaded';
 	}
@@ -9,7 +9,7 @@ Template.slideshowTitle.slideshowTitle= function(){
 
 
 Template.slideshowTitle.slideTitle= function(){
-	console.info("Template.slideshowTitle.slideTitle");
+	//logger.info("Template.slideshowTitle.slideTitle");
 	if(typeof CurrentEditing.findOne({}) === 'undefined'){
 		return null;
 	}
@@ -19,14 +19,14 @@ Template.slideshowTitle.slideTitle= function(){
 
 Slideshow.find({}).observeChanges({
 	added: function(){
-		console.log("Slideshow.find({}).observeChanges.added");
+		logger.log("Slideshow.find({}).observeChanges.added");
 		_.each(buttonWhenSlideshow,function(id){
 			toolbarButton.getChild(id).setEnabled(true);
 		});
 		
 	},
 	removed: function(){
-		console.log("Slideshow.find({}).observeChanges.removed");
+		logger.log("Slideshow.find({}).observeChanges.removed");
 		_.each(buttonWhenSlideshow,function(id){
 			toolbarButton.getChild(id).setEnabled(false);
 		});

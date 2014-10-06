@@ -4,7 +4,7 @@
  * @return {[type]}         [description]
  */
 createElementTexte = function(options) {
-    console.info("createElementTexte", options);
+    logger.info("createElementTexte", options);
     // return;
     var d = new Date;
     var content = "ele:" + d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
@@ -16,7 +16,7 @@ createElementTexte = function(options) {
             x: 200,
             y: 200
         };
-        // console.log("create element texte with pos",options.pos.x, options.pox.y);
+        // logger.log("create element texte with pos",options.pos.x, options.pox.y);
     }
 
     if(typeof options.targetSlide === 'undefined'){
@@ -60,7 +60,7 @@ createElementTexte = function(options) {
  * slide size and ratioContentMode *
  */
 updateElementPos = function(getUpdateData) {
-    console.info("updateElementPos", getUpdateData,this._id);
+    logger.info("updateElementPos", getUpdateData,this._id);
 
     var $element = $("#" + this.id)
     var top = parseFloat($element.css('top'));
@@ -100,7 +100,7 @@ updateElementPos = function(getUpdateData) {
 
     //petite verif que l'element ait effectivement été bougé
     if (element.displayOptions.editor.positions.x == left && element.displayOptions.editor.positions.y == top) {
-        console.log("updateElementPos : element didn't really move");
+        logger.log("updateElementPos : element didn't really move");
         return;
     }
 
@@ -126,7 +126,7 @@ updateElementPos = function(getUpdateData) {
  * @return {[type]}         [description]
  */
 updateSlideElementModel = function(content) {
-    console.info("updateSlideElementModel",this._id);
+    logger.info("updateSlideElementModel",this._id);
 
     Elements.update(this._id, {
         $set: {
@@ -141,7 +141,7 @@ updateSlideElementModel = function(content) {
  * @return {[type]} [description]
  */
 deleteSlideElement = function() {
-    console.info("deleteSlideElement", this._id);
+    logger.info("deleteSlideElement", this._id);
     if (!userHasAccessToComponent.call(this)) {
         throw new Meteor.Error('500', 'deleteSlideElement : cannot remove an element locked');
     }

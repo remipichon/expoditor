@@ -3,7 +3,7 @@
  */
 
 createSlideControler = function() {
-	console.info("createSlideControler");
+	logger.info("createSlideControler");
 	var d = new Date;
 	var title = d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
 	createSlide({
@@ -51,7 +51,7 @@ editSlideContent = function() {
 	if (CurrentEditing.find({}).fetch().length !== 0) {
 		throw new Meteor.Error("500", "a slide is already currently editing (or the last currentEditing doesn't terminate properly");
 	}
-	console.info("editSlideContent insert ", this._id);
+	logger.info("editSlideContent insert ", this._id);
 	Session.set("modalCurrentEditing", true);
 	CurrentEditing.insert(Slides.findOne({
 		_id: this._id
@@ -62,12 +62,12 @@ editSlideContent = function() {
 }
 
 updateSlideTitleControler = function() {
-	console.info("updateSlideTitleControler");
+	logger.info("updateSlideTitleControler");
 	updateWithLocksControler.apply(this, "title", updateSlideTitleModel);
 };
 
 
 doubleClickSlide = function(event){
-	console.info("doubleClickSlide");
+	logger.info("doubleClickSlide");
 	event.stopPropagation();
 }

@@ -6,7 +6,7 @@
  *                          * order     (default)
  */
 createSlide = function(options) {
-    console.info("createSlide", options);
+    logger.info("createSlide", options);
     if (typeof options === "undefined") {
         var options = {};
     }
@@ -16,7 +16,7 @@ createSlide = function(options) {
             x: 2000,
             y: 2000
         };
-        // console.log("create element texte with pos",options.pos.x, options.pox.y);
+        // logger.log("create element texte with pos",options.pos.x, options.pox.y);
     }
 
     if (typeof options.order === "undefined") {
@@ -67,14 +67,14 @@ createSlide = function(options) {
 
 
 deleteSlide = function() {
-    console.info("delete slide : ", this._id);
+    logger.info("delete slide : ", this._id);
     Slides.remove(this._id);
 };
 
 
 
 updateSlideTitleModel = function() {
-    console.info("updateSlideTitleModel");
+    logger.info("updateSlideTitleModel");
     var title = prompt("new title", this.informations.title);
 
     if (title != null) {
@@ -85,7 +85,7 @@ updateSlideTitleModel = function() {
         });
     }
 
-    console.info("update title : remove lock of slide", this._id);
+    logger.info("update title : remove lock of slide", this._id);
     removeLocksControler.call(this);
 
 };
@@ -98,7 +98,7 @@ updateSlideTitleModel = function() {
  *
  */
 updateSlidePos = function(getUpdateData) {
-    console.info("updateSlidePos", this._id);
+    logger.info("updateSlidePos", this._id);
 
 
 
@@ -136,7 +136,7 @@ updateSlidePos = function(getUpdateData) {
 
     //petite verif que la slide a effectivement bougée
     if (slide.displayOptions.editor.positions.x == pos.x && slide.displayOptions.editor.positions.y == pos.y) {
-        console.log("updateSlidePosMove : slide didn't really move");
+        logger.log("updateSlidePosMove : slide didn't really move");
         return;
     }
 

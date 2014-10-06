@@ -418,7 +418,7 @@ that use the API provided by core.
       window.setTimeout(function() {
         if (beforeInitEvent.locks) {
           if (window.console) {
-            window.console.warn('Something locked deck initialization\
+            window.logger.warn('Something locked deck initialization\
               without releasing it before the timeout. Proceeding with\
               initialization anyway.');
           }

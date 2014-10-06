@@ -1,12 +1,12 @@
 resizeModel = function(){
-	console.info("resizeModel",this._id,this.id);
+	logger.info("resizeModel",this._id,this.id);
 
 	var component = goog.dom.getElement(this.id);
-	// console.log("resizeModel",component);
+	// logger.log("resizeModel",component);
 
 	var size = goog.style.getSize(component
 		);
-	// console.log("resizeModel",size);
+	// logger.log("resizeModel",size);
 
 	var ratio;
 	if(goog.dom.classes.has(component,'slide')){
@@ -29,11 +29,11 @@ resizeModel = function(){
 	}
 
 	var updatePos = updateElementPos.apply(this,[true]);
-	console.info("resizeModel updatepos",updatePos);
+	logger.info("resizeModel updatepos",updatePos);
 	jQuery.extend(update.$set,updatePos.$set);
 
 
-	console.info("resizeModel",update.$set);
+	logger.info("resizeModel",update.$set);
 
 
 	/**

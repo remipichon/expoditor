@@ -8,12 +8,12 @@ Template.deleteElement.events({
 
 
 updateSlideElementControler = function() {
-    console.info("updateSlideElementControler");
+    logger.info("updateSlideElementControler");
     updateWithLocksControler.apply(this, updateSlideElementModel);
 };
 
 doubleClickElement = function(event){
-    console.info("doubleClickElement");
+    logger.info("doubleClickElement");
     event.stopPropagation();
 }
 
@@ -41,7 +41,7 @@ doubleClickElement = function(event){
 /*
 CurrentEditing.find({}).observeChanges({
     added: function(_id, fields) {
-        console.log("slide added to current editing", _id, Elements.find({
+        logger.log("slide added to current editing", _id, Elements.find({
             slideReference: {
                 $in: [_id]
             }
@@ -53,16 +53,16 @@ CurrentEditing.find({}).observeChanges({
             }
         }).observeChanges({
             added: function(_id) {
-                console.log("debug : an element has been added");
+                logger.log("debug : an element has been added");
             },
             changed: function(_id, fields) {
                 var gwrapper = goog.dom.getElement(_id + '-currentEditing-wrapper');
 
                 if (goog.dom.classes.has(gwrapper, 'currentlyEditingByMe')) {
-                    console.log("debug update skipped")
+                    logger.log("debug update skipped")
                     return;
                 }
-                console.log("elements changed", _id, fields);
+                logger.log("elements changed", _id, fields);
 
                 //display options
                 if (typeof fields.displayOptions !== 'undefined') {
@@ -107,7 +107,7 @@ CurrentEditing.find({}).observeChanges({
         //nothing to do
     },
     removed: function(_id, fields) {
-        console.log("slide removed to current editing");
+        logger.log("slide removed to current editing");
         handleElementCurrentEditing.stop();
     }
 });

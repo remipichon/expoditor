@@ -7,7 +7,7 @@ ratioTimeline = 10;
 
 
 resizeModalCurrentEditing = function() {
-    console.info("resizeModalCurrentEditing");
+    logger.info("resizeModalCurrentEditing");
     var $modal = $("#modalCurrentEditing");
     if ($modal.length === 1) {
         var offSetTop = 70; //parseFloat($modal.css("top"));
@@ -23,8 +23,8 @@ resizeModalCurrentEditing = function() {
             w = W;
             h = rapportHW * w;
         }
-        console.log('resizeModal : W:', W, 'H:', H, 'offset:', offSetTop);
-        console.log("resize modal to w h", w, h);
+        logger.log('resizeModal : W:', W, 'H:', H, 'offset:', offSetTop);
+        logger.log("resize modal to w h", w, h);
         $modal.css("width", w).css("height", h);
 
 
@@ -32,7 +32,7 @@ resizeModalCurrentEditing = function() {
 
         /* var newRatioX = w / 900;
         var newRatioY = h / 700;
-        console.log("resizeModal : rescale modal to x y", newRatioX, newRatioY);
+        logger.log("resizeModal : rescale modal to x y", newRatioX, newRatioY);
         $modal.css("transform", "scale(" + newRatioX + "," + newRatioX + ")");
 
         //pas bien ici
@@ -41,11 +41,11 @@ resizeModalCurrentEditing = function() {
         var posLeft = (-1) * 900 * (1 - newRatioX) / 2;
         var posTop = (-1) * 700 * (1 - newRatioY) / 2 + offSetTop;
         $modal.css("top", posTop).css("left", posLeft);
-        console.log("resizeModal : repos modal to top left", posTop, posLeft);*/
+        logger.log("resizeModal : repos modal to top left", posTop, posLeft);*/
 
 
     } else {
-        console.warn('resizeModal modalCurrentEditing not in dom');
+        logger.warn('resizeModal modalCurrentEditing not in dom');
     }
 
     // setTimeout(repositionElementModalCurrentEditing, 100);
@@ -64,7 +64,7 @@ resizeModalCurrentEditing = function() {
  * this.CSS : CSS displayed top/left
  */
 CSSToPos = function(){
-    // console.info("CSSToPos");
+    // logger.info("CSSToPos");
 
     if (typeof this.size === "undefined") {
         throw new Meteor.Error('500', "recalPos : this.size not defined")
@@ -78,7 +78,7 @@ CSSToPos = function(){
         this.center = {};
         this.center.x = (this.CSS.left  )  * this.ratio.left + this.size.width / 2;
         this.center.y = (this.CSS.top ) * this.ratio.top + this.size.height / 2; 
-        // console.info("CSStoPos : convert", this.CSS.left, '', this.CSS.top, 'to center', this.center.x, '', this.center.y);
+        // logger.info("CSStoPos : convert", this.CSS.left, '', this.CSS.top, 'to center', this.center.x, '', this.center.y);
         return;
     }
     throw new Meteor.Error('500', "CSStoPos : this.CSS doesn't exists or both exists");
@@ -93,7 +93,7 @@ CSSToPos = function(){
  * this.center :real pos x/y (in db)
  */
 posToCSS = function(){
-    // console.info("posToCSS");
+    // logger.info("posToCSS");
 
     if (typeof this.size === "undefined") {
         throw new Meteor.Error('500', "recalPos : this.size not defined")
@@ -111,7 +111,7 @@ posToCSS = function(){
         //this.CSS.top = this.center.y / this.ratioTop - this.size.height / 2;
         
 
-        // console.info("posToCSS : convert", this.center.x, '', this.center.y, 'to CSS', this.CSS.left, '', this.CSS.top);
+        // logger.info("posToCSS : convert", this.center.x, '', this.center.y, 'to CSS', this.CSS.left, '', this.CSS.top);
         return;
     }
     throw new Meteor.Error('500', "posToCSS : this.center doesn't exists or both exists");
@@ -129,7 +129,7 @@ posToCSS = function(){
  * @return {[type]}     [description]
  */
 recalcPos = function(ref) {
-    console.info("recalcPos");
+    logger.info("recalcPos");
     var doNothing = false;
     var $ref, refW, refH;
 
@@ -164,7 +164,7 @@ recalcPos = function(ref) {
 
 
 
-    // console.log("!!!2 ", this);
+    // logger.log("!!!2 ", this);
 
     if (typeof this.size === "undefined") {
         throw new Meteor.Error('500', "recalPos : this.size not defined")
@@ -188,7 +188,7 @@ recalcPos = function(ref) {
         this.ratioLeft = 1;
         this.ratioTop = 1;
 
-        console.info("recalcPos : convert", this.center.x, '', this.center.y, 'to CSS', this.CSS.left, '', this.CSS.top);
+        logger.info("recalcPos : convert", this.center.x, '', this.center.y, 'to CSS', this.CSS.left, '', this.CSS.top);
         return;
     } else
     //CSS to position center 
@@ -206,11 +206,11 @@ recalcPos = function(ref) {
             this.ratioLeft = 1;
             this.ratioTop = 1;
         }
-        console.info("recalcPos : convert", this.CSS.left, '', this.CSS.top, 'to center', this.center.x, '', this.center.y);
+        logger.info("recalcPos : convert", this.CSS.left, '', this.CSS.top, 'to center', this.center.x, '', this.center.y);
         return;
     }
-    // console.log("debug recalc",this);
-    // console.log("!!!3", this);
+    // logger.log("debug recalc",this);
+    // logger.log("!!!3", this);
     throw new Meteor.Error('500', "recalcPos : this.center or this.CSS doesn't exists or both exists");
 
 }
@@ -255,18 +255,18 @@ fin tst
 
 
 repositionElementModalCurrentEditing = function() {
-    console.warn("repositionElementModalCurrentEditing SKIPPED");
+    logger.warn("repositionElementModalCurrentEditing SKIPPED");
     return;
 
 
     if (!Session.get('modalCurrentEditing')) return;
-    console.log("repositionElementModalCurrentEditing");
+    logger.log("repositionElementModalCurrentEditing");
     $(Elements.find({
         slideReference: {
             $in: [CurrentEditing.findOne({})._id]
         }
     }).fetch()).each(function() {
-        console.info("repositionElementModalCurrentEditing", this._id)
+        logger.info("repositionElementModalCurrentEditing", this._id)
         var ele = Elements.findOne({
             _id: this._id
         });
@@ -295,7 +295,7 @@ repositionElementModalCurrentEditing = function() {
         l = l + "px";
         var t = this.CSS.top; //ele.displayOptions.editor.positions.y / ratioTop;
         t = t + "px";
-        console.log(l, t)
+        logger.log(l, t)
         $ele.css('left', l)
             .css('top', t);
 

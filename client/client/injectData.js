@@ -3,7 +3,7 @@ injectData = function(slidehoswName, options) {
 
 	nbSlide = 5;
 	nbElementPerSlide = 3;
-	console.debug("you can specify : string:<slideshowname> , object:<nbSlide:int, nbElementPerSlide:int>");
+	logger.debug("you can specify : string:<slideshowname> , object:<nbSlide:int, nbElementPerSlide:int>");
 	if (typeof options === "object") {
 		if (typeof options.nbSlide === "number") {
 			nbSlide = options.nbSlide;

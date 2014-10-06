@@ -1,11 +1,11 @@
 Template.jmpressContainer.slides = function() {
     if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'jmpress') {
-        console.info("Template.jmpressContainer.slides  empty");
+        // logger.info("Template.jmpressContainer.slides  empty");
         $("#jmpress-container").jmpress("deinit");
         $("#jmpress-container >").remove();
         return [];
     }
-    console.log("Template.jmpressContainer.slides  inject data");
+    // logger.log("Template.jmpressContainer.slides  inject data");
     return Slides.find({}, {
         sort: {
             order: 1
@@ -17,7 +17,7 @@ Template.jmpressContainer.slides = function() {
 
 
 initJmpress = function() {
-    console.info("initJmpress");
+    logger.info("initJmpress");
 
     $('#jmpress-container').jmpress({
         viewPort: {
@@ -33,7 +33,7 @@ initJmpress = function() {
 
 function createJmpressSlide(_id) {
     if (_id === null) {
-        console.debug("createJmpressSLide traitement de la slide invisible");
+        logger.debug("createJmpressSLide traitement de la slide invisible");
         //il s'agit de traiter la slide invisible
             var newSlide = UI.renderWithData(Template.jmpressSlide, {
                 _id: "invisibleOne",
@@ -48,7 +48,7 @@ function createJmpressSlide(_id) {
                 }
             });
 
-        console.debug("new slide", newSlide);
+        logger.debug("new slide", newSlide);
         UI.insert(newSlide, $("#jmpress-container >").get(0));
         $("#invisibleOne").attr("style", "display:none");
         $("#invisibleOne").attr("data-scale", 5);
@@ -66,8 +66,8 @@ function createJmpressSlide(_id) {
 
 
     setTimeout(function() {
-        console.debug("delete remainfin slide if exits");
-        if($("#jmpress-container >.slide").length !== 0) console.error("deleteJmpressSlide slide remaining in a wrong place !")
+        logger.debug("delete remainfin slide if exits");
+        if($("#jmpress-container >.slide").length !== 0) logger.error("deleteJmpressSlide slide remaining in a wrong place !")
         $("#jmpress-container >.slide").remove(); //pour etre sur qu'il ne reste rien de facheux
     }, 500); //TODO improve
 
@@ -82,8 +82,8 @@ function deleteJmpressSlide(_id) {
    
 
      setTimeout(function() {
-        console.debug("delete remainfin slide if exits");
-        if($("#jmpress-container >.slide").length !== 0) console.error("deleteJmpressSlide slide remaining in a wrong place !")
+        logger.debug("delete remainfin slide if exits");
+        if($("#jmpress-container >.slide").length !== 0) logger.error("deleteJmpressSlide slide remaining in a wrong place !")
         $("#jmpress-container >.slide").remove(); //pour etre sur qu'il ne reste rien de facheux
     }, 500); //TODO improve
 }
@@ -94,7 +94,7 @@ Slides.find({}).observeChanges({
         if (Session.get("clientMode") === "jmpress") {
             //required : get techno status : is init ?
             if ($("#jmpress-container").jmpress("initialized")) {
-                console.debug("slides.obsverchanges.added.jmpress.isInit", _id);
+                logger.debug("slides.obsverchanges.added.jmpress.isInit", _id);
                 createJmpressSlide(_id);
             }
 
@@ -109,11 +109,11 @@ Slides.find({}).observeChanges({
             }
 
             var activeSlideId = $("#jmpress-container >div .active").attr("id");
-            console.debug("slides.obsverchanges.changed.jmpress", _id, "activeslideId", activeSlideId, "fields", fields);
+            logger.debug("slides.obsverchanges.changed.jmpress", _id, "activeslideId", activeSlideId, "fields", fields);
 
 
             if (activeSlideId === _id) {
-                console.debug("shit, someone move the where you are and this broke jmpress...");
+                logger.debug("shit, someone move the where you are and this broke jmpress...");
                 $("#jmpress-container").jmpress("next");
                 deleteJmpressSlide(_id);
                 var newSlide = createJmpressSlide(_id);
@@ -129,12 +129,12 @@ Slides.find({}).observeChanges({
     },
     removed: function(_id) {
         if (Session.get("clientMode") === "jmpress") {
-            console.debug("slides.obsverchanges.removed.jmpress", _id);
+            logger.debug("slides.obsverchanges.removed.jmpress", _id);
             //required : get active slide (only if deleted current slide is a problem)
             var activeSlideId = $("#jmpress-container >div .active").attr("id");
             if (activeSlideId === _id && $("#jmpress-container >div").children().length !== 1) {
                 //if we are on the deleted slide and it's not the last
-                console.debug("slides.obsverchanges.removed.jmpress : next slide");
+                logger.debug("slides.obsverchanges.removed.jmpress : next slide");
                 $("#jmpress-container").jmpress("next");
             }
             deleteJmpressSlide(_id);
@@ -145,7 +145,7 @@ Slides.find({}).observeChanges({
 
 
 Template.jmpressSlide.getJmpressData = function(axis) {
-    console.info("Template.jmpressSlide.getJmpressData", axis);
+    logger.info("Template.jmpressSlide.getJmpressData", axis);
     switch (axis) {
         case "x":
             var coord = parseFloat(this.displayOptions.jmpress.positions.x);
@@ -160,7 +160,7 @@ Template.jmpressSlide.getJmpressData = function(axis) {
             return "";
 
     }
-    //            console.log(coord, parseFloat(this.displayOptions.jmpress.positions.y));
+    //            logger.log(coord, parseFloat(this.displayOptions.jmpress.positions.y));
     return coord;
 };
 
@@ -169,7 +169,7 @@ Template.jmpressSlide.getJmpressData = function(axis) {
  * jmpress mode
  */
 Template.elementsAreaJmpress.elements = function() {
-    console.info("Template.elementsAreaJmpress.elements");
+    logger.info("Template.elementsAreaJmpress.elements");
     return Elements.find({
         slideReference: {
             $in: [this._id]
@@ -187,7 +187,7 @@ Template.elementsAreaJmpress.elements = function() {
 Template.elementJmpress.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
 
     if (typeof this.CSS === 'undefined') { //works here because elementCurrendEditing are #constant
-        console.info("Template.elementJmpress.getEditorData", this._id);
+        logger.info("Template.elementJmpress.getEditorData", this._id);
 
         //a a factoriser avec l'observeChanges
         this.center = {

@@ -1,18 +1,18 @@
 
 Template.deckContainer.slides = function() {
-	console.info("Template.deckContainer.slides");
+	// logger.info("Template.deckContainer.slides");
     if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'deck') {
-        console.log("deckContainer empty");
+        // logger.log("deckContainer empty");
         return [];
     }
-    console.info("Template.deckContainer.slides","deckContainer inject data");
+    // logger.info("Template.deckContainer.slides","deckContainer inject data");
    return Slides.find({},{sort:{order:1}});
 };
 
 
 
 initDeck = function() {
-    console.info("initDeck");
+    logger.info("initDeck");
     $.deck('.slide');
 };
 

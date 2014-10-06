@@ -6,7 +6,7 @@ turnIsInit = false; //vairable globale degeullasse
 Template.turnContainer.slides = function() {
     if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'turn') {
         turnIsInit = false;
-        console.info("Template.turnContainer.slides  empty");
+        // logger.info("Template.turnContainer.slides  empty");
         if($("#turn-container").length !== 0){
                 $("#turn-container").turn("destroy");
             }
@@ -17,7 +17,7 @@ Template.turnContainer.slides = function() {
 
        
     $("#turn-container").append('<div class="cover"><h1>The Bible</h1></div>');
-    console.log("Template.turnContainer.slides  inject data");
+    // logger.log("Template.turnContainer.slides  inject data");
     return Slides.find({}, {
         sort: {
             order: 1
@@ -29,7 +29,7 @@ Template.turnContainer.slides = function() {
 
 
 initTurn = function() {
-    console.info("initTurn");
+    logger.info("initTurn");
 
     $("#turn-container").turn({
         acceleration: true, //for mobile use
@@ -44,7 +44,7 @@ initTurn = function() {
 
 
 function createTurnPage(_id) {
-    console.debug("createTurnPage",_id);
+    logger.debug("createTurnPage",_id);
     var newPage = UI.renderWithData(Template.turnSlide, Slides.findOne({
         _id: _id
     }));
@@ -54,10 +54,10 @@ function createTurnPage(_id) {
 }
 
 function deleteTurnPage(_id) {
-    console.debug("deleteTurnPage",_id);    
+    logger.debug("deleteTurnPage",_id);    
     var page = Slides.findOne({_id:_id});
     var order = page.order;
-    console.debug("deleteTurnPage",page,order);
+    logger.debug("deleteTurnPage",page,order);
     $("#turn-container").turn("removePage", order);
 }
 
@@ -67,10 +67,10 @@ function deleteTurnPage(_id) {
 Slides.find({}).observeChanges({
     added: function(_id, slide) {
         if (Session.get("clientMode") === "turn") {
-            console.debug("Slides.find({}).observeChanges.added.turn",_id);
+            logger.debug("Slides.find({}).observeChanges.added.turn",_id);
             //required : get techno status : is init ?
            if (turnIsInit) {
-                console.debug("slides.obsverchanges.added.turn.isInit", _id);
+                logger.debug("slides.obsverchanges.added.turn.isInit", _id);
                 createTurnPage(_id);
             }
 
@@ -87,11 +87,11 @@ Slides.find({}).observeChanges({
 
 
             var activeSlideId = $("#turn-container >div .active").attr("id");
-            console.debug("slides.obsverchanges.changed.turn", _id, "activeslideId", activeSlideId, "fields", fields);
+            logger.debug("slides.obsverchanges.changed.turn", _id, "activeslideId", activeSlideId, "fields", fields);
 
 
             if (activeSlideId === _id) {
-                console.debug("shit, someone move the where you are and this broke turn...");
+                logger.debug("shit, someone move the where you are and this broke turn...");
                 $("#turn-container").turn("next");
                 deleteTurnSlide(_id);
                 var newSlide = createTurnSlide(_id);
@@ -108,12 +108,12 @@ Slides.find({}).observeChanges({
     //TODO : is the document still present when removed is called ?
     removed: function(_id) {
         if (Session.get("clientMode") === "turn") {
-            console.debug("slides.obsverchanges.removed.turn", _id);
+            logger.debug("slides.obsverchanges.removed.turn", _id);
             //required : get active slide (only if deleted current slide is a problem)
             // var activeSlideId = $("#turn-container >div .active").attr("id");
             // if (activeSlideId === _id && $("#turn-container >div").children().length !== 1) {
             //     //if we are on the deleted slide and it's not the last
-            //     console.debug("slides.obsverchanges.removed.turn : next slide");
+            //     logger.debug("slides.obsverchanges.removed.turn : next slide");
             //     $("#turn-container").turn("next");
             // }
             deleteTurnSlide(_id);

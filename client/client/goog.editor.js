@@ -15,12 +15,12 @@ makeEditableCallback = function(e) {
 
         //cancel all other editor (if exists)
         $("#quitEditTexteButton").trigger("click");
-        console.info("makeEditableCallback", this._id);
+        logger.info("makeEditableCallback", this._id);
         $("#" + this._id + '-currentEditing-wrapper').toggleClass('currentlyEditingByMe');
         this.makeEditable();
 
         //pas top !
-        console.warn("bricolage ! pour changer le background color et le margin du body del'iframe");
+        logger.warn("bricolage ! pour changer le background color et le margin du body del'iframe");
         $("iframe").css('background-color', 'rgba(0,0,0,0)')
         $("iframe").contents().find('body').css('margin-top', '0px');
         $("iframe").contents().find('body').css('margin-left', '0px');
@@ -35,7 +35,7 @@ makeUneditableCallback = function(e) {
 
     if (this.isUneditable()) return;
 
-    console.info("makeUneditableCallback", this._id);
+    logger.info("makeUneditableCallback", this._id);
     $("#" + this._id + '-currentEditing-wrapper').toggleClass('currentlyEditingByMe');
     this.makeUneditable();
 
@@ -53,13 +53,13 @@ makeUneditableCallback = function(e) {
 
 updateFieldContents = function(e) {
     var content = this.getCleanContents();
-    console.info('makeUneditableCallback', content);
+    logger.info('makeUneditableCallback', content);
     if (Session.get("heavyRefresh")) updateSlideElementModel.apply(this, [content]);
 }
 
 setEditor = function(idElement) {
     if (typeof idElement === "undefined") return;
-    console.info("setEditor ", idElement);
+    logger.info("setEditor ", idElement);
 
     var myField = new goog.editor.Field(idElement);
     myField.id = idElement;
@@ -91,7 +91,7 @@ setEditor = function(idElement) {
     //manage event
     //double click pour activer l'édition de texte
     goog.events.listen(goog.dom.getElement(myField.id), goog.events.EventType.DBLCLICK, makeEditableCallback, 'false', myField);
-    console.log('#', idElement, '.editTextContent');
+    logger.log('#', idElement, '.editTextContent');
     $('#' + idElement + '-wrapper .editTextContent').on('click', function() {
         makeEditableCallback.call(myField);
     });

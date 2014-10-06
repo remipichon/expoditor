@@ -20,7 +20,7 @@
 subscriptionSlideshow = null;
 subscriptionSlides = null;
 subscriptionElements = null;
-subscriptionRemote = null;
+// subscriptionRemote = null;
 subscriptionLocks = null;
 
 Slideshow = new Meteor.Collection("slideshow");
@@ -29,7 +29,6 @@ Slides = new Meteor.Collection("slides", {
 });
 Elements = new Meteor.Collection("elements");
 Locks = new Meteor.Collection("lock");
-Remote = new Meteor.Collection("remoteSlides");
 
 //slide en cours d'édition
 CurrentEditing = new Meteor.Collection('currentEditing', {
@@ -59,7 +58,7 @@ toolbarButton = null;
  * @param  {str} mode describe mode which mode to show
  */
 displayBlockAccordingToEditorMode = function(modeToDisplay) {
-    console.info("displayBlockAccordingToEditorMode", modeToDisplay)
+    logger.info("displayBlockAccordingToEditorMode", modeToDisplay)
     _.each(modeBlock, function(blockList, mode) {
         if (modeToDisplay === mode) {
             _.each(blockList, function(block) {
@@ -74,28 +73,28 @@ displayBlockAccordingToEditorMode = function(modeToDisplay) {
 }
 
 disableLog = function() {
-    console.log("disableLog");
-    console.info("disableLog");
-    console.debug("disableLog");
+    logger.log("disableLog");
+    logger.info("disableLog");
+    logger.debug("disableLog");
 
-    console.log2 = console.log;
-    console.log = function() {};
-    console.debug2 = console.debug;
-    console.debug = function() {};
-    console.info2 = console.info;
-    console.info = function() {};
+    logger.log2 = logger.log;
+    logger.log = function() {};
+    logger.debug2 = logger.debug;
+    logger.debug = function() {};
+    logger.info2 = logger.info;
+    logger.info = function() {};
 }
 enableLog = function() {
-    console.log = console.log2;
-    console.log2 = function() {};
-    console.debug = console.debug2;
-    console.debug2 = function() {};
-    console.info = console.info2;
-    console.info2 = function() {};
+    logger.log = logger.log2;
+    logger.log2 = function() {};
+    logger.debug = logger.debug2;
+    logger.debug2 = function() {};
+    logger.info = logger.info2;
+    logger.info2 = function() {};
 
-    console.log("enableLog");
-    console.info("enableLog");
-    console.debug("enableLog");
+    logger.log("enableLog");
+    logger.info("enableLog");
+    logger.debug("enableLog");
 
 }
 
@@ -103,6 +102,18 @@ enableLog = function() {
  * manage live Remote
  **********************************************************/
 Meteor.startup(function() {
+
+    logger = log.noConflict();
+    logger.setLevel("trace");
+    logger.log = function() {
+        var args = Array.prototype.slice.call(arguments);
+        console.log.apply(console, args);
+    }
+ 
+    
+
+    logger.debug("logger init");
+
     Hooks.init();
     // disableLog();
     //init toolbar, global pour l'init des editeurs de textes
@@ -125,7 +136,7 @@ Meteor.startup(function() {
         } else if (Session.get("clientMode") === "deck") {
             activeSlide = $(".deck-container .deck-current").attr("id");
         }
-        console.log("active slide : ", activeSlide);
+        logger.log("active slide : ", activeSlide);
         if (activeSlide === null)
             return;
 
@@ -154,7 +165,7 @@ Meteor.startup(function() {
 
     });
 */
-    console.log("init pres pour test");
+    logger.log("init pres pour test");
     Session.set("clientMode", "editor");
     getSlideshowModel({
         title: 'test'
@@ -172,9 +183,9 @@ Meteor.startup(function() {
 });
 
 addElementTexte = function(event) {
-    console.info("addElementTexte", event.offsetY, event.offsetX);
+    logger.info("addElementTexte", event.offsetY, event.offsetX);
     if (event.target.className !== "elementsAreaCurrentEditing") {
-        console.warn("addElementTexte : magouille pour prevent le dblclick on element to create element");
+        logger.warn("addElementTexte : magouille pour prevent le dblclick on element to create element");
         return;
     }
 
@@ -188,7 +199,7 @@ addElementTexte = function(event) {
 }
 
 addSlide = function(event) {
-    console.info("addSlide", event.offsetY, event.offsetX)
+    logger.info("addSlide", event.offsetY, event.offsetX)
     createSlide({
         pos: {
             y: event.offsetY * ratioSlideshowMode,
@@ -202,12 +213,12 @@ addSlide = function(event) {
  * listen to change on remote
  * ==> projet de ClaireZed
  */
-Remote.find({}).observeChanges({
+/*Remote.find({}).observeChanges({
     changed: function(id, fields) {
-        console.info("Remote.find({}).observeChanges.changed");
+        logger.info("Remote.find({}).observeChanges.changed");
         var remote = Remote.findOne({});
         if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
-            console.info("Remote.find({}).observeChanges.changed", "follow slide", remote.activeSlideId);
+            logger.info("Remote.find({}).observeChanges.changed", "follow slide", remote.activeSlideId);
             var type = Session.get("clientMode");
             if (type === "jmpress") {
                 $("#jmpress-container").jmpress("goTo", "#" + remote.activeSlideId);
@@ -218,12 +229,12 @@ Remote.find({}).observeChanges({
             }
         }
     }
-});
+});*/
 
 
 
-setActive = function(activeSlide) {
-    console.info("setActive in remote", activeSlide);
+/*setActive = function(activeSlide) {
+    logger.info("setActive in remote", activeSlide);
     var remote = Remote.findOne();
 
     Remote.update(remote._id, {
@@ -232,7 +243,7 @@ setActive = function(activeSlide) {
         }
     });
 
-};
+};*/
 
 
 
@@ -241,13 +252,13 @@ setActive = function(activeSlide) {
  **********************************************************/
 
 launchEditorControler = function() {
-    console.info("launchEditorControler");
+    logger.info("launchEditorControler");
     this.getChild('backToEditor').setEnabled(false);
     Session.set("clientMode", "editor");
 }
 
 launchJmpressControler = function() {
-    console.info("launchJmpressControler");
+    logger.info("launchJmpressControler");
     this.getChild('backToEditor').setEnabled(true);
 
     Session.set("clientMode", "jmpress");
@@ -256,14 +267,14 @@ launchJmpressControler = function() {
 }
 
 launchDeckControler = function() {
-    console.info("launchDeckControler");
+    logger.info("launchDeckControler");
     this.getChild('backToEditor').setEnabled(true);
     Session.set("clientMode", "deck");
     setTimeout(initDeck, 200);
 }
 
 launchTurnControler = function() {
-    console.info("launchTurnControler");
+    logger.info("launchTurnControler");
     this.getChild('backToEditor').setEnabled(true);
     Session.set("clientMode", "turn");
     setTimeout(initTurn, 1500);
@@ -275,7 +286,7 @@ launchTurnControler = function() {
 }
 
 showTimelineControler = function() {
-    console.info("showTimelineControler");
+    logger.info("showTimelineControler");
     goog.style.showElement(goog.dom.getElement("timeline"), (goog.dom.getElement('showTimeline').getAttribute("aria-pressed") === "true") ? true : false);
 }
 
@@ -283,12 +294,12 @@ showTimelineControler = function() {
  * magouille mais on s'en fout, ca va disparaitre avec le merge avec expo.remote
  */
 getSlideshowControlerCaller = function() {
-    console.info("getSlideshowControlerCaller");
+    logger.info("getSlideshowControlerCaller");
     getSlideshowControler();
 }
 
 initButtons = function() {
-    console.info("initButtons");
+    logger.info("initButtons");
     var buttons = new goog.ui.Toolbar();
     buttons.decorate(goog.dom.getElement('buttons'));
 
@@ -325,7 +336,7 @@ initButtons = function() {
 }
 
 setToolbar = function() {
-    console.info("setToolbar");
+    logger.info("setToolbar");
     // if(typeof toolbar !== 'undefined'){
     //     throw new Meteor.Error("500","A toolbar is alredy set",toolbar);
     // }
@@ -383,7 +394,7 @@ setToolbar = function() {
 
 
 quitEditSlide = function() {
-    console.info("quitEditSlide");
+    logger.info("quitEditSlide");
     //cancel all remaining editor (if exists)
     $(".expo-toolbar-quitEdit-texte").trigger("click"); //TODO fire event perso
 

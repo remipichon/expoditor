@@ -1,5 +1,5 @@
 Template.timeline.slides = function() {
-	console.info("Template.timeline.slides");
+	//logger.info("Template.timeline.slides");
 	return Slides.find({}, {
 		sort: {
 			order: 1
@@ -8,7 +8,7 @@ Template.timeline.slides = function() {
 }
 
 Template.clonedTimeline.slides = function() {
-	console.info("Template.clonedTimeline.slides");
+	//logger.info("Template.clonedTimeline.slides");
 	return Slides.find({}, {
 		sort: {
 			order: 1
@@ -42,23 +42,23 @@ Slides.find({}).observeChanges({
 	removed: function(_id) {
 		$("#" + _id + '-timeline').remove();
 		$("#" + _id + '-timeline-cloned').remove();
-		console.log("removeclone and timelineslide", _id);
+		logger.log("removeclone and timelineslide", _id);
 		setSortable();
 	}
 })
 */
 
 Template.timelineSlide.destroyed = function() {
-    console.info("emplate.timelineSlide.destroyed");
+   logger.info("emplate.timelineSlide.destroyed");
     updateOrderControler();
 
 }
 
 
 Template.timelineSlide.rendered = function() {
-	console.info("Template.timelineSlide.rendered");
+	logger.info("Template.timelineSlide.rendered");
 	// settimelineOnSlide = function() {
-	// console.log("render timelineslide");
+	// logger.log("render timelineslide");
 	// var setToTimeline = false;
 	//ca me saoul mais je mets cela là quand meme
 	if (typeof $("#timeline").data("timelineSlide") === "undefined") {
@@ -74,7 +74,7 @@ Template.timelineSlide.rendered = function() {
 
 
 	if (setToTimeline) {
-		console.info("render timelineslide for editor", this.data._id);
+		logger.info("render timelineslide for editor", this.data._id);
 
 		//ajout à la timeline
 		//c'est pas top parce que la premiere fois on setSortable pour chaque slide 
@@ -85,7 +85,7 @@ Template.timelineSlide.rendered = function() {
 		$("#" + this.data._id).data("timelineIsSet", true);
 		$("#timeline").data("timelineSlide", $("#timeline").data("timelineSlide") + "-" + this.data._id);
 	} else {
-		console.warn("render timelineslide for editor SKIPPED", this.data._id);
+		logger.warn("render timelineslide for editor SKIPPED", this.data._id);
 	}
 }
 
@@ -95,6 +95,6 @@ Template.timelineSlide.rendered = function() {
  */
 /*Template.timelineSlide.destroyed = function(){
 	$("#"+this.data._id+'-timeline-cloned').remove();
-	console.log("removeclone",this.data._id+'-timeline-cloned');
+	logger.log("removeclone",this.data._id+'-timeline-cloned');
 	setSortable();
 }*/
