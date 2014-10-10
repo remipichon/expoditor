@@ -59,33 +59,29 @@ Slides.after.remove(function(userId, element) {
  */
 Slides.allow({
     insert: function(userId, slide, fields, modifier) {
-        return true;
         //slideshow access control
         _.each(slide.slideshowReference, function(slideshowId) {
-            if (!hasAccessSlideshow(slideshowId, userId))
-                throw new Meteor.Error("24", "slides.insert : user has not access to slideshow ", lock.slideshowId);
+            if (!SlideshowHelper.prototype.hasAccessSlideshow(slideshowId, userId))
+                throw new Meteor.Error("24", "Slides.insert : user has not access to slideshow ", lock.slideshowId);
         });
 
-        logger.log("info : slides.allow.insert : true ", slide);
+        logger.info("Slides.allow.insert : true ", slide._id);
         return true;
     },
     update: function(userId, slide, fields, modifier) {
-        return true;
-        logger.log("slides.allow.update : ", slide._id);
 
         var toReturn = false;
 
         //slideshow access control
         _.each(slide.slideshowReference, function(slideshowId) {
-            if (!hasAccessSlideshow(slideshowId, userId))
-                throw new Meteor.Error("24", "slides.update : user has not access to slideshow ", slideshowId);
+            if (!SlideshowHelper.prototype.hasAccessSlideshow(slideshowId, userId))
+                throw new Meteor.Error("24", "Slides.update : user has not access to slideshow ", slideshowId);
         });
 
 
         //lock control
         if (!userHasAccessToComponent(slide, fields)) {
-            logger.log("slides.allow.update : user does not have access to update fiels " + fields);
-            throw new Meteor.Error("slides.allow.update : user does not have access to update fiels " + fields);
+           throw new Meteor.Error("Slides.allow.update : user does not have access to update fiels " + fields);
         }
 
         //display options
@@ -93,7 +89,7 @@ Slides.allow({
             //position
             if (modifier.toString().indexOf("positions") !== -1) { //pas funky ca
                 var position = slide.displayOptions.jmpress.positions;
-                logger.log("slides.allow.update.pos : ", position, " _id : ", slide._id);
+                logger.info("Slides.allow.update : allow pos update on", slide._id);
             }
 
             toReturn = true;
@@ -112,10 +108,10 @@ Slides.allow({
                 });
 
                 if (typeof lock == 'undefined') {
-                    logger.log("info : slides.allow.update : client trying to update without lock slide : ", slide._id, "client :", userId);
+                    logger.info("Slides.allow.update : client trying to update without lock slide : ", slide._id, "client :", userId);
                     return false;
                 }
-                logger.log("info : slides.allow.update : allow title update");
+                logger.info("Slides.allow.update : allow title update on",slide._id);
             }
             toReturn = true;
         }
@@ -136,10 +132,11 @@ Slides.allow({
             _.each(allSlides, function(slide) {
                 if (slide.order != cpt++) {
                     toReturn = false;
-                    return;
+                    return false;
                 }
             });
 
+            logger.info("Slides.allow.update : allow order update on",slide._id);
             toReturn = true;
         }
 
@@ -148,17 +145,17 @@ Slides.allow({
         }
 
 
-        logger.log("info : slidesLock.allow.update pos : case not expected, return false");
+        logger.log("Slides.allow.update : case not expected, return false on",slide._id);
         return false;
 
     },
     remove: function(userId, slide) {
-        return true;
         //slideshow access control
         _.each(slide.slideshowReference, function(slideshowId) {
-            if (!hasAccessSlideshow(slideshowId, userId))
+            if (!SlideshowHelper.prototype.hasAccessSlideshow(slideshowId, userId))
                 throw new Meteor.Error("24", "slides.delete : user has not access to slideshow ", lock.slideshowId);
         });
+        logger.info("Slides.allow.remove : allow remove of slide",slide._id);
         return true;
     }
 });
@@ -189,10 +186,10 @@ Slides.allow({
  //                        (leftForbidenZone < leftSlide && leftSlide < leftForbidenZone + widthForbidenZone ||
  //                                leftForbidenZone < leftSlide + widthSlide && leftSlide + widthSlide < leftForbidenZone + widthForbidenZone)
  //                        ) {
- //                    logger.log("info : slides.allow.update pos : refuse pos update, forbidden zone");
+ //                    logger.log("info : Slides.allow.update pos : refuse pos update, forbidden zone");
  //                    return false;
  //                }
- //                logger.log("info : slides.allow.update pos : allow pos update");
+ //                logger.log("info : Slides.allow.update pos : allow pos update");
  //                return true;
  //            }
  //

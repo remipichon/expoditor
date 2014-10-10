@@ -1,4 +1,5 @@
 PROCESS_ENV = ""; //variable d'environnement
+LOG_MODE = "trace";
 
 /*
  * key : slideshowID
@@ -24,19 +25,20 @@ Meteor.startup(function() {
 
 
     if (PROCESS_ENV === "prod") {
-        recoverData();
+        SlideshowState.prototype.recoverData();
     }
 
     console.log("Meteor startup sucessfully");
 
-
-
     logger = log.noConflict();
-    logger.setLevel("trace");
+    logger.setLevel(LOG_MODE);
     logger.log = function() {
         var args = Array.prototype.slice.call(arguments);
         console.log.apply(console, args);
     }
-
     delete log;
+
+    logger.info("logger set in",LOG_MODE);
 });
+
+

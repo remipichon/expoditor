@@ -3,31 +3,28 @@
 
 
 Meteor.methods({
-
-
     _clearServerData: function() {
         logger.log("dev : clear all db's data");
         Slideshow.remove({});
         Slides.remove({});
         Elements.remove({});
         Locks.remove({});
-        // Remotes.remove({});
         slideshowPublished = {};
     },
+
     _clearDynamiqueServerData: function() {
         logger.log("dev : clear dynamique server data");
         Locks.remove({});
-        // Remotes.remove({});
         slideshowPublished = {};
     },
 
     _unloadToStore: function(slideshowId) {
-        logger.log("dev : _unloadToStore");
-        unloadToStore(slideshowId);
+        logger.log("dev : _unloadToStore",slideshowId);
+         SlideshowState.prototype.unloadToStore(slideshowId);
     },
 
     _loadToEdit: function(slideshowId) {
-        logger.log("dev : _loadToEdit");
+        logger.log("dev : _loadToEdit",slideshowId);
         loadToEdit(slideshowId);
     },
 

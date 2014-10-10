@@ -1,6 +1,7 @@
+SlideshowState = function(){};
 
-unloadToStore = function(slideshowId) {
-    logger.log("unloadToStore ", slideshowId);
+
+SlideshowState.prototype.unloadToStore = function(slideshowId) {
 
     delete slideshowPublished[slideshowId];
 
@@ -11,9 +12,9 @@ unloadToStore = function(slideshowId) {
 
     var slide, slideElements, nb;
     _.each(slides, function(slideId) {
-        logger.log("unloadToStore slide ", slideId);
+        logger.info("SlideshowState.prototype.unloadToStore : slide ", slideId);
         if (typeof slideId === 'object') {
-            logger.log("unloadToStore : error : a slide is already an object");
+            logger.info("SlideshowState.prototype.unloadToStore : error : the slide is already an object");
             return;
         }
 
@@ -28,10 +29,9 @@ unloadToStore = function(slideshowId) {
             _id: slideId
         });
 
-        logger.log("unloadToStore elements ", slideElements);
         var elementToStore = [];
         _.each(slideElements, function(element) {
-            logger.log("unloadToStore element ", element._id);
+            logger.info("SlideshowState.prototype.unloadToStore : element ", element._id);
             //add elements into the slide
             elementToStore.push(element);
 
@@ -42,7 +42,6 @@ unloadToStore = function(slideshowId) {
                 }
             });
         });
-        logger.log("unloadToStore elementToStore ", elementToStore.length);
         //add elements into the slide
         nb = Slides.update(slideId, {
             $set: {
@@ -72,12 +71,11 @@ unloadToStore = function(slideshowId) {
         });
 
     });
-    logger.log("unloadToStore done");
+    logger.info("SlideshowState.prototype.unloadToStore : done");
 };
 
 
-loadToEdit = function(slideshowId) {
-    logger.log("loadToEdit ", slideshowId);
+SlideshowState.prototype.loadToEdit = function(slideshowId) {
     var slideshow = Slideshow.findOne({
         _id: slideshowId
     });
@@ -85,7 +83,7 @@ loadToEdit = function(slideshowId) {
 
     var slide, slideElements, nb;
     _.each(slides, function(slide) {
-        logger.log("loadToEdit slide ", slide._id);
+        logger.info("SlideshowState.prototype.loadToEdit : slide ", slide._id);
 
         // insert slide in collection.slides
         Slides.insert(slide);
@@ -109,7 +107,7 @@ loadToEdit = function(slideshowId) {
 
         // foreach element in slide.element
         _.each(slide.elements, function(element) {
-            logger.log("loadToEdit element", element._id);
+            logger.log("SlideshowState.prototype.loadToEdit : element", element._id);
             //  if element already in collection.elements
             if (typeof Elements.findOne({
                 _id: element._id
@@ -131,28 +129,28 @@ loadToEdit = function(slideshowId) {
 
 
     });
-    logger.log("loadToEdit done");
+    logger.log("SlideshowState.prototype.loadToEdit : done");
 
 }
 
 
 
-recoverData = function(){
+SlideshowState.prototype.recoverData = function(){
     Locks.remove({});
         //belov code is bad but it's not intended to be often use
         var slides = Slides.find({}).fetch();
         if (slides.length !== 0) {
-            logger.log("warning : startup : there is slides remaining in slides collection (must be empty, something bad appends last shutdown");
-            logger.log("infos : startup : trying to recover data...");
+            logger.warn("SlideshowState.prototype.recoverData : there is slides remaining in slides collection (must be empty, something bad appends last shutdown");
+            logger.info("SlideshowState.prototype.recoverData : trying to recover data...");
             var slideshowId;
             var nbShittySlide = slides.length;
 
             while (slides.length !== 0) {
                 slideshowId = slides[0].slideshowReference[0]; //get first slideshow of the first remaining slide
-                logger.log("infos : startup : trying to recover data for slideshow ", slideshowId);
-                unloadToStore(slideshowId);
+                logger.info("SlideshowState.prototype.recoverData : trying to recover data for slideshow ", slideshowId);
+                 SlideshowState.prototype.unloadToStore(slideshowId);
                 if (--nbShittySlide === 0) {
-                    logger.log("infos : startup : recovering didn't success completely, remaining slides are deleted...");
+                    logger.info("SlideshowState.prototype.recoverData : recovering didn't success completely, remaining slides are deleted...");
                     Slides.remove({});
                     break;
                 }
@@ -162,8 +160,8 @@ recoverData = function(){
             }
             var l = Elements.find({}).fetch().length;
             if (l !== 0) {
-                logger.log("warning : startup : there is -", l, "- elements remaining in elements collection (must be empty, something bad appends last shutdonw");
-                logger.log("infos : startup : remaining elements are deleted...");
+                logger.warn("SlideshowState.prototype.recoverData : there is -", l, "- elements remaining in elements collection (must be empty, something bad appends last shutdonw");
+                logger.info("SlideshowState.prototype.recoverData : remaining elements are deleted...");
                 Elements.remove({});
             }
 
