@@ -1,4 +1,9 @@
 /**
+ * MIGRATION DONE
+ */
+
+
+/**
  * [createSlide description]
  * @param  {object} options given options to set a slide :
  *                          * pos.x/y   (default)

@@ -1,12 +1,13 @@
+/**
+ * MIGRATION DONE
+ */
+
 resizeModel = function(){
 	logger.info("resizeModel",this._id,this.id);
 
 	var component = goog.dom.getElement(this.id);
-	// logger.log("resizeModel",component);
 
-	var size = goog.style.getSize(component
-		);
-	// logger.log("resizeModel",size);
+	var size = goog.style.getSize(component);
 
 	var ratio;
 	if(goog.dom.classes.has(component,'slide')){

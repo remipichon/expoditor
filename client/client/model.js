@@ -1,3 +1,8 @@
+
+/**
+ * DONE ARCHITECTURE until the end of the file
+ */
+
 /***********************
  * Manage locks
  *
@@ -77,51 +82,3 @@ removeLocksControler = function() {
 };
 
 
-
-_clearServerData = function(str) {
-    logger.info("_clearServerData");
-    Meteor.call('_clearServerData', function(error, result) {
-        logger.log("_clearServerData : server answered with ", result);
-    });
-};
-
-_clearDynamiqueServerData = function(str) {
-    logger.info("_clearDynamiqueServerData");
-    Meteor.call('_clearDynamiqueServerData', function(error, result) {
-        logger.log("_clearDynamiqueServerData : server answered with ", result);
-    });
-};
-
-_unloadToStore = function(str) {
-    logger.info("_unloadToStore");
-    Meteor.call('_unloadToStore', str, function(error, result) {
-        logger.log("_unloadToStore : server answered with ", result);
-    });
-};
-
-_loadToEdit = function(str) {
-    logger.info("_loadToEdit");
-    Meteor.call('_loadToEdit', str, function(error, result) {
-        logger.log("_loadToEdit : server answered with ", result);
-    });
-};
-
-_getInfos = function(str) {
-    logger.info("_getInfos");
-    Meteor.call('_getInfos', str, function(error, result) {
-        logger.log(error,result)
-        slideshows = result.slideshows;
-        slides = result.slides;
-        elements = result.elements;
-        locks = result.locks;
-        slideshowPublished = result.slideshowPublished;
-
-        logger.log("***get infos***")
-        logger.log("nb slideshow :", slideshows);
-        logger.log("nb slides :", slides);
-        logger.log("nb elements :", elements);
-        logger.log("nb locks :", locks);
-        logger.log("slideshowPublished :", slideshowPublished);
-         logger.log("***all are set in global variable***")
-    });
-};

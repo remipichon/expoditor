@@ -5,8 +5,9 @@
  * @type {Object}
  */
 var logginAop = {
-	"SlideshowHelper": SlideshowHelper,
-	"SlideshowState": SlideshowState
+	"ServerBackendDAO": ServerBackendDAO,
+	"CommonDao": CommonDao,
+	"LockDAO": LockDAO
 };
 
 

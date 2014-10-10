@@ -1,11 +1,13 @@
-    /**
+/**
+ * MIGRATION DONE
+ */
+
+/**
  * create an element texte in the slide currently editing (_id get from CurrentEditing)
  * @param  {[object]} options nothing by now
  * @return {[type]}         [description]
  */
 createElementTexte = function(options) {
-    logger.info("createElementTexte", options);
-    // return;
     var d = new Date;
     var content = "ele:" + d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
     if (typeof options === "undefined") {
@@ -16,7 +18,6 @@ createElementTexte = function(options) {
             x: 200,
             y: 200
         };
-        // logger.log("create element texte with pos",options.pos.x, options.pox.y);
     }
 
     if(typeof options.targetSlide === 'undefined'){
@@ -60,8 +61,6 @@ createElementTexte = function(options) {
  * slide size and ratioContentMode *
  */
 updateElementPos = function(getUpdateData) {
-    logger.info("updateElementPos", getUpdateData,this._id);
-
     var $element = $("#" + this.id)
     var top = parseFloat($element.css('top'));
     var left = parseFloat($element.css('left'));
@@ -126,8 +125,6 @@ updateElementPos = function(getUpdateData) {
  * @return {[type]}         [description]
  */
 updateSlideElementModel = function(content) {
-    logger.info("updateSlideElementModel",this._id);
-
     Elements.update(this._id, {
         $set: {
             content: content
@@ -141,7 +138,6 @@ updateSlideElementModel = function(content) {
  * @return {[type]} [description]
  */
 deleteSlideElement = function() {
-    logger.info("deleteSlideElement", this._id);
     if (!userHasAccessToComponent.call(this)) {
         throw new Meteor.Error('500', 'deleteSlideElement : cannot remove an element locked');
     }

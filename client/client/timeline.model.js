@@ -1,4 +1,9 @@
 /**
+ * MIGRATION OK
+ */
+
+
+/**
  * this : est un objet jquery lorsqu'appelé par timeline.controler.sortable
  * @return {[type]} [description]
  */
