@@ -1,4 +1,6 @@
 
+/// MIGRATION DONE
+
 turnIsInit = false; //vairable globale degeullasse
 
 

@@ -2,55 +2,14 @@
  * The following give elements of the slide (onto the slide) to each elements area needed
  */
 
-/**
- * slideshow editor mode
- */
-Template.elementsArea.elements = function() {
-    logger.info("Template.elementsArea.elements");
-    return Elements.find({
-        slideReference: {
-            $in: [this._id]
-        }
-    });
-};
-
-/**
- * content slide editor mode
- */
-Template.elementsAreaCurrentEditing.elements = function() {
-    logger.info("Template.elementsAreaCurrentEditing.elements");
-    return Elements.find({
-        slideReference: {
-            $in: [this._id]
-        }
-    });
-};
-
-/**
- * timeline
- */
-Template.elementsAreaTimeline.elements = function() {
-    logger.info("Template.elementsAreaTimeline.elements");
-    return Elements.find({
-        slideReference: {
-            $in: [this._id]
-        }
-    });
-};
 
 
-/******* render *****/
 
-Elements.find({}).observeChanges({
-    changed: function(elemenId, fields) {
-        logger.info("Elements.obsverveChanges.changed",elemenId);
-       if(typeof fields.content !== "undefined"){
-             logger.info("Elements.obsverveChanges.changed.content",fields.content);
-            var editor = $("#"+elemenId+"-currentEditing").data("editorInstance");
-            editor.setHtml(false,fields.content,true,true)
-        }
-    },
-});
+
+
+
+
+/********************** RENDER **********************/
 
 
 /**
@@ -73,9 +32,11 @@ Template.elementCurrentEditing.rendered = function() {
     goog.events.listen(dragger, 'end', endDragElement, 'false', this.data);
 
     setResize.call(this.data);
-
-
 }
+
+
+
+/********************** HELPERS *********************/
 
 /**
  * calculate position and size of an element in slideshow editor mode according to ratioSlideshowMode
@@ -140,7 +101,7 @@ Template.element.getEditorData = function(axis) {
 Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
 
     if (typeof this.CSS === 'undefined') { //works here because elementCurrendEditing are #constant
-        logger.info("Template.elementCurrentEditing.getEditorData", this._id);
+        //logger.debug("Template.elementCurrentEditing.getEditorData", this._id);
 
         //a a factoriser avec l'observeChanges
         this.center = {
@@ -198,7 +159,7 @@ Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore uti
  */
 Template.elementTimeline.getEditorData = function(axis) {
     // if (typeof this.CSS === 'undefined') {
-    logger.info("Template.elementTimeline.getEditorData", this._id);
+    //logger.debug("Template.elementTimeline.getEditorData", this._id);
 
     this.center = {
         x: parseFloat(this.displayOptions.editor.positions.x),
@@ -247,7 +208,6 @@ Template.elementTimeline.getEditorData = function(axis) {
 };
 
 
-
 Template.element.getFontSize = function() {
     return 16 / ratioSlideshowMode; //16 est un peu au pif via le debugger
 }
@@ -257,7 +217,7 @@ Template.elementTimeline.getFontSize = function() {
 }
 
 Template.elementCurrentEditing.isLocked = function() {
-    logger.info("Template.elementCurrentEditing.isLocked");
+    //logger.debug("Template.elementCurrentEditing.isLocked");
     var component = Locks.findOne({
         componentId: this._id,
         user: {
@@ -265,10 +225,8 @@ Template.elementCurrentEditing.isLocked = function() {
         }
     });
 
-
-
     if (typeof component !== "undefined") {
-        logger.info("Template.elementCurrentEditing.isLocked", "element is locked");
+        //logger.debug("Template.elementCurrentEditing.isLocked", "element is locked");
         return "locked";
     }
 

@@ -21,10 +21,10 @@ Template.editorContainer.slides = function() {
  * @return {[cursor]} one slide max, if not empty
  */
 Template.modalCurrentEditing.editorSlideCurrentEditing = function() {
-    // logger.info("Template.modalCurrentEditing.editorSlideCurrentEditing");
-    if (CurrentEditing.find({}).fetch().length !== 0) {
-        // throw new Meteor.Error("500","More than one slide in CurrentEditing");
-        // logger.error("Template.modalCurrentEditing.editorSlideCurrentEditing","More than one slide in CurrentEditing");
+    //console.info("Template.modalCurrentEditing.editorSlideCurrentEditing");
+    if (CurrentEditing.find({}).fetch().length > 1) {
+        throw new Meteor.Error("500","More than one slide in CurrentEditing");
+        //console.error("Template.modalCurrentEditing.editorSlideCurrentEditing","More than one slide in CurrentEditing");
     }
     return CurrentEditing.find({});
 };

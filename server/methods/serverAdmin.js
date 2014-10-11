@@ -3,7 +3,7 @@
 
 
 Meteor.methods({
-    _clearServerData: function() {
+    clearServerData: function() {
         logger.log("dev : clear all db's data");
         Slideshow.remove({});
         Slides.remove({});
@@ -12,23 +12,23 @@ Meteor.methods({
         slideshowPublished = {};
     },
 
-    _clearDynamiqueServerData: function() {
+    clearDynamiqueServerData: function() {
         logger.log("dev : clear dynamique server data");
         Locks.remove({});
         slideshowPublished = {};
     },
 
-    _unloadToStore: function(slideshowId) {
+    unloadToStore: function(slideshowId) {
         logger.log("dev : _unloadToStore",slideshowId);
          SlideshowState.prototype.unloadToStore(slideshowId);
     },
 
-    _loadToEdit: function(slideshowId) {
+    loadToEdit: function(slideshowId) {
         logger.log("dev : _loadToEdit",slideshowId);
         loadToEdit(slideshowId);
     },
 
-    _getInfos: function() {
+    getInfos: function() {
         var slideshows = Slideshow.find({}).fetch();
         var slides = Slides.find({}).fetch();
         var elements = Elements.find({}).fetch();
