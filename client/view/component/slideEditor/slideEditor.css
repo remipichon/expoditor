@@ -1,0 +1,7 @@
+#modalCurrentEditing {
+    /*background-color: gray;*/
+   position: absolute;
+    top: 70px;
+    width: 900px;
+    height: 700px;
+}

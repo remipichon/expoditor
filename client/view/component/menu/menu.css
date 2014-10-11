@@ -1,0 +1,19 @@
+  
+
+
+#slideshowTitle {
+	display: inline-block;
+}
+
+#slideCurrentEditing {
+	display: inline-block;
+}
+
+
+#buttons{
+    position: absolute;
+    top:30px; 
+    left: 150px;
+    display: inline-block;
+    z-index: 10;
+}

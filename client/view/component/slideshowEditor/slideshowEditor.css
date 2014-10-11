@@ -1,10 +1,3 @@
-#buttons{
-    position: absolute;
-    top:30px; 
-    left: 150px;
-    display: inline-block;
-    z-index: 10;
-}
 
 #editor-container{
     /*degeu !*/
@@ -40,4 +33,3 @@
 #editor-container .locked {
     border : dashed blue 2px;
 }
-

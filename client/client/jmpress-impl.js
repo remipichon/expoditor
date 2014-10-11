@@ -1,19 +1,5 @@
-Template.jmpressContainer.slides = function() {
-    if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'jmpress') {
-        // logger.info("Template.jmpressContainer.slides  empty");
-        $("#jmpress-container").jmpress("deinit");
-        $("#jmpress-container >").remove();
-        return [];
-    }
-    // logger.log("Template.jmpressContainer.slides  inject data");
-    return Slides.find({}, {
-        sort: {
-            order: 1
-        },
-        reactive: false
-    });
-};
 
+//migration done
 
 
 initJmpress = function() {
@@ -89,150 +75,106 @@ function deleteJmpressSlide(_id) {
 }
 
 
-Slides.find({}).observeChanges({
-    added: function(_id, slide) {
-        if (Session.get("clientMode") === "jmpress") {
-            //required : get techno status : is init ?
-            if ($("#jmpress-container").jmpress("initialized")) {
-                logger.debug("slides.obsverchanges.added.jmpress.isInit", _id);
-                createJmpressSlide(_id);
-            }
+// Slides.find({}).observeChanges({
+//     added: function(_id, slide) {
+//         if (Session.get("clientMode") === "jmpress") {
+//             //required : get techno status : is init ?
+//             if ($("#jmpress-container").jmpress("initialized")) {
+//                 logger.debug("slides.obsverchanges.added.jmpress.isInit", _id);
+//                 createJmpressSlide(_id);
+//             }
 
 
 
-        }
-    },
-    changed: function(_id, fields) {
-        if (Session.get("clientMode") === "jmpress") {
-            if (typeof fields.displayOptions === "undefined") {
-                return;
-            }
+//         }
+//     },
+//     changed: function(_id, fields) {
+//         if (Session.get("clientMode") === "jmpress") {
+//             if (typeof fields.displayOptions === "undefined") {
+//                 return;
+//             }
 
-            var activeSlideId = $("#jmpress-container >div .active").attr("id");
-            logger.debug("slides.obsverchanges.changed.jmpress", _id, "activeslideId", activeSlideId, "fields", fields);
-
-
-            if (activeSlideId === _id) {
-                logger.debug("shit, someone move the where you are and this broke jmpress...");
-                $("#jmpress-container").jmpress("next");
-                deleteJmpressSlide(_id);
-                var newSlide = createJmpressSlide(_id);
-                $("#jmpress-container").jmpress("prev");
-            } else {
-                deleteJmpressSlide(_id);
-                var newSlide = createJmpressSlide(_id);
-            }
+//             var activeSlideId = $("#jmpress-container >div .active").attr("id");
+//             logger.debug("slides.obsverchanges.changed.jmpress", _id, "activeslideId", activeSlideId, "fields", fields);
 
 
-
-        }
-    },
-    removed: function(_id) {
-        if (Session.get("clientMode") === "jmpress") {
-            logger.debug("slides.obsverchanges.removed.jmpress", _id);
-            //required : get active slide (only if deleted current slide is a problem)
-            var activeSlideId = $("#jmpress-container >div .active").attr("id");
-            if (activeSlideId === _id && $("#jmpress-container >div").children().length !== 1) {
-                //if we are on the deleted slide and it's not the last
-                logger.debug("slides.obsverchanges.removed.jmpress : next slide");
-                $("#jmpress-container").jmpress("next");
-            }
-            deleteJmpressSlide(_id);
-        }
-    }
-});
+//             if (activeSlideId === _id) {
+//                 logger.debug("shit, someone move the where you are and this broke jmpress...");
+//                 $("#jmpress-container").jmpress("next");
+//                 deleteJmpressSlide(_id);
+//                 var newSlide = createJmpressSlide(_id);
+//                 $("#jmpress-container").jmpress("prev");
+//             } else {
+//                 deleteJmpressSlide(_id);
+//                 var newSlide = createJmpressSlide(_id);
+//             }
 
 
 
-Template.jmpressSlide.getJmpressData = function(axis) {
-    logger.info("Template.jmpressSlide.getJmpressData", axis);
-    switch (axis) {
-        case "x":
-            var coord = parseFloat(this.displayOptions.jmpress.positions.x);
-            break;
-        case "y":
-            var coord = parseFloat(this.displayOptions.jmpress.positions.y);
-            break;
-        case "z":
-            var coord = 0;
-            break;
-        default:
-            return "";
+//         }
+//     },
+//     removed: function(_id) {
+//         if (Session.get("clientMode") === "jmpress") {
+//             logger.debug("slides.obsverchanges.removed.jmpress", _id);
+//             //required : get active slide (only if deleted current slide is a problem)
+//             var activeSlideId = $("#jmpress-container >div .active").attr("id");
+//             if (activeSlideId === _id && $("#jmpress-container >div").children().length !== 1) {
+//                 //if we are on the deleted slide and it's not the last
+//                 logger.debug("slides.obsverchanges.removed.jmpress : next slide");
+//                 $("#jmpress-container").jmpress("next");
+//             }
+//             deleteJmpressSlide(_id);
+//         }
+//     }
+// });
 
-    }
-    //            logger.log(coord, parseFloat(this.displayOptions.jmpress.positions.y));
-    return coord;
-};
-
-
-/**
- * jmpress mode
- */
-Template.elementsAreaJmpress.elements = function() {
-    logger.info("Template.elementsAreaJmpress.elements");
-    return Elements.find({
-        slideReference: {
-            $in: [this._id]
-        }
-    });
-};
-
-
-
-/**
- * calculate position and size of an element in slide content editor mode according to ratioSlideshowMode
- * @param  {string} axis which CSS style is needed
- * @return {int}      value of the CSS style
- */
-Template.elementJmpress.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
-
-    if (typeof this.CSS === 'undefined') { //works here because elementCurrendEditing are #constant
-        logger.info("Template.elementJmpress.getEditorData", this._id);
-
-        //a a factoriser avec l'observeChanges
-        this.center = {
-            x: parseFloat(this.displayOptions.editor.positions.x),
-            y: parseFloat(this.displayOptions.editor.positions.y)
-        };
-        this.size = {
-            width: parseFloat(this.displayOptions.editor.size.width),
-            height: parseFloat(this.displayOptions.editor.size.height)
-        }
-        this.ratio = {
-            top: ratioContentMode,
-            left: ratioContentMode
-        }
-        delete this.CSS;
-        posToCSS.call(this);
-    }
+// Template.jmpressContainer.slides = function() {
+//     if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'jmpress') {
+//         // logger.info("Template.jmpressContainer.slides  empty");
+//         $("#jmpress-container").jmpress("deinit");
+//         $("#jmpress-container >").remove();
+//         return [];
+//     }
+//     // logger.log("Template.jmpressContainer.slides  inject data");
+//     return Slides.find({}, {
+//         sort: {
+//             order: 1
+//         },
+//         reactive: false
+//     });
+// };
 
 
-    switch (axis) {
-        case "x":
-            var coord = this.CSS.left;
-            break;
-        case "y":
-            var coord = this.CSS.top;
-            break;
-        case "z":
-            var coord = 0;
-            break;
-        case "scaleX":
-            var coord = 1;
-            break;
-        case "scaleY":
-            var coord = 1;
-            break;
-        case "h":
-            var coord = this.displayOptions.editor.size.height / 1;
-            break;
-        case "w":
-            var coord = this.displayOptions.editor.size.width / 1;
-            break;
-        default:
-            return "";
-    }
+// Template.jmpressSlide.getJmpressData = function(axis) {
+//     logger.info("Template.jmpressSlide.getJmpressData", axis);
+//     switch (axis) {
+//         case "x":
+//             var coord = parseFloat(this.displayOptions.jmpress.positions.x);
+//             break;
+//         case "y":
+//             var coord = parseFloat(this.displayOptions.jmpress.positions.y);
+//             break;
+//         case "z":
+//             var coord = 0;
+//             break;
+//         default:
+//             return "";
+
+//     }
+//     //            logger.log(coord, parseFloat(this.displayOptions.jmpress.positions.y));
+//     return coord;
+// };
 
 
-    return coord;
-};
+// /**
+//  * jmpress mode
+//  */
+// Template.elementsAreaJmpress.elements = function() {
+//     logger.info("Template.elementsAreaJmpress.elements");
+//     return Elements.find({
+//         slideReference: {
+//             $in: [this._id]
+//         }
+//     });
+// };
+

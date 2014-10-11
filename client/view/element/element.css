@@ -1,11 +1,14 @@
 
-#modalCurrentEditing {
-    /*background-color: gray;*/
-   position: absolute;
-    top: 70px;
-    width: 900px;
-    height: 700px;
+/*******generic CSS*********/
+
+.element{
+    border : dashed 1px blue;
 }
+
+
+
+/*******specific for slideEditor mode*********/
+
 
 #modalCurrentEditing .wrapper-element-currentEditing{
     position: absolute;
