@@ -1,4 +1,4 @@
-// Set up a logger.
+//MIGATION DONE
 
 startResizeElement = function() {
   logger.info("startResizeElement", this._id,this.id);

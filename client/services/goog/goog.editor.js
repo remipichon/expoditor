@@ -1,10 +1,12 @@
-//// MIGRATION DONE
+GoogEditor = function() {};
 
-makeEditableCallback = function(e) {
+
+GoogEditor.prototype.makeEditableCallback = function(e) {
     e.stopPropagation();
     if (updateWithLocksControler.apply(Elements.findOne({
         _id: this._id
     }))) {
+        logger.info("GoogEditor.makeEditableCallback", this._id);
 
 
         //super listener jQuery qui s'auto off et permet de desactiver les editor lorqu'on clique ailleurs
@@ -32,12 +34,12 @@ makeEditableCallback = function(e) {
     }
 }
 
-makeUneditableCallback = function(e) {
+GoogEditor.prototype.makeUneditableCallback = function(e) {
     e.stopPropagation();
 
     if (this.isUneditable()) return;
 
-    logger.info("makeUneditableCallback", this._id);
+    logger.info("GoogEditor.makeUneditableCallback", this._id);
     $("#" + this._id + '-currentEditing-wrapper').toggleClass('currentlyEditingByMe');
     this.makeUneditable();
 
@@ -47,21 +49,21 @@ makeUneditableCallback = function(e) {
     var button = goog.dom.getElement('quitEditTexteButton');
     goog.style.setOpacity(button, '0');
 
-    
+
     removeLocksControler.call(Elements.findOne({
         _id: this._id
     }));
 }
 
-updateFieldContents = function(e) {
+GoogEditor.prototype.updateFieldContents = function(e) {
     var content = this.getCleanContents();
-    logger.info('makeUneditableCallback', content);
+    logger.info('GoogEditor.makeUneditableCallback', content);
     if (Session.get("heavyRefresh")) updateSlideElementModel.apply(this, [content]);
 }
 
-setEditor = function(idElement) {
+GoogEditor.prototype.setEditor = function(idElement) {
     if (typeof idElement === "undefined") return;
-    logger.info("setEditor ", idElement);
+    logger.info("GoogEditor.setEditor ", idElement);
 
     var myField = new goog.editor.Field(idElement);
     myField.id = idElement;
@@ -103,9 +105,9 @@ setEditor = function(idElement) {
     goog.events.listen(goog.dom.getElement(button), goog.events.EventType.CLICK, makeUneditableCallback, 'false', myField);
     //TODO handle an event fired instead of trigger click
     //
-    
+
     //try for giving the editor to everyone
-    $("#"+idElement).data("editorInstance",myField);
+    $("#" + idElement).data("editorInstance", myField);
 
     return myField;
 }
