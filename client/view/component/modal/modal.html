@@ -1,0 +1,27 @@
+<template name='modalTemplate'>
+    {{#if isVisible}}
+        <div id='modalSelectSlideshow'>
+            <div>
+                <p> Choose a slideshow to load </p>                
+                {{data}}
+                {{>listSlideshow}}
+            </div>
+           {{>cancel}}
+           {{>validate}}
+        </div>
+   {{/if}}
+</template>
+
+<template name='cancel'>
+   <input class='cancel button' type='button' value='cancel'/> 
+</template>
+
+<template name='validate'>
+   <input class='validate button' type='button' value='validate'/> 
+</template>
+
+<template name='listSlideshow'>
+    {{#each slideshowList}}
+            <input type='button' value='{{this}}'/>
+    {{/each}}
+</template>

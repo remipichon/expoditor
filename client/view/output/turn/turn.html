@@ -1,25 +1,23 @@
 <!---------------------------- slide container ---------------------------->
 
-<template name='deckContainer'>   
-  <div>page</div>
+<template name='turnContainer'>   
     {{#each slides}}
-         {{> deckSlide}}
+         {{> turnSlide}}
     {{/each}}
 </template>
 
 
 <!---------------------------- slide  ---------------------------->
 
-<template name='deckSlide'>
-    <section id='{{_id}}' class='slide'>        
+<template name='turnSlide'>
+    <div id='{{_id}}' class='page'>        
          <h1> {{informations.title}} </h1>         
          {{> elementsArea}}
-    </section>      
-</template>
+    </div>      
+</template> 
 
-  
+
 <!---------------------------- element container ---------------------------->
 
 
 <!---------------------------- element ---------------------------->
-

@@ -1,0 +1,33 @@
+<!---------------------------- slide container ---------------------------->
+
+<template name='editorContainer' > 
+    {{#each slides}}
+         {{> editorSlide}}
+    {{/each}}
+</template>
+
+<template name='modalCurrentEditing'>
+    <div id='modalCurrentEditing'>
+      {{#each editorSlideCurrentEditing}}
+          {{> editorSlideCurrentEditingT}}
+      {{/each}}
+    </div>
+</template>
+
+<!---------------------------- slide  ---------------------------->
+
+<template name='editorSlide'>
+    <div id='{{_id}}' class='slide {{isLocked}} {{isActive}}' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px; top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px ;transform:scale({{getEditorData 'scaleX'}},{{getEditorData 'scaleY'}})'> 
+         {{> deleteSlide }}
+         {{> editSlideContent}}
+         <p class='title'> {{order}} - {{informations.title}} </p>
+    
+      {{> elementsArea}}
+    </div>      
+</template> 
+
+<template name='editorSlideCurrentEditing'>
+    <div id='{{_id}}'>   
+        {{> elementsAreaCurrentEditing}}
+    </div>      
+</template> 

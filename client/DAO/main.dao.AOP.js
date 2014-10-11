@@ -57,7 +57,7 @@ for (strKey in logginAopDA0) {
 
 
 	Aop.around("update|delete", function(f) {
-		logger.info("   AOPbefore "+strKey+"." + f.fnName, " on component._id",this._id,"which is",this.id,"on the DOM";
+		logger.info("   AOPbefore "+strKey+"." + f.fnName, "on component._id",this._id,"which is",this.id,"on the DOM");
 		var retour = Aop.next(f, SlideshowHelper.prototype); //mandatory
 		logger.info("   AOPafter  "+strKey+"." + f.fnName, "altered", retour,"documents");
 		return retour; //mandatory

@@ -1,0 +1,38 @@
+<!---------------------------- element container ---------------------------->
+
+<template name='elementsArea'>
+    <div class='elementsArea'>        
+        {{#each elements}}              
+          {{> element}}
+        {{/each}}         
+    </div>   
+</template>
+
+<template name='elementsAreaCurrentEditing'>
+    <div class='elementsAreaCurrentEditing' style="width:900px; height:700px;">        
+        {{#each elements}}         
+            {{> elementCurrentEditing}}
+        {{/each}}         
+    </div>
+</template>
+
+
+<!---------------------------- element ---------------------------->
+
+<template name='element'>
+    <div id='{{_id}}-wrapper' class=' wrapper-element element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px; top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px ;transform:scale({{getEditorData 'scaleX'}},{{getEditorData 'scaleY'}}); font-size:{{getFontSize}}px' >
+        <div id='{{_id}}' class='editor {{type}}'></div>       
+    </div>
+</template>
+
+<template name='elementCurrentEditing'>
+   <div id='{{_id}}-currentEditing-wrapper' class='{{isLocked}} wrapper-element-currentEditing element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px;top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px; '>
+      {{>editTexteContent}}
+      {{>deleteElement}}
+      <div id='{{_id}}-dragMe' class='elementDragMe'> {{! has to wrapp text in order to get event bubbling because of texte is z-index upper than dragme}}
+        <div id='{{_id}}-currentEditing' class='editor {{type}}'>
+            {{{content}}}
+        </div>       
+      </div>
+    </div>  
+</template>

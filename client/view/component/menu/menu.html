@@ -1,0 +1,47 @@
+
+<template name='toolbar'>
+    <div id='toolbar'></div>
+</template>  
+
+
+
+
+<template name='buttons'>
+    <div id="buttons" class="goog-toolbar goog-toolbar">
+      <div id="loadSlideshow" class="goog-toolbar-button">Load Slideshow</div>
+      <div id="createSlideshow" class="goog-toolbar-button">Create Slideshow</div>
+      <div id="updateSlideshow" class="goog-toolbar-button">Update Slideshow</div>
+      <div id="deleteSlideshow" class="goog-toolbar-button">Delete Slideshow</div>
+      <hr>
+      <div id="launchSlideshow" class="goog-toolbar-menu-button">
+        Launch Slideshow
+        <div id="decoratedMenuLaunch" class="goog-menu">
+          <div id="launchJmpress" class="goog-menuitem">jmpressjs</div>
+          <div id="launchDeck" class="goog-menuitem">deckjs</div>
+          <div id="launchTurn" class="goog-menuitem">turnjs</div>
+        </div>
+      </div>
+      <div dir='rtl' id="backToEditor" class="goog-toolbar-button goog-toolbar-button-disabled">
+        Back to editor
+      </div>
+      <br>
+      <div id="createSlide" class="goog-toolbar-button">Create Slide</div>
+
+
+
+      <div id="showTimeline" class="goog-toolbar-toggle-button goog-toolbar-button-checked">
+        Show Timeline
+      </div>
+    </div>
+
+</template>
+
+
+
+<!---------------------------- button   ---------------------------->
+
+<template name='deleteSlide'><input type='button' class='deleteSlide' value='X'></template>
+<template name='deleteElement'><input type='button' class='deleteElement' value='X'></template>
+
+<template name='editSlideContent'><input type='button' class='editSlideContent' value='edit'></template>
+<template name='editTexteContent'><input type='button' class='editTextContent' value='edit'></template>

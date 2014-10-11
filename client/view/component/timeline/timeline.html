@@ -1,0 +1,55 @@
+<!---------------------------- slide container ---------------------------->
+
+<template name="timeline">
+    <div id="timeline">
+      <h2 class='timeline-slides-title'> Timeline </h2>
+      {{#each slides}}
+              {{> timelineSlide}}
+      {{/each}}
+    </div>  
+</template> 
+
+<template name="clonedTimeline">
+    <div class='cloned-slides' id='cloned-slides'>
+      {{#each slides}}
+              {{> clonedTimelineSlide}}
+      {{/each}}
+    </div>
+</template>  
+
+
+<!---------------------------- slide  ---------------------------->
+
+<template name="timelineSlide">
+  <div class="timeline-slide" id='{{_id}}-timeline'> 
+      <p class='title'> {{informations.title}}_{{order}} </p>
+      {{> elementsAreaTimeline}}
+  </div>
+</template> 
+
+<template name="clonedTimelineSlide">
+  <div class="timeline-slide" id='{{_id}}-timeline-cloned'> 
+      <p class='title'> {{informations.title}}_{{order}} </p>
+      {{> elementsAreaTimeline}}
+  </div>
+</template>
+
+
+<!---------------------------- element container ---------------------------->
+
+<template name='elementsAreaTimeline'>
+    <div class='elementsAreaTimeline'>        
+        {{#each elements}}              
+          {{> elementTimeline}}
+        {{/each}}         
+    </div>   
+</template>
+
+
+<!---------------------------- element ---------------------------->
+
+<template name='elementTimeline'>
+    <div id='{{_id}}-wrapper-timeline' class='wrapper-element-timeline element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px; top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px ;transform:scale({{getEditorData 'scaleX'}},{{getEditorData 'scaleY'}}); font-size:{{getFontSize}}px' >
+        <div id='{{_id}}-timeline' class='{{type}}'></div>       
+    </div>
+</template>

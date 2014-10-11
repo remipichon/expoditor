@@ -1,0 +1,38 @@
+<!---------------------------- slide container ---------------------------->
+
+<template name='jmpressContainer'>  
+    {{#each slides}}
+         {{> jmpressSlide}}
+    {{/each}}
+</template>
+
+
+<!---------------------------- slide  ---------------------------->
+
+<template name='jmpressSlide'>
+    <div id='{{_id}}' class='step slide' 
+         data-x='{{getJmpressData 'x'}}' data-y='{{getJmpressData 'y'}}' data-z='{{getJmpressData 'z'}}' >        
+         <p class='title'> {{informations.title}} </p>         
+      {{> elementsAreaJmpress}}        
+    </div>    
+</template>
+
+
+<!---------------------------- element container ---------------------------->
+
+<template name='elementsAreaJmpress'>
+    <div class='elementsAreaJmpress'>        
+        {{#each elements}}              
+          {{> elementJmpress}}
+        {{/each}}         
+    </div>   
+</template>
+
+
+<!---------------------------- element ---------------------------->
+
+<template name='elementJmpress'>
+    <div id='{{_id}}-wrapper' class='wrapper-element element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px; top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px ;transform:scale({{getEditorData 'scaleX'}},{{getEditorData 'scaleY'}}); font-size:{{getFontSize}}px' >
+        <div id='{{_id}}' class='editor {{type}}'>{{content}}</div>       
+    </div>
+</template>
