@@ -1,4 +1,4 @@
-ElementDao = function(){};
+ElementDAO = function(){};
 
 /**
  * create an element texte in the slide currently editing (_id get from CurrentEditing)
@@ -6,7 +6,7 @@ ElementDao = function(){};
  * @return {[type]}         [description]
  */
 //createElementTexte
-ElementDao.prototype.createTexte = function(options) {
+ElementDAO.prototype.createTexte = function(options) {
     var d = new Date;
     var content = "ele:" + d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
     if (typeof options === "undefined") {
@@ -61,7 +61,7 @@ ElementDao.prototype.createTexte = function(options) {
  * @param  {boolean} getUpdateData wether or not return the update objet or really update data
  */
 //updateElementPos
-ElementDao.prototype.updatePos = function(getUpdateData) {
+ElementDAO.prototype.updatePos = function(getUpdateData) {
     var $element = $("#" + this.id)
     var top = parseFloat($element.css('top'));
     var left = parseFloat($element.css('left'));
@@ -126,8 +126,8 @@ ElementDao.prototype.updatePos = function(getUpdateData) {
  * @return {[type]}         [description]
  */
 //updateSlideElementModel
-ElementDao.prototype.updateContent = function(content) {
-    Elements.update(this._id, {
+ElementDAO.prototype.updateContent = function(content) {
+    return Elements.update(this._id, {
         $set: {
             content: content
         }
@@ -140,10 +140,10 @@ ElementDao.prototype.updateContent = function(content) {
  * @return {[type]} [description]
  */
 //deleteSlideElement
-ElementDao.prototype.delete = function() {
+ElementDAO.prototype.delete = function() {
     if (!userHasAccessToComponent.call(this)) {
         throw new Meteor.Error('500', 'deleteSlideElement : cannot remove an element locked');
     }
     //TODO ne pas supprimer l'element et seueleent sa reference
-    Elements.remove(this._id);
+    return Elements.remove(this._id);
 };

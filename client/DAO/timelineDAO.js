@@ -1,4 +1,4 @@
-TimlelineDAO = function(){};
+TimelineDAO = function(){};
 
 
 /**
@@ -6,10 +6,10 @@ TimlelineDAO = function(){};
  * @return {[type]} [description]
  */
 //updateOrder
-TimlelineDAO.prototype.updateOrder = function(newPos) {
+TimelineDAO.prototype.updateOrder = function(newPos) {
 	if (this instanceof jQuery) {
 		var _id = this.attr("id").split('-')[0];
 		var title = this.children('.title').html();
-		Slides.update({_id:_id},{$set:{order:parseInt(newPos)}});
+		return Slides.update({_id:_id},{$set:{order:parseInt(newPos)}});
 	}
 }

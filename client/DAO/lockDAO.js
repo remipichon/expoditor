@@ -64,7 +64,7 @@ LockDAO.prototype.removeLocksControler = function() {
         return;
 
     //supression du lock
-    Locks.update(
+    return Locks.update(
         lock._id, {
             $set: {
                 user: null

@@ -70,13 +70,13 @@ SlideDAO.prototype.create = function(options) {
 
 //delete
 SlideDAO.prototype.delete = function() {
-    Slides.remove(this._id);
+    return Slides.remove(this._id);
 };
 
 
 //updateSlideTitleModel
 SlideDAO.prototype.updateTitle = function() {
-    Slides.update(this._id, {
+    return Slides.update(this._id, {
         $set: {
 
             "informations.title": this.informations.title
