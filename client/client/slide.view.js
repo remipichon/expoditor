@@ -20,13 +20,14 @@ Template.editorContainer.slides = function() {
  * if a slide is added to collection CurrentEditing, it active the modal related
  * @return {[cursor]} one slide max, if not empty
  */
-Template.modalCurrentEditing.editorSlideCurrentEditing = function() {
+Template.modalCurrentEditing.editorCurrentEditing = function() {
     //console.info("Template.modalCurrentEditing.editorSlideCurrentEditing");
     if (CurrentEditing.find({}).fetch().length > 1) {
         throw new Meteor.Error("500","More than one slide in CurrentEditing");
         //console.error("Template.modalCurrentEditing.editorSlideCurrentEditing","More than one slide in CurrentEditing");
     }
     return CurrentEditing.find({});
+    //return null;
 };
 
 
