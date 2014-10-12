@@ -1,6 +1,9 @@
-/**
+	/**
  * binding by goog.listen when initToolbar
  */
+
+
+//// MIGRATION DONE
 
 createSlideControler = function() {
 	logger.info("createSlideControler");
@@ -16,27 +19,6 @@ createSlideControler = function() {
 
 
 
-/**
- * switch to slide content editor mode
- */
-Template.editSlideContent.events({
-	'click': function(event) {
-		event.stopPropagation();
-		editSlideContent.call(this);
-	}
-});
-
-Template.editorSlide.events({
-	'dblclick': function() {
-		updateSlideTitleControler.call(this);
-	}
-});
-
-Template.deleteSlide.events({
-	"click": function() {
-		deleteSlide.call(this);
-	}
-});
 
 
 

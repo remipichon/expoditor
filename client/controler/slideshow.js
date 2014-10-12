@@ -1,7 +1,6 @@
+SlideshowControler = function(){};
 
-//// MIGRATION DONE
-
-createSlideshowControler = function(callbackReturn) {
+SlideshowControler.prototype.createSlideshowControler = function(callbackReturn) {
     logger.info("createSlideshowControler");
     if (typeof callbackReturn === "number") { //is it the callback ?
         if (callbackReturn !== 1) { //there was an error
@@ -22,7 +21,7 @@ createSlideshowControler = function(callbackReturn) {
 
 };
 
-createSlideshowModel = function(options, callback) {
+SlideshowControler.prototype.createSlideshowModel = function(options, callback) {
     logger.info("createSlideshowModel ", options);
     Meteor.call('createSlideshow', options, function(error, result) {
         if (typeof error !== "undefined") {
@@ -39,7 +38,7 @@ createSlideshowModel = function(options, callback) {
 };
 
 
-updateSlideshowControler = function() {
+SlideshowControler.prototype.updateSlideshowControler = function() {
     logger.info("updateSlideshowControler");
     var title = Slideshow.findOne({}).informations.title;
     title = prompt("Enter a new title for slideshow \n(you also can dblClick on title to edit)", title);
@@ -50,7 +49,7 @@ updateSlideshowControler = function() {
 };
 
 
-updateSlideshowModel = function(options) {
+SlideshowControler.prototype.updateSlideshowModel = function(options) {
     logger.info("updateSlideshowModel");
     if (typeof options.title === "undefined") {
         logger.warnig("updateSlideshow : title undefined");
@@ -66,7 +65,7 @@ updateSlideshowModel = function(options) {
     });
 };
 
-deleteSlideshowControler = function() {
+SlideshowControler.prototype.deleteSlideshowControler = function() {
     logger.info("deleteSlideshowControler");
     var title = Slideshow.findOne().informations.title;
     var answ = confirm("Do you really want to delete all slideshow " + title + " ? It will affect all users, you should'nt do that...");
@@ -76,7 +75,7 @@ deleteSlideshowControler = function() {
 };
 
 
-deleteSlideshowModel = function() {
+SlideshowControler.prototype.deleteSlideshowModel = function() {
     logger.info("deleteSlideshowModel");
     Meteor.call('removeSlideshow', Slideshow.findOne({})._id, Meteor.userId(), function(error, result) {
         if (typeof error !== "undefined") {
@@ -93,7 +92,7 @@ deleteSlideshowModel = function() {
 
 
 
-getSlideshowList = function(callback) {
+SlideshowControler.prototype.getSlideshowList = function(callback) {
     logger.info("getSlideshowList");
     if (typeof callback !== "function")
         callback = printResult;
@@ -110,7 +109,7 @@ getSlideshowList = function(callback) {
 };
 
 
-getSlideshowControler = function(callbackReturn) {
+SlideshowControler.prototype.getSlideshowControler = function(callbackReturn) {
     logger.info("getSlideshowControler");
     if (typeof callbackReturn === "undefined") {
         getSlideshowList(getSlideshowControler);
@@ -132,7 +131,7 @@ getSlideshowControler = function(callbackReturn) {
 
 
 
-getSlideshowModel = function(options, callback) {
+SlideshowControler.prototype.getSlideshowModel = function(options, callback) {
     logger.info("getSlideshowModel", options);
     if (Meteor.userId() === null) {
         alert("you have to be connected as a user \nlogin : user1@yopmail.com \npswd : user1user1");

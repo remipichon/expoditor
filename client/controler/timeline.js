@@ -1,8 +1,9 @@
+/***************  EVENTS ***************/
 
-//// MIGRATION DONE
 
+TimelineControler = function(){};
 
-cloneSlide = function(i, doSetSortable) {
+TimelineControler.prototype.cloneSlide = function(i, doSetSortable) {
 
   logger.info("cloneSlide", this.id, i);
 
@@ -29,7 +30,7 @@ cloneSlide = function(i, doSetSortable) {
 
 
 
-setSortable = function() {
+TimelineControler.prototype.setSortable = function() {
   logger.info("setSortable");
   $("#timeline").sortable({
 
@@ -89,7 +90,7 @@ setSortable = function() {
 
 }
 
-updateOrderControler = function() {
+TimelineControler.prototype.updateOrderControler = function() {
   logger.info("updateOrderControler");
   //met à jour les data-pos des clones
   $("#timeline .timeline-slide").each(function() {
@@ -107,7 +108,7 @@ updateOrderControler = function() {
   updateOrderControlerVersModel();
 }
 
-updateOrderControlerVersModel = function() {
+TimelineControler.prototype.updateOrderControlerVersModel = function() {
   logger.info("updateOrderControlerVersModel");
   $("#timeline .timeline-slide").each(function() {
     var item = $(this);

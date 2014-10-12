@@ -1,3 +1,7 @@
+
+//// MIGRATION DONE
+
+
 /**
  * Remote controler
  *
@@ -17,23 +21,23 @@
  **********************************************************/
 
 
-subscriptionSlideshow = null;
-subscriptionSlides = null;
-subscriptionElements = null;
-// subscriptionRemote = null;
-subscriptionLocks = null;
+// subscriptionSlideshow = null;
+// subscriptionSlides = null;
+// subscriptionElements = null;
+// // subscriptionRemote = null;
+// subscriptionLocks = null;
 
-Slideshow = new Meteor.Collection("slideshow");
-Slides = new Meteor.Collection("slides", {
-    idGeneration: 'MONGO'
-});
-Elements = new Meteor.Collection("elements");
-Locks = new Meteor.Collection("lock");
+// Slideshow = new Meteor.Collection("slideshow");
+// Slides = new Meteor.Collection("slides", {
+//     idGeneration: 'MONGO'
+// });
+// Elements = new Meteor.Collection("elements");
+// Locks = new Meteor.Collection("lock");
 
-//slide en cours d'édition
-CurrentEditing = new Meteor.Collection('currentEditing', {
-    connection: null
-});
+// //slide en cours d'édition
+// CurrentEditing = new Meteor.Collection('currentEditing', {
+//     connection: null
+// });
 
 //pour conversion editor vers jmpress
 ratio = 5;
@@ -57,6 +61,7 @@ toolbarButton = null;
  * display block mode params and hide all other block existing in the other mode
  * @param  {str} mode describe mode which mode to show
  */
+//MIG
 displayBlockAccordingToEditorMode = function(modeToDisplay) {
     logger.info("displayBlockAccordingToEditorMode", modeToDisplay)
     _.each(modeBlock, function(blockList, mode) {
@@ -98,90 +103,9 @@ enableLog = function() {
 
 }
 
-/**********************************************************
- * manage live Remote
- **********************************************************/
-Meteor.startup(function() {
-
-    logger = log.noConflict();
-    logger.setLevel("trace");
-    logger.log = function() {
-        var args = Array.prototype.slice.call(arguments);
-        console.log.apply(console, args);
-    }
- 
-    
-
-    logger.debug("logger init");
-
-    Hooks.init();
-    // disableLog();
-    //init toolbar, global pour l'init des editeurs de textes
-    toolbar = setToolbar();
-    toolbarButton = initButtons();
-
-    //affiche les block pour le slideshowMode
-    displayBlockAccordingToEditorMode('slideshowMode');
 
 
-    /*
-    //listener jquery pour la remote
-    //keypress ne fire pas les arrow sont webkit et IE
-    $(document).on("keypress", function(event) {
-        //setTimeline();
-
-        var activeSlide = null;
-        if (Session.get("clientMode") === "jmpress") {
-            activeSlide = $("#jmpress-container .active").attr("id");
-        } else if (Session.get("clientMode") === "deck") {
-            activeSlide = $(".deck-container .deck-current").attr("id");
-        }
-        logger.log("active slide : ", activeSlide);
-        if (activeSlide === null)
-            return;
-
-        switch (event.keyCode) {
-            case 37: // left
-                setActive(activeSlide);
-                break;
-            case 38: // up
-                setActive(activeSlide);
-                break;
-            case 39: // right
-                setActive(activeSlide);
-                break;
-            case 8: // space
-                setActive(activeSlide);
-                break;
-            case 32: // space
-                setActive(activeSlide);
-                break;
-            case 40: // down
-                setActive(activeSlide);
-                break;
-            default:
-                return; // exit this handler for other keys
-        }
-
-    });
-*/
-    logger.log("init pres pour test");
-    Session.set("clientMode", "editor");
-    getSlideshowModel({
-        title: 'test'
-    });
-    /*setTimeout(function() {
-        $($(".editSlideContent")[0]).trigger('click');
-    }, 1000);*/
-
-    //add texte with dbl blick
-    goog.events.listen(goog.dom.getElement('modalCurrentEditing'), goog.events.EventType.DBLCLICK, addElementTexte)
-    goog.events.listen(goog.dom.getElement('editor-container'), goog.events.EventType.DBLCLICK, addSlide)
-    //edit slideshowTitle
-    goog.events.listen(goog.dom.getElement('slideshowTitle'), goog.events.EventType.DBLCLICK, updateSlideshowControler);
-
-});
-
+//MIG DONE
 addElementTexte = function(event) {
     logger.info("addElementTexte", event.offsetY, event.offsetX);
     if (event.target.className !== "elementsAreaCurrentEditing") {
@@ -198,6 +122,7 @@ addElementTexte = function(event) {
 
 }
 
+//MIG DONE
 addSlide = function(event) {
     logger.info("addSlide", event.offsetY, event.offsetX)
     createSlide({
@@ -209,41 +134,7 @@ addSlide = function(event) {
 
 }
 
-/*
- * listen to change on remote
- * ==> projet de ClaireZed
- */
-/*Remote.find({}).observeChanges({
-    changed: function(id, fields) {
-        logger.info("Remote.find({}).observeChanges.changed");
-        var remote = Remote.findOne({});
-        if (typeof remote !== "undefined") { //pour eviter une erreur la premeire fois
-            logger.info("Remote.find({}).observeChanges.changed", "follow slide", remote.activeSlideId);
-            var type = Session.get("clientMode");
-            if (type === "jmpress") {
-                $("#jmpress-container").jmpress("goTo", "#" + remote.activeSlideId);
-            } else if (type === "deck") {
-                $.deck("go", remote.activeSlideId);
-            } else {
 
-            }
-        }
-    }
-});*/
-
-
-
-/*setActive = function(activeSlide) {
-    logger.info("setActive in remote", activeSlide);
-    var remote = Remote.findOne();
-
-    Remote.update(remote._id, {
-        $set: {
-            activeSlideId: activeSlide
-        }
-    });
-
-};*/
 
 
 
@@ -251,12 +142,14 @@ addSlide = function(event) {
  * buttons to switch between editor and presentator technos
  **********************************************************/
 
+//MIG
 launchEditorControler = function() {
     logger.info("launchEditorControler");
     this.getChild('backToEditor').setEnabled(false);
     Session.set("clientMode", "editor");
 }
 
+//MIG
 launchJmpressControler = function() {
     logger.info("launchJmpressControler");
     this.getChild('backToEditor').setEnabled(true);
@@ -266,6 +159,7 @@ launchJmpressControler = function() {
 
 }
 
+//MIG
 launchDeckControler = function() {
     logger.info("launchDeckControler");
     this.getChild('backToEditor').setEnabled(true);
@@ -273,6 +167,7 @@ launchDeckControler = function() {
     setTimeout(initDeck, 200);
 }
 
+//MIG
 launchTurnControler = function() {
     logger.info("launchTurnControler");
     this.getChild('backToEditor').setEnabled(true);
@@ -285,6 +180,7 @@ launchTurnControler = function() {
 
 }
 
+//MIG
 showTimelineControler = function() {
     logger.info("showTimelineControler");
     goog.style.showElement(goog.dom.getElement("timeline"), (goog.dom.getElement('showTimeline').getAttribute("aria-pressed") === "true") ? true : false);
@@ -392,7 +288,7 @@ setToolbar = function() {
     return myToolbar;
 }
 
-
+//MIG
 quitEditSlide = function() {
     logger.info("quitEditSlide");
     //cancel all remaining editor (if exists)

@@ -1,21 +1,43 @@
+/***************  EVENTS ***************/
 
 
+Template.deleteElement.events({
+    'click': function(event) {
+        deleteSlideElement.call(this);
+    }
+});
 
-// MIGRATION DONE
+
+ElementControler = function(){};
 
 
-
-updateSlideElementControler = function() {
+ElementControler.prototype.updateSlideElementControler = function() {
     logger.info("updateSlideElementControler");
     updateWithLocksControler.apply(this, updateSlideElementModel);
 };
 
-doubleClickElement = function(event){
+//doubleClickElement
+ElementControler.prototype.doubleClick = function(event){
     logger.info("doubleClickElement");
     event.stopPropagation();
 }
 
+//addElementTexte
+ElementControler.prototype.addTexte = function(event) {
+    logger.info("addElementTexte", event.offsetY, event.offsetX);
+    if (event.target.className !== "elementsAreaCurrentEditing") {
+        logger.warn("addElementTexte : magouille pour prevent le dblclick on element to create element");
+        return;
+    }
 
+    createElementTexte({
+        pos: {
+            y: event.offsetY * ratioContentMode,
+            x: event.offsetX * ratioContentMode
+        }
+    });
+
+}
 
 
 /*********************
