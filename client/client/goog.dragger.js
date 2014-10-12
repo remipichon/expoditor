@@ -1,3 +1,5 @@
+//MIG DONE
+
 startDragSlide = function(e) {
     logger.info("startDragSlide");
     e.stopPropagation();
