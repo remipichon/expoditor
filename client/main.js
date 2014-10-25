@@ -29,7 +29,7 @@ Meteor.startup(function() {
     logger.setLevel("trace");
     logger.log = function() {
         var args = Array.prototype.slice.call(arguments);
-        console.log.apply(console, args);
+        //console.log.apply(console, args);
     }
 
     logger.debug("logger init");
@@ -37,9 +37,11 @@ Meteor.startup(function() {
 
     //INJECT CONTROLER
 	elementControler = new ElementControler();
+    elementControler.instanceName = "elementControler"; 
 
 	//INJECT SERVICES
 	googEditor = new GoogEditor();
+	googDragger = new GoogDragger();
 	resizeService = new ResizeService();
 
 

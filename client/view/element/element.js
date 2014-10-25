@@ -51,33 +51,22 @@ Meteor.startup(function() {
 Template.elementCurrentEditing.rendered = function() {
     //logger.log("Template.elementCurrentEditing.rendered", this.data._id);
 
+    //set text editor
     this.data.id = this.data._id + '-currentEditing';
     googEditor.init(this.data.id);
 
-    //set resize and draggable on wrapper
+    //set draggable on wrapper
     this.data.id = this.data.id + '-wrapper';
-
     var dragged = goog.dom.getElement(this.data._id + '-currentEditing-wrapper');
     var dr = goog.dom.getElement(this.data._id + '-dragMe');
-    var dragger = new goog.fx.Dragger(dragged, dr);
-    goog.events.listen(dragger, 'start', callerStartDrag, 'false', this.data);
-    // if (Session.get("heavyRefresh")) 
-    goog.events.listen(dragger, goog.fx.Dragger.EventType.DRAG, callerDrag, 'false', this.data);
-    goog.events.listen(dragger, 'end', callerEndDrag, 'false', this.data);
+    googDragger.init(dragged,dr,this.data,elementControler.instanceName);
 
-    resizeService.init(this.data);
+    //set resize on wrapper    
+    var widgetbox = goog.dom.getElement(this.data.id);
+    resizeService.init(widgetbox,this.data,elementControler.instanceName);
 }
 
-callerStartDrag = function(e){
-    e.stopPropagation();
-    elementControler.startDrag(this);
-}
-callerDrag = function() {
-    elementControler.drag(this);
-}
-callerEndDrag = function() {
-    elementControler.endDrag(this);
-}
+
 
 /********************** HELPERS *********************/
 
@@ -88,7 +77,7 @@ callerEndDrag = function() {
  */
 Template.element.getEditorData = function(axis) {
     // if (typeof this.CSS === 'undefined') {
-    logger.log("Template.element.getEditorData", this._id);
+//    logger.log("Template.element.getEditorData", this._id);
 
     this.center = {
         x: parseFloat(this.displayOptions.editor.positions.x),

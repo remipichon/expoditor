@@ -160,3 +160,8 @@ ElementDAO.prototype.updateContent = function(content) {
         }
     });
 };
+
+
+ElementDAO.prototype.updateSize = function(){
+    
+}

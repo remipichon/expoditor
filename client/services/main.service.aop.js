@@ -1,21 +1,26 @@
 /**
  * Object on which simple logging is added through AOP
- * before call : Object.functionName 
+ * before call : Object.functionName
  * @type {Object}
  */
 var logginAop = {
-	"GoogEditor": GoogEditor,
-	"ResizeService": ResizeService
+	//"GoogEditor": GoogEditor,
+	"GoogDragger": GoogDragger,
+	//"ResizeService": ResizeService
 };
 
 
 for (strKey in logginAop) {
-	var obj = logginAop[strKey];
-	console.log("add AOP on",strKey);
+	(function(strKey) {
+		var obj = logginAop[strKey];
+		console.log("add AOP on", strKey);
 
-	Aop.around("", function(f) {
-		logger.info("   Service   "+strKey+"." + f.fnName);
-		var retour = Aop.next(f, obj.prototype); //mandatory
-		return retour; //mandatory
-	}, [obj.prototype]);
+		Aop.around("", function(f) {
+			logger.info("   Service   " + strKey + "." + f.fnName + " called with ", f.arguments);
+			var retour = Aop.next(f, obj.prototype); //mandatory
+			return retour; //mandatory
+		}, [obj.prototype]);
+
+	})(strKey);
+
 }
