@@ -6,13 +6,15 @@
 
 
 updateSlideElementControler = function() {
-    logger.info("updateSlideElementControler");
-    updateWithLocksControler.apply(this, updateSlideElementModel);
+    logger.error("updateSlideElementControler");
+    // logger.info("updateSlideElementControler");
+    // updateWithLocksControler.apply(this, updateSlideElementModel);
 };
 
 doubleClickElement = function(event){
-    logger.info("doubleClickElement");
-    event.stopPropagation();
+    logger.error("doubleClickElement");
+    // logger.info("doubleClickElement");
+    // event.stopPropagation();
 }
 
 

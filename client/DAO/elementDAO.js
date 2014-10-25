@@ -1,34 +1,57 @@
-ElementDAO = function(){};
+ElementDAO = function(args) {
+
+    //constructor
+    this.defaultPos = {
+        x: 200,
+        y: 200
+    };
+
+    this.defaultContent = "Type text here";
+
+    if (typeof args === "string") {
+        this._id = args;
+    } else if (typeof args === "object") {
+        //TODO merge this et args
+    } else {
+        this._id = null;
+    }
+}
+
+//methods
+
+ElementDAO.prototype.delete = function() {
+    if (!userHasAccessToComponent.call(this)) {
+        throw new Meteor.Error('500', 'deleteSlideElement : cannot remove an element locked');
+    }
+    //TODO ne pas supprimer l'element et seuelement sa reference
+    return Elements.remove(this._id);
+};
+
 
 /**
  * create an element texte in the slide currently editing (_id get from CurrentEditing)
  * @param  {[object]} options nothing by now
  * @return {[type]}         [description]
  */
-//createElementTexte
-ElementDAO.prototype.createTexte = function(options) {
+ElementDAO.prototype.create = function() {
     var d = new Date;
     var content = "ele:" + d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
-    if (typeof options === "undefined") {
-        var options = {};
-    }
-    if (typeof options.pos === "undefined") {
-        options.pos = {
-            x: 200,
-            y: 200
-        };
-    }
 
-    if(typeof options.targetSlide === 'undefined'){
-        if(typeof CurrentEditing.findOne({}) === 'undefined'){
-            throw new Meteor.Error('500','createElementTexte : CurrentEditing.findOne({}) or targetSlide missing')
+    if (typeof this.pos !== "object" || typeof this.pos.x !== "number" || typeof this.pos.y !== "number") {
+        this.pos = this.defaultPos;
+    };
+
+
+    if (typeof this.targetSlide !== 'string') {
+        if (typeof CurrentEditing.findOne({}) === 'undefined') {
+            throw new Meteor.Error('500', 'ElementDAO.createTexte : CurrentEditing.findOne({}) or targetSlide missing')
         }
         var slideId = CurrentEditing.findOne({})._id;
-    }else{
-        var slideId = options.targetSlide;
+    } else {
+        var slideId = this.targetSlide;
     }
 
-    return Elements.insert({
+    var el = Elements.insert({
         _id: Random.id(),
         slideReference: [
             slideId
@@ -37,14 +60,14 @@ ElementDAO.prototype.createTexte = function(options) {
         type: "text",
         displayOptions: {
             editor: {
-                positions: options.pos,
+                positions: this.pos,
                 size: {
                     height: 100,
                     width: 200
                 }
             },
             jmpress: {
-                positions: options.pos,
+                positions: this.pos,
                 size: {
                     height: 100,
                     width: 200
@@ -52,7 +75,10 @@ ElementDAO.prototype.createTexte = function(options) {
             }
         }
     });
+    this._id = el;
+    return this._id;
 };
+
 
 
 /**
@@ -62,23 +88,23 @@ ElementDAO.prototype.createTexte = function(options) {
  */
 //updateElementPos
 ElementDAO.prototype.updatePos = function(getUpdateData) {
-    var $element = $("#" + this.id)
-    var top = parseFloat($element.css('top'));
-    var left = parseFloat($element.css('left'));
+    // var $element = $("#" + this.id)
+    // var top = parseFloat($element.css('top'));
+    // var left = parseFloat($element.css('left'));
 
-    this.CSS = {
-        top: top,
-        left: left
-    };
-    this.size = {
-        width: parseFloat(this.displayOptions.editor.size.width),
-        height: parseFloat(this.displayOptions.editor.size.height)
-    };
-    //si resize en cours les données dans la bd ne sont pas accurate
-    this.size = {
-        width: parseFloat($element.css('width')),
-        height: parseFloat($element.css('height'))
-    };
+    // this.CSS = {
+    //     top: top,
+    //     left: left
+    // };
+    // this.size = {
+    //     width: parseFloat(this.displayOptions.editor.size.width),
+    //     height: parseFloat(this.displayOptions.editor.size.height)
+    // };
+    // //si resize en cours les données dans la bd ne sont pas accurate
+    // this.size = {
+    //     width: parseFloat($element.css('width')),
+    //     height: parseFloat($element.css('height'))
+    // };
     this.ratio = {
         top: ratioContentMode,
         left: ratioContentMode
@@ -99,8 +125,9 @@ ElementDAO.prototype.updatePos = function(getUpdateData) {
 
 
     //petite verif que l'element ait effectivement été bougé
-    if (element.displayOptions.editor.positions.x == left && element.displayOptions.editor.positions.y == top) {
-        logger.log("updateElementPos : element didn't really move");
+    if (element.displayOptions.editor.positions.x == this.CSS.left 
+        && element.displayOptions.editor.positions.y == this.CSS.top) {
+        logger.info("ElementDAO.updatePos : element didn't really move");
         return;
     }
 
@@ -111,7 +138,7 @@ ElementDAO.prototype.updatePos = function(getUpdateData) {
         }
     }
 
-    if (typeof getUpdateData !== 'undefined' && getUpdateData) {
+    if (typeof getUpdateData === 'boolean' && getUpdateData) {
         return update;
     }
 
@@ -132,18 +159,4 @@ ElementDAO.prototype.updateContent = function(content) {
             content: content
         }
     });
-};
-
-
-/**
- * delete an element given by this._id
- * @return {[type]} [description]
- */
-//deleteSlideElement
-ElementDAO.prototype.delete = function() {
-    if (!userHasAccessToComponent.call(this)) {
-        throw new Meteor.Error('500', 'deleteSlideElement : cannot remove an element locked');
-    }
-    //TODO ne pas supprimer l'element et seueleent sa reference
-    return Elements.remove(this._id);
 };

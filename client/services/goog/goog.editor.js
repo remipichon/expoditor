@@ -61,9 +61,8 @@ GoogEditor.prototype.updateFieldContents = function(e) {
     if (Session.get("heavyRefresh")) updateSlideElementModel.apply(this, [content]);
 }
 
-GoogEditor.prototype.setEditor = function(idElement) {
+GoogEditor.prototype.init = function(idElement) {
     if (typeof idElement === "undefined") return;
-    logger.info("GoogEditor.setEditor ", idElement);
 
     var myField = new goog.editor.Field(idElement);
     myField.id = idElement;
@@ -90,19 +89,22 @@ GoogEditor.prototype.setEditor = function(idElement) {
 
     //send data
     goog.events.listen(myField, goog.editor.Field.EventType.DELAYEDCHANGE,
-        updateFieldContents, myField);
+        updateFieldContents, myField);//TOUPDATE
 
     //manage event
     //double click pour activer l'édition de texte
-    goog.events.listen(goog.dom.getElement(myField.id), goog.events.EventType.DBLCLICK, makeEditableCallback, 'false', myField);
+    goog.events.listen(goog.dom.getElement(myField.id), goog.events.EventType.DBLCLICK, 
+        makeEditableCallback, 'false', myField);//TOUPDATE
     logger.log('#', idElement, '.editTextContent');
     $('#' + idElement + '-wrapper .editTextContent').on('click', function() {
-        makeEditableCallback.call(myField);
+        makeEditableCallback.call(myField); //TOUPDATE
     });
 
     // click on button to disable editor
     var button = goog.dom.getElement('quitEditTexteButton');
-    goog.events.listen(goog.dom.getElement(button), goog.events.EventType.CLICK, makeUneditableCallback, 'false', myField);
+    goog.events.listen(goog.dom.getElement(button), goog.events.EventType.CLICK, 
+        makeUneditableCallback, 'false', myField); //TOUPDATE
+    
     //TODO handle an event fired instead of trigger click
     //
 

@@ -78,3 +78,20 @@ SlideControler.prototype.addSlide = function(event) {
     });
 
 }
+
+GoogDragger.prototype.startDragSlide = function(e) {
+    logger.info("GoogDragger.prototype.startDragSlide");
+    e.stopPropagation();
+    $("#" + this._id).toggleClass('dragged');
+}
+
+GoogDragger.prototype.endDragSlide = function(e) {
+    logger.info("GoogDragger.prototype.endDragSlide");
+    $("#" + this._id).toggleClass('dragged');
+    updateSlidePos.call(this);
+}
+
+GoogDragger.prototype.dragSlide = function(e) {
+    logger.info("GoogDragger.prototype.dragSlide");
+    updateSlidePos.call(this);
+}

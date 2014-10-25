@@ -42,7 +42,7 @@ Template.editorSlide.rendered = function() {
     this.data.id = this.data._id;
     var dragger = new goog.fx.Dragger(goog.dom.getElement(this.data._id));
     goog.events.listen(dragger, 'start', startDragSlide, 'false', this.data);
-    //if(Session.get("heavyRefresh")) goog.events.listen(dragger, goog.fx.Dragger.EventType.DRAG, dragSlide, 'false', this.data);    
+    if(Session.get("heavyRefresh")) goog.events.listen(dragger, goog.fx.Dragger.EventType.DRAG, dragSlide, 'false', this.data);    
     goog.events.listen(dragger, 'end', endDragSlide, 'false', this.data);
 
     //prevent doublclick    

@@ -12,12 +12,12 @@ var logginAop = {
 
 for (strKey in logginAop) {
 	var obj = logginAop[strKey];
-	console.log("add AOP on",strKey);
+	console.info("add AOP on", strKey);
 
 	Aop.around("", function(f) {
-		logger.info("   AOPbefore "+strKey+"." + f.fnName, "called with", ((arguments[0].arguments.length == 0) ? "no args" : arguments[0].arguments));
+		logger.info("   AOPbefore " + strKey + "." + f.fnName, "called with", ((arguments[0].arguments.length == 0) ? "no args" : arguments[0].arguments));
 		var retour = Aop.next(f, obj.prototype); //mandatory
-		logger.info("   AOPafter  "+strKey+"." + f.fnName, "which returned", retour);
+		logger.info("   AOPafter  " + strKey + "." + f.fnName, "which returned", retour);
 		return retour; //mandatory
 	}, [obj.prototype]);
 }
@@ -37,28 +37,29 @@ for (strKey in logginAop) {
 
 var logginAopDA0 = {
 	"ElementDAO": ElementDAO,
-	"SlideDAO": SlideDAO,
-	"TimelineDAO": TimelineDAO
+	//"SlideDAO": SlideDAO,
+	//"TimelineDAO": TimelineDAO
 };
 
 
+for (namespaceName in logginAopDA0) {
+	var namespace = logginAopDA0[namespaceName];
 
-for (strKey in logginAopDA0) {
-	var obj = logginAopDA0[strKey];
-	console.log("add AOP on",strKey);
+		console.info("add AOP on", namespaceName);
 
-	Aop.around("create", function(f) {
-		logger.info("   AOPbefore "+strKey+"." + f.fnName, "called with", ((arguments[0].arguments.length == 0) ? "no args" : arguments[0].arguments));
-		var retour = Aop.next(f, obj.prototype); //mandatory
-		logger.info("   AOPafter  "+strKey+"." + f.fnName, " component created with _id", retour._id);
-		return retour; //mandatory
-	}, [obj.prototype]);
+		Aop.around("create", function(fn) {
+			logger.info("   AOPbefore " + namespaceName + "." + fn.fnName);
+			var retour = Aop.next(fn,fn.self); //mandatory
+			logger.info("   AOPafter  " + namespaceName + "." + fn.fnName, " component created with _id", retour);
+			return retour; //mandatory
+		}, [namespace.prototype]);
 
 
-	Aop.around("update|delete", function(f) {
-		logger.info("   AOPbefore "+strKey+"." + f.fnName, "on component._id",this._id,"which is",this.id,"on the DOM");
-		var retour = Aop.next(f, obj.prototype); //mandatory
-		logger.info("   AOPafter  "+strKey+"." + f.fnName, "altered", retour,"documents");
-		return retour; //mandatory
-	}, [obj.prototype]);
+		Aop.around("update|delete", function(fn) {
+			logger.info("   AOPbefore " + namespaceName + "." + fn.fnName, "on component._id", fn.self._id, "which is", fn.self.id, "on the DOM");
+			var retour = Aop.next(fn,fn.self); //mandatory
+			logger.info("   AOPafter  " + namespaceName + "." + fn.fnName, "altered", retour, "documents");
+			return retour; //mandatory
+		}, [namespace.prototype]);
+
 }

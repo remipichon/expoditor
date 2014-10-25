@@ -44,7 +44,7 @@ ratio = 5;
 
 //reinit des variables de sessions
 Session.set('modalCurrentEditing', false);
-Session.set("heavyRefresh", false); //false to update positions and content less frequently
+Session.set("heavyRefresh", true); //false to update positions and content less frequently
 
 //id of block displayed according to editor mode
 modeBlock = {
@@ -106,21 +106,21 @@ enableLog = function() {
 
 
 //MIG DONE
-addElementTexte = function(event) {
-    logger.info("addElementTexte", event.offsetY, event.offsetX);
-    if (event.target.className !== "elementsAreaCurrentEditing") {
-        logger.warn("addElementTexte : magouille pour prevent le dblclick on element to create element");
-        return;
-    }
+// addElementTexte = function(event) {
+//     logger.info("addElementTexte", event.offsetY, event.offsetX);
+//     if (event.target.className !== "elementsAreaCurrentEditing") {
+//         logger.warn("addElementTexte : magouille pour prevent le dblclick on element to create element");
+//         return;
+//     }
 
-    createElementTexte({
-        pos: {
-            y: event.offsetY * ratioContentMode,
-            x: event.offsetX * ratioContentMode
-        }
-    });
+//     createElementTexte({
+//         pos: {
+//             y: event.offsetY * ratioContentMode,
+//             x: event.offsetX * ratioContentMode
+//         }
+//     });
 
-}
+// }
 
 //MIG DONE
 addSlide = function(event) {
@@ -194,6 +194,7 @@ getSlideshowControlerCaller = function() {
     getSlideshowControler();
 }
 
+//MIG
 initButtons = function() {
     logger.info("initButtons");
     var buttons = new goog.ui.Toolbar();
@@ -231,6 +232,7 @@ initButtons = function() {
 
 }
 
+//MIG
 setToolbar = function() {
     logger.info("setToolbar");
     // if(typeof toolbar !== 'undefined'){

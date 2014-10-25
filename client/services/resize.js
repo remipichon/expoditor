@@ -18,14 +18,10 @@ ResizeService.prototype.endResizeElement = function() {
 }
 
 
-ResizeService.prototype.setResize = function() {
-  logger.info("setResize",this.id);
-
-
+//setResize
+ResizeService.prototype.init = function() {
   // var EVENTS = goog.object.getValues(goog.ui.Component.EventType);
   // var EVENTS2 = goog.object.getValues(goog.ui.Resizable.EventType);
-
-
 
   var widgetbox = goog.dom.getElement(this.id);
 
@@ -42,9 +38,12 @@ ResizeService.prototype.setResize = function() {
   // goog.events.listen(resizeelem, EVENTS2, logEvent);
   
   $.extend(widgetbox,this);
-  goog.events.listen(resizeelem, goog.ui.Resizable.EventType.START_RESIZE, startResizeElement,'false',widgetbox);
-  goog.events.listen(resizeelem, goog.ui.Resizable.EventType.RESIZE, resizeElement,'false',widgetbox);
-  goog.events.listen(resizeelem, goog.ui.Resizable.EventType.END_RESIZE, endResizeElement,'false',widgetbox);
+  goog.events.listen(resizeelem, goog.ui.Resizable.EventType.START_RESIZE, 
+    startResizeElement,'false',widgetbox);
+  goog.events.listen(resizeelem, goog.ui.Resizable.EventType.RESIZE, 
+    resizeElement,'false',widgetbox);
+  goog.events.listen(resizeelem, goog.ui.Resizable.EventType.END_RESIZE, 
+    endResizeElement,'false',widgetbox);
   // };
 
 

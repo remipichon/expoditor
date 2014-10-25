@@ -59,53 +59,53 @@ updateFieldContents = function(e) {
     if (Session.get("heavyRefresh")) updateSlideElementModel.apply(this, [content]);
 }
 
-setEditor = function(idElement) {
-    if (typeof idElement === "undefined") return;
-    logger.info("setEditor ", idElement);
+// setEditor = function(idElement) {
+//     if (typeof idElement === "undefined") return;
+//     logger.info("setEditor ", idElement);
 
-    var myField = new goog.editor.Field(idElement);
-    myField.id = idElement;
-    var mongoId = idElement.split('-')[0]
-    myField._id = mongoId; //pour coller à miniMongo
+//     var myField = new goog.editor.Field(idElement);
+//     myField.id = idElement;
+//     var mongoId = idElement.split('-')[0]
+//     myField._id = mongoId; //pour coller à miniMongo
 
-    // Create and register all of the editing plugins you want to use.
-    myField.registerPlugin(new goog.editor.plugins.BasicTextFormatter());
-    myField.registerPlugin(new goog.editor.plugins.RemoveFormatting());
-    myField.registerPlugin(new goog.editor.plugins.UndoRedo());
-    myField.registerPlugin(new goog.editor.plugins.ListTabHandler());
-    myField.registerPlugin(new goog.editor.plugins.SpacesTabHandler());
-    myField.registerPlugin(new goog.editor.plugins.EnterHandler());
-    myField.registerPlugin(new goog.editor.plugins.HeaderFormatter());
-    myField.registerPlugin(
-        new goog.editor.plugins.LoremIpsum('Click here to edit'));
-    myField.registerPlugin(
-        new goog.editor.plugins.LinkDialogPlugin());
-    myField.registerPlugin(new goog.editor.plugins.LinkBubble());
+//     // Create and register all of the editing plugins you want to use.
+//     myField.registerPlugin(new goog.editor.plugins.BasicTextFormatter());
+//     myField.registerPlugin(new goog.editor.plugins.RemoveFormatting());
+//     myField.registerPlugin(new goog.editor.plugins.UndoRedo());
+//     myField.registerPlugin(new goog.editor.plugins.ListTabHandler());
+//     myField.registerPlugin(new goog.editor.plugins.SpacesTabHandler());
+//     myField.registerPlugin(new goog.editor.plugins.EnterHandler());
+//     myField.registerPlugin(new goog.editor.plugins.HeaderFormatter());
+//     myField.registerPlugin(
+//         new goog.editor.plugins.LoremIpsum('Click here to edit'));
+//     myField.registerPlugin(
+//         new goog.editor.plugins.LinkDialogPlugin());
+//     myField.registerPlugin(new goog.editor.plugins.LinkBubble());
 
-    // Hook the toolbar into the field.
-    var myToolbarController =
-        new goog.ui.editor.ToolbarController(myField, toolbar);
+//     // Hook the toolbar into the field.
+//     var myToolbarController =
+//         new goog.ui.editor.ToolbarController(myField, toolbar);
 
-    //send data
-    goog.events.listen(myField, goog.editor.Field.EventType.DELAYEDCHANGE,
-        updateFieldContents, myField);
+//     //send data
+//     goog.events.listen(myField, goog.editor.Field.EventType.DELAYEDCHANGE,
+//         updateFieldContents, myField);
 
-    //manage event
-    //double click pour activer l'édition de texte
-    goog.events.listen(goog.dom.getElement(myField.id), goog.events.EventType.DBLCLICK, makeEditableCallback, 'false', myField);
-    logger.log('#', idElement, '.editTextContent');
-    $('#' + idElement + '-wrapper .editTextContent').on('click', function() {
-        makeEditableCallback.call(myField);
-    });
+//     //manage event
+//     //double click pour activer l'édition de texte
+//     goog.events.listen(goog.dom.getElement(myField.id), goog.events.EventType.DBLCLICK, makeEditableCallback, 'false', myField);
+//     logger.log('#', idElement, '.editTextContent');
+//     $('#' + idElement + '-wrapper .editTextContent').on('click', function() {
+//         makeEditableCallback.call(myField);
+//     });
 
-    // click on button to disable editor
-    var button = goog.dom.getElement('quitEditTexteButton');
-    goog.events.listen(goog.dom.getElement(button), goog.events.EventType.CLICK, makeUneditableCallback, 'false', myField);
-    //TODO handle an event fired instead of trigger click
-    //
+//     // click on button to disable editor
+//     var button = goog.dom.getElement('quitEditTexteButton');
+//     goog.events.listen(goog.dom.getElement(button), goog.events.EventType.CLICK, makeUneditableCallback, 'false', myField);
+//     //TODO handle an event fired instead of trigger click
+//     //
     
-    //try for giving the editor to everyone
-    $("#"+idElement).data("editorInstance",myField);
+//     //try for giving the editor to everyone
+//     $("#"+idElement).data("editorInstance",myField);
 
-    return myField;
-}
+//     return myField;
+// }
