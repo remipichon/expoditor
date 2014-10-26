@@ -17,7 +17,7 @@ for (strKey in logginAop) {
 
 		Aop.around("", function(f) {
 			logger.info("   Service   " + strKey + "." + f.fnName + " called with ", f.arguments);
-			var retour = Aop.next(f, obj.prototype); //mandatory
+			var retour = Aop.next(f, f.self); //mandatory
 			return retour; //mandatory
 		}, [obj.prototype]);
 

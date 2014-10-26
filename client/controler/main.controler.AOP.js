@@ -5,6 +5,7 @@
  */
 var logginAop = {
 	"ElementControler": ElementControler,
+	"TimelineControler": TimelineControler
 };
 
 
@@ -15,7 +16,7 @@ for (namespace in logginAop) {
 
 		Aop.around("", function(f) {
 			logger.info("   Controler   " + namespace + "." + f.fnName);
-			var retour = Aop.next(f, obj.prototype); //mandatory
+			var retour = Aop.next(f, f.self); //mandatory
 			return retour; //mandatory
 		}, [obj.prototype]);
 

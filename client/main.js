@@ -38,6 +38,7 @@ Meteor.startup(function() {
     //INJECT CONTROLER
 	elementControler = new ElementControler();
     elementControler.instanceName = "elementControler"; 
+    timelineControler = new TimelineControler("timeline");
 
 	//INJECT SERVICES
 	googEditor = new GoogEditor();

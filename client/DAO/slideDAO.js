@@ -142,3 +142,15 @@ SlideDAO.prototype.updatePos = function(getUpdateData) {
 
     return Slides.update(slide._id, update);
 };
+
+
+SlideDAO.prototype.updateOrder = function() {
+    return Slides.update({
+        _id: this._id
+    }, {
+        $set: {
+            order: parseInt(this.order)
+        }
+    });
+
+}

@@ -72,17 +72,12 @@ Slides.find({}).observeChanges({
 /********************** RENDER **********************/
 
 Template.timelineSlide.destroyed = function() {
-   logger.info("emplate.timelineSlide.destroyed");
-    updateOrderControler();
+    timelineControler.updateOrder();
 
 }
 
 
 Template.timelineSlide.rendered = function() {
-	logger.info("Template.timelineSlide.rendered");
-	// settimelineOnSlide = function() {
-	// logger.log("render timelineslide");
-	// var setToTimeline = false;
 	//ca me saoul mais je mets cela là quand meme
 	if (typeof $("#timeline").data("timelineSlide") === "undefined") {
 		$("#timeline").data("timelineSlide", "");
@@ -103,7 +98,7 @@ Template.timelineSlide.rendered = function() {
 		//c'est pas top parce que la premiere fois on setSortable pour chaque slide 
 		this._id = this.data._id;
 		this.id = this.data._id + "-timeline";
-		cloneSlide.apply(this, [this.data.order, true]);
+		timelineControler.cloneSlide(this,this.data.order,true);
 
 		$("#" + this.data._id).data("timelineIsSet", true);
 		$("#timeline").data("timelineSlide", $("#timeline").data("timelineSlide") + "-" + this.data._id);
