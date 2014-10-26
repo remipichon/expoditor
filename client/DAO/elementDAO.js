@@ -88,23 +88,6 @@ ElementDAO.prototype.create = function() {
  */
 //updateElementPos
 ElementDAO.prototype.updatePos = function(getUpdateData) {
-    // var $element = $("#" + this.id)
-    // var top = parseFloat($element.css('top'));
-    // var left = parseFloat($element.css('left'));
-
-    // this.CSS = {
-    //     top: top,
-    //     left: left
-    // };
-    // this.size = {
-    //     width: parseFloat(this.displayOptions.editor.size.width),
-    //     height: parseFloat(this.displayOptions.editor.size.height)
-    // };
-    // //si resize en cours les données dans la bd ne sont pas accurate
-    // this.size = {
-    //     width: parseFloat($element.css('width')),
-    //     height: parseFloat($element.css('height'))
-    // };
     this.ratio = {
         top: ratioContentMode,
         left: ratioContentMode
@@ -121,7 +104,6 @@ ElementDAO.prototype.updatePos = function(getUpdateData) {
     var element = Elements.findOne({
         _id: this._id
     });
-
 
 
     //petite verif que l'element ait effectivement été bougé
@@ -153,15 +135,10 @@ ElementDAO.prototype.updatePos = function(getUpdateData) {
  * @return {[type]}         [description]
  */
 //updateSlideElementModel
-ElementDAO.prototype.updateContent = function(content) {
+ElementDAO.prototype.updateTextContent = function() {
     return Elements.update(this._id, {
         $set: {
-            content: content
+            content: this.content
         }
     });
 };
-
-
-ElementDAO.prototype.updateSize = function(){
-    
-}

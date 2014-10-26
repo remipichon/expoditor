@@ -1,5 +1,5 @@
 PROCESS_ENV = ""; //variable d'environnement
-LOG_MODE = "error";
+LOG_MODE = "trace";
 
 /*
  * key : slideshowID

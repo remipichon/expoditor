@@ -25,13 +25,13 @@ ElementControler.prototype.addTexte = function(event) {
     };
 
     el.create();
-    trucChouette = el;
 }
 
-ElementControler.prototype.editTexte = function(event) {
-    var content = this.getCleanContents();
-    logger.info('GoogEditor.makeUneditableCallback', content);
-    if (Session.get("heavyRefresh")) updateSlideElementModel.apply(this, [content]);
+ElementControler.prototype.updateTextContent = function(field) {
+    var content = field.getCleanContents();
+    var el = new ElementDAO(field._id);
+    el.content = content;
+    el.updateTextContent();
 }
 
 ElementControler.prototype.deleteElement = function(element) {
@@ -41,31 +41,7 @@ ElementControler.prototype.deleteElement = function(element) {
 
 
 ElementControler.prototype.drag = function(self) {
-     var el = this._getDomPosSize(self)
-
-     
-    // var el = new ElementDAO(self._id);
-
-    // var $element = $("#" + self.id)
-    // var top = parseFloat($element.css('top'));
-    // var left = parseFloat($element.css('left'));
-
-    // el.CSS = {
-    //     top: top,
-    //     left: left
-    // };
-
-    // el.size = {
-    //     width: parseFloat(self.displayOptions.editor.size.width),
-    //     height: parseFloat(self.displayOptions.editor.size.height)
-    // };
-    // //si resize en cours les données dans la bd ne sont pas accurate
-    // el.size = {
-    //     width: parseFloat($element.css('width')),
-    //     height: parseFloat($element.css('height'))
-    // };
-
-
+    var el = this._getDomPosSize(self)
     el.updatePos();
 }
 
@@ -90,7 +66,7 @@ ElementControler.prototype._getDomPosSize = function(self) {
 
     var $element = $("#" + self.id);
     var component = goog.dom.getElement(self.id);
-    
+
     var top = parseFloat($element.css('top'));
     var left = parseFloat($element.css('left'));
 
@@ -106,7 +82,6 @@ ElementControler.prototype._getDomPosSize = function(self) {
     //si resize en cours les données dans la bd ne sont pas accurate
     el.size = goog.style.getSize(component);
 
-    logger.debug("_getDomPosSize", el.CSS, el.size);
     return el;
 }
 

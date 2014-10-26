@@ -9,7 +9,7 @@ GoogDragger = function(){};
  * @params 	{string}  callbackTarget   string name of the object which will handle the events callback
  *          			This object must have : startDrag(component), drag(component), endDrag(component)
  *  */
-GoogDragger.prototype.init = function(dragged, dragger,component, callbackTarget){
+GoogDragger.prototype.init = function(dragged, dragger,component, callbackTarget,callback){
 	if(typeof window[callbackTarget] !== "object" ){
 		logger.error(callbackTarget,"doesn't exist in the window scope");
 		return;
@@ -18,22 +18,22 @@ GoogDragger.prototype.init = function(dragged, dragger,component, callbackTarget
 
 	var dragger = new goog.fx.Dragger(dragged, dragger);
     goog.events.listen(dragger, goog.fx.Dragger.EventType.START, 
-    	callerStartDrag, 'false', component);
+    	_callerStartDrag, 'false', component);
     goog.events.listen(dragger, goog.fx.Dragger.EventType.DRAG, 
-    	callerDrag, 'false', component);
+    	_callerDrag, 'false', component);
     goog.events.listen(dragger, goog.fx.Dragger.EventType.END, 
-    	callerEndDrag, 'false', component);
+    	_callerEndDrag, 'false', component);
 
 
 }
 
-callerStartDrag = function(e){
+function _callerStartDrag(e){
     e.stopPropagation();
     window[this.callbackTarget].startDrag(this);
 }
-callerDrag = function() {
+function _callerDrag(e) {
      window[this.callbackTarget].drag(this);
 }
-callerEndDrag = function() {
+function _callerEndDrag(e) {
      window[this.callbackTarget].endDrag(this);
 }

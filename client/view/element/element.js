@@ -27,18 +27,18 @@ Template.elementsAreaCurrentEditing.elements = function() {
 /**
  * update text content dynamically
  */
-Meteor.startup(function() {
-    Elements.find({}).observeChanges({
-        changed: function(elemenId, fields) {
-            //logger.debug("Elements.obsverveChanges.changed",elemenId);
-            if (typeof fields.content !== "undefined") {
-                //logger.debug("Elements.obsverveChanges.changed.content",fields.content);
-                var editor = $("#" + elemenId + "-currentEditing").data("editorInstance");
-                editor.setHtml(false, fields.content, true, true)
-            }
-        },
-    });
-});
+// Meteor.startup(function() {
+//     Elements.find({}).observeChanges({
+//         changed: function(elemenId, fields) {
+//             //logger.debug("Elements.obsverveChanges.changed",elemenId);
+//             if (typeof fields.content !== "undefined") {
+//                 //logger.debug("Elements.obsverveChanges.changed.content",fields.content);
+//                 var editor = $("#" + elemenId + "-currentEditing").data("editorInstance");
+//                 editor.setHtml(false, fields.content, true, true)
+//             }
+//         },
+//     });
+// });
 
 
 
@@ -49,21 +49,26 @@ Meteor.startup(function() {
  * add editor and dragger and resize on an element in slide content editor mode
  */
 Template.elementCurrentEditing.rendered = function() {
-    //logger.log("Template.elementCurrentEditing.rendered", this.data._id);
-
     //set text editor
     this.data.id = this.data._id + '-currentEditing';
-    googEditor.init(this.data.id);
-
-    //set draggable on wrapper
-    this.data.id = this.data.id + '-wrapper';
-    var dragged = goog.dom.getElement(this.data._id + '-currentEditing-wrapper');
-    var dr = goog.dom.getElement(this.data._id + '-dragMe');
-    googDragger.init(dragged,dr,this.data,elementControler.instanceName);
+    var self = this;
+    googEditor.init(this.data.id, elementControler.instanceName,
+        //sinon conflict d'event. Il faut que les events de goodEditor (le dblclick)
+        //soit en premier dans le pool d'event, or googEditor.init est bien plus long que
+        // googDragger.init. Ce doit on a besoin ici c'est du synchrone (sadly...)
+        // TODO FIND A BETTER WAY
+        function() {
+            //set draggable on wrapper
+            self.data.id = self.data.id + '-wrapper';
+            var dragged = goog.dom.getElement(self.data._id + '-currentEditing-wrapper');
+            var dr = goog.dom.getElement(self.data._id + '-dragMe');
+            googDragger.init(dragged, dr, self.data, elementControler.instanceName);
+        }
+    );
 
     //set resize on wrapper    
     var widgetbox = goog.dom.getElement(this.data.id);
-    resizeService.init(widgetbox,this.data,elementControler.instanceName);
+    resizeService.init(widgetbox, this.data, elementControler.instanceName);
 }
 
 
@@ -76,9 +81,6 @@ Template.elementCurrentEditing.rendered = function() {
  * @return {int}      value of the CSS style
  */
 Template.element.getEditorData = function(axis) {
-    // if (typeof this.CSS === 'undefined') {
-//    logger.log("Template.element.getEditorData", this._id);
-
     this.center = {
         x: parseFloat(this.displayOptions.editor.positions.x),
         y: parseFloat(this.displayOptions.editor.positions.y)
@@ -93,7 +95,6 @@ Template.element.getEditorData = function(axis) {
     }
     delete this.CSS;
     posToCSS.call(this);
-    //}
 
     switch (axis) {
         case "x":
@@ -131,9 +132,7 @@ Template.element.getEditorData = function(axis) {
  * @return {int}      value of the CSS style
  */
 Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
-
     if (typeof this.CSS === 'undefined') { //works here because elementCurrendEditing are #constant
-        //logger.debug("Template.elementCurrentEditing.getEditorData", this._id);
 
         //a a factoriser avec l'observeChanges
         this.center = {
@@ -151,7 +150,6 @@ Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore uti
         delete this.CSS;
         posToCSS.call(this);
     }
-
 
     switch (axis) {
         case "x":
@@ -178,8 +176,6 @@ Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore uti
         default:
             return "";
     }
-
-
     return coord;
 };
 
@@ -190,19 +186,15 @@ Template.element.getFontSize = function() {
 
 
 Template.elementCurrentEditing.isLocked = function() {
-    //logger.debug("Template.elementCurrentEditing.isLocked");
     var component = Locks.findOne({
         componentId: this._id,
         user: {
             $not: null
         }
     });
-
     if (typeof component !== "undefined") {
-        //logger.debug("Template.elementCurrentEditing.isLocked", "element is locked");
         return "locked";
     }
-
     return "";
 }
 

@@ -4,9 +4,9 @@
  * @type {Object}
  */
 var logginAop = {
-	//"GoogEditor": GoogEditor,
+	"GoogEditor": GoogEditor,
 	"GoogDragger": GoogDragger,
-	//"ResizeService": ResizeService
+	"ResizeService": ResizeService
 };
 
 

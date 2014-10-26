@@ -1,13 +1,14 @@
 GoogEditor = function() {};
 
 
-GoogEditor.prototype.makeEditableCallback = function(e) {
-    e.stopPropagation();
+GoogEditor.prototype.makeEditable = function(field) {
     if (updateWithLocksControler.apply(Elements.findOne({
-        _id: this._id
+        _id: field._id
     }))) {
-        logger.info("GoogEditor.makeEditableCallback", this._id);
 
+        //cancel all other editor (if exists)
+        if ($("#quitEditTexteButton").length === 0) logger.warn("need a quit edit all texte button");
+        $("#quitEditTexteButton").trigger("click");
 
         //super listener jQuery qui s'auto off et permet de desactiver les editor lorqu'on clique ailleurs
         //quit editor anywhere except iframe
@@ -16,12 +17,8 @@ GoogEditor.prototype.makeEditableCallback = function(e) {
             $("#quitEditTexteButton").trigger("click");
         });
 
-
-        //cancel all other editor (if exists)
-        $("#quitEditTexteButton").trigger("click");
-        logger.info("makeEditableCallback", this._id);
-        $("#" + this._id + '-currentEditing-wrapper').toggleClass('currentlyEditingByMe');
-        this.makeEditable();
+        $("#" + field._id + '-currentEditing-wrapper').toggleClass('currentlyEditingByMe');
+        field.makeEditable(); //methode de google Closure sur une instance editor 
 
         //pas top !
         logger.warn("bricolage ! pour changer le background color et le margin du body del'iframe");
@@ -34,40 +31,37 @@ GoogEditor.prototype.makeEditableCallback = function(e) {
     }
 }
 
-GoogEditor.prototype.makeUneditableCallback = function(e) {
-    e.stopPropagation();
+GoogEditor.prototype.makeUneditable = function(field) {
+    if (field.isUneditable()) return;
 
-    if (this.isUneditable()) return;
+    $("#" + field._id + '-currentEditing-wrapper').toggleClass('currentlyEditingByMe');
+    field.makeUneditable();
 
-    logger.info("GoogEditor.makeUneditableCallback", this._id);
-    $("#" + this._id + '-currentEditing-wrapper').toggleClass('currentlyEditingByMe');
-    this.makeUneditable();
-
-    var content = this.getCleanContents();
-    updateSlideElementModel.apply(this, [content]);
+    _callerUpdateData.call(field);
 
     var button = goog.dom.getElement('quitEditTexteButton');
     goog.style.setOpacity(button, '0');
 
-
     removeLocksControler.call(Elements.findOne({
-        _id: this._id
+        _id: field._id
     }));
 }
 
-GoogEditor.prototype.updateFieldContents = function(e) {
-    var content = this.getCleanContents();
-    logger.info('GoogEditor.makeUneditableCallback', content);
-    if (Session.get("heavyRefresh")) updateSlideElementModel.apply(this, [content]);
-}
 
-GoogEditor.prototype.init = function(idElement) {
+
+GoogEditor.prototype.init = function(idElement, callbackTarget, callback) {
     if (typeof idElement === "undefined") return;
+    if (typeof window[callbackTarget] !== "object") {
+        logger.error(callbackTarget, "doesn't exist in the window scope");
+        return;
+    }
 
     var myField = new goog.editor.Field(idElement);
     myField.id = idElement;
     var mongoId = idElement.split('-')[0]
     myField._id = mongoId; //pour coller à miniMongo
+
+    myField.callbackTarget = callbackTarget;
 
     // Create and register all of the editing plugins you want to use.
     myField.registerPlugin(new goog.editor.plugins.BasicTextFormatter());
@@ -89,27 +83,38 @@ GoogEditor.prototype.init = function(idElement) {
 
     //send data
     goog.events.listen(myField, goog.editor.Field.EventType.DELAYEDCHANGE,
-        updateFieldContents, myField);//TOUPDATE
+        _callerUpdateData, myField); //TOUPDATE
 
-    //manage event
+    /***  manage event  **/
     //double click pour activer l'édition de texte
-    goog.events.listen(goog.dom.getElement(myField.id), goog.events.EventType.DBLCLICK, 
-        makeEditableCallback, 'false', myField);//TOUPDATE
-    logger.log('#', idElement, '.editTextContent');
-    $('#' + idElement + '-wrapper .editTextContent').on('click', function() {
-        makeEditableCallback.call(myField); //TOUPDATE
-    });
-
+    goog.events.listen(goog.dom.getElement(myField.id), goog.events.EventType.DBLCLICK,
+        _callerMakeEditable, 'false', myField);
+    //click on button to enable editor
+    var wrp = goog.dom.getElement(idElement + '-wrapper');
+    goog.events.listen(goog.dom.getElementByClass('editTextContent', wrp), goog.events.EventType.CLICK,
+        _callerMakeEditable, 'false', myField);
     // click on button to disable editor
     var button = goog.dom.getElement('quitEditTexteButton');
-    goog.events.listen(goog.dom.getElement(button), goog.events.EventType.CLICK, 
-        makeUneditableCallback, 'false', myField); //TOUPDATE
-    
-    //TODO handle an event fired instead of trigger click
-    //
+    goog.events.listen(goog.dom.getElement(button), goog.events.EventType.CLICK,
+        // this._
+        _callerMakeUneditable, 'false', myField); //TOUPDATE
 
-    //try for giving the editor to everyone
-    $("#" + idElement).data("editorInstance", myField);
+
+    if (typeof callback === "function") {
+        callback();
+    }
 
     return myField;
+}
+
+_callerMakeEditable = function(e) {
+    e.stopPropagation();
+    googEditor.makeEditable(this) //TODO utiliser instanceName
+}
+_callerMakeUneditable = function(e) {
+    e.stopPropagation();
+    googEditor.makeUneditable(this);
+}
+_callerUpdateData = function(e) {
+    window[this.callbackTarget].updateTextContent(this);
 }
