@@ -1,4 +1,20 @@
-SlideDAO = function() {};
+SlideDAO = function(args) {
+     //constructor
+    this.defaultPos = {
+        x: 2000,
+        y: 2000
+    };
+
+    this.defaultContent = "Type text here";
+
+    if (typeof args === "string") {
+        this._id = args;
+    } else if (typeof args === "object") {
+        //TODO merge this et args
+    } else {
+        this._id = null;
+    }
+};
 
 
 /**
@@ -8,42 +24,37 @@ SlideDAO = function() {};
  *                          * title     (default)
  *                          * order     (default)
  */
-//createSlide
-SlideDAO.prototype.create = function(options) {
-    if (typeof options === "undefined") {
-        var options = {};
-    }
+SlideDAO.prototype.create = function() {
 
-    if (typeof options.pos === "undefined") {
-        options.pos = {
+    if (typeof this.pos === "undefined") {
+        this.pos = {
             x: 2000,
             y: 2000
         };
-        // logger.log("create element texte with pos",options.pos.x, options.pox.y);
     }
 
-    if (typeof options.order === "undefined") {
-        options.order = $("#timeline .timeline-slide").length + 1;
+    if (typeof this.order === "undefined") {
+        this.order = $("#timeline .timeline-slide").length + 1;
     }
-    if (typeof options.title === "undefined") {
+    if (typeof this.title === "undefined") {
         var d = new Date;
-        options.title = "ele:" + d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
+        this.title = "ele:" + d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
 
     }
 
-    return Slides.insert({
+    var sl = Slides.insert({
         _id: Random.id(),
         informations: {
-            title: options.title
+            title: this.title
         },
         slideshowReference: [Slideshow.findOne({})._id],
         elements: [],
-        order: options.order,
+        order: this.order,
         displayOptions: {
             editor: {
                 positions: {
-                    x: options.pos.x,
-                    y: options.pos.y,
+                    x: this.pos.x,
+                    y: this.pos.y,
                     z: 0
                 },
                 size: {
@@ -53,8 +64,8 @@ SlideDAO.prototype.create = function(options) {
             },
             jmpress: {
                 positions: {
-                    x: options.pos.x,
-                    y: options.pos.y,
+                    x: this.pos.x,
+                    y: this.pos.y,
                     z: 0
                 },
                 rotates: {
@@ -65,11 +76,16 @@ SlideDAO.prototype.create = function(options) {
             }
         }
     });
+
+    this._id = sl;
+    return this._id;
 };
 
 
-//delete
 SlideDAO.prototype.delete = function() {
+    if (!userHasAccessToComponent.call(this)) {
+        throw new Meteor.Error('500', 'deleteSlideElement : cannot remove an element locked');
+    }
     return Slides.remove(this._id);
 };
 
@@ -91,21 +107,8 @@ SlideDAO.prototype.updateTitle = function() {
  * slide size and ratioSlideshowMode
  * @param  {boolean} getUpdateData wether or not return the update objet or really update data
  */
-//updateSlidePos
 SlideDAO.prototype.updatePos = function(getUpdateData) {
-    var $slide = $("#" + this._id);
-    var top = parseFloat($slide.css('top'));
-    var left = parseFloat($slide.css('left'));
-
-
-    this.CSS = {
-        top: top,
-        left: left
-    };
-    this.size = {
-        width: parseFloat(this.displayOptions.editor.size.width),
-        height: parseFloat(this.displayOptions.editor.size.height)
-    }
+    
     this.ratio = {
         top: ratioSlideshowMode,
         left: ratioSlideshowMode
@@ -125,7 +128,7 @@ SlideDAO.prototype.updatePos = function(getUpdateData) {
 
     //petite verif que la slide a effectivement bougée
     if (slide.displayOptions.editor.positions.x == pos.x && slide.displayOptions.editor.positions.y == pos.y) {
-        logger.log("updateSlidePosMove : slide didn't really move");
+        logger.info("updateSlidePosMove : slide didn't really move");
         return;
     }
 

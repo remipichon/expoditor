@@ -54,7 +54,7 @@ ElementControler.prototype.startDrag = function(self) {
 ElementControler.prototype.endDrag = function(self) {
     $("#" + self._id).toggleClass('dragged');
     $("#" + self._id + '-currentEditing-wrapper').toggleClass('currentlyEditingByMe');
-    elementControler.drag(self);
+    this.drag(self);
 }
 
 /**

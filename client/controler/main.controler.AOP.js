@@ -5,7 +5,8 @@
  */
 var logginAop = {
 	"ElementControler": ElementControler,
-	"TimelineControler": TimelineControler
+	"TimelineControler": TimelineControler,
+	"SlideControler": SlideControler
 };
 
 

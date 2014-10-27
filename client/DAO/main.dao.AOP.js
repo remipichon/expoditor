@@ -38,7 +38,7 @@ for (strKey in logginAop) {
  */
 
 var logginAopDA0 = {
-	"ElementDAO": ElementDAO,
+	//"ElementDAO": ElementDAO,
 	"SlideDAO": SlideDAO,
 };
 

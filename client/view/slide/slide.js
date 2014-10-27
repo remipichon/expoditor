@@ -22,10 +22,9 @@ Template.editorContainer.slides = function() {
  * @return {[cursor]} one slide max, if not empty
  */
 Template.modalCurrentEditing.editorCurrentEditing = function() {
-    //logger.debug("Template.modalCurrentEditing.editorSlideCurrentEditing");
     if (CurrentEditing.find({}).fetch().length > 1) {
-        throw new Meteor.Error("500","More than one slide in CurrentEditing");
-       }
+        throw new Meteor.Error("500", "More than one slide in CurrentEditing");
+    }
     return CurrentEditing.find({});
 };
 
@@ -37,18 +36,17 @@ Template.modalCurrentEditing.editorCurrentEditing = function() {
  * callback of render to add draggable when in slideshow edit mode
  */
 Template.editorSlide.rendered = function() {
-    logger.info("Template.editorSlide.rendered", this.data._id);
-
     this.data.id = this.data._id;
 
-    var dragger = new goog.fx.Dragger(goog.dom.getElement(this.data._id));
-    goog.events.listen(dragger, 'start', startDragSlide, 'false', this.data);
-    goog.events.listen(dragger, goog.fx.Dragger.EventType.DRAG, dragSlide, 'false', this.data);    
-    goog.events.listen(dragger, 'end', endDragSlide, 'false', this.data);
+    //set dragger
+    this.data.id = this.data.id;
+    var dragged = goog.dom.getElement(this.data._id);    
+    var dr = goog.dom.getElement(this.data._id+"drag-me");
+    googDragger.init(dragged, dr, this.data, slideControler.instanceName);
 
     //prevent doublclick    
-    goog.events.listen(goog.dom.getElement(this.data.id), goog.events.EventType.DBLCLICK, doubleClickSlide, 'false');
-    
+    goog.events.listen(goog.dom.getElement(this.data.id), goog.events.EventType.DBLCLICK,
+        slideControler.doubleClick, 'false');
 
 };
 
@@ -57,7 +55,6 @@ Template.editorSlide.rendered = function() {
 
 
 Template.editorSlide.isLocked = function() {
-    logger.info("Template.editorSlide.isLocked");
     var component = Locks.findOne({
         componentId: this._id,
         user: {
@@ -68,7 +65,6 @@ Template.editorSlide.isLocked = function() {
     if (typeof component !== "undefined") {
         return "locked";
     }
-
     return "";
 };
 
@@ -80,8 +76,6 @@ Template.editorSlide.isLocked = function() {
  */
 Template.editorSlide.getEditorData = function(axis) {
 
-    // if(typeof this.CSS === "undefined"){
-    //logger.debug('Template.editorSlide.getEditorData', this._id);
     var posX = parseFloat(this.displayOptions.editor.positions.x);
     var posY = parseFloat(this.displayOptions.editor.positions.y);
 
@@ -99,7 +93,6 @@ Template.editorSlide.getEditorData = function(axis) {
     }
     delete this.CSS;
     posToCSS.call(this);
-    // }
 
     switch (axis) {
         case "x":
@@ -129,4 +122,3 @@ Template.editorSlide.getEditorData = function(axis) {
     }
     return coord;
 };
-

@@ -220,7 +220,7 @@ initButtons = function() {
     goog.events.listen(goog.dom.getElement('backToEditor'),
         goog.events.EventType.CLICK, launchEditorControler, false, buttons);
     goog.events.listen(goog.dom.getElement('createSlide'),
-        goog.events.EventType.CLICK, createSlideControler, false, buttons);
+        goog.events.EventType.CLICK, slideControler.create, false, buttons);
     goog.events.listen(goog.dom.getElement('showTimeline'),
         goog.events.EventType.CLICK, showTimelineControler, false, buttons);
 

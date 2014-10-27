@@ -6,35 +6,33 @@
 Template.editSlideContent.events({
 	'click': function(event) {
 		event.stopPropagation();
-		editSlideContent.call(this);
+		slideControler.editContent(this);
 	}
 });
 
 Template.editorSlide.events({
 	'dblclick': function() {
-		updateSlideTitleControler.call(this);
+		slideControler.updateTitle(this);
 	}
 });
 
 Template.deleteSlide.events({
 	"click": function() {
-		deleteSlide.call(this);
+		slideControler.delete(this);
 	}
 });
 
 
-SlideControler = function(){};
+SlideControler = function() {};
 
-
-SlideControler.prototype.createSlideControler = function() {
-	logger.info("createSlideControler");
+SlideControler.prototype.create = function() {
 	var d = new Date;
 	var title = d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds();
-	return createSlide({
-		title: title,
-		type: 'default'
-	});
 
+	var sl = new SlideDAO();
+	sl.title = title;
+	sl.type = "default";
+	sl.create();
 }
 
 
@@ -42,56 +40,74 @@ SlideControler.prototype.createSlideControler = function() {
  * Switch to slide content editor mode by adding the slide in CurrentEditing collection, show text
  * editor toolbar and hide timeline and slideshow buttons
  */
-SlideControler.prototype.editSlideContent = function() {
+SlideControler.prototype.editContent = function(slide) {
 	if (CurrentEditing.find({}).fetch().length !== 0) {
 		throw new Meteor.Error("500", "a slide is already currently editing (or the last currentEditing doesn't terminate properly");
 	}
-	logger.info("editSlideContent insert ", this._id);
 	Session.set("modalCurrentEditing", true);
 	CurrentEditing.insert(Slides.findOne({
-		_id: this._id
+		_id: slide._id
 	}));
 
 	displayBlockAccordingToEditorMode('contentMode');
-
 }
 
-SlideControler.prototype.updateSlideTitleControler = function() {
-	logger.info("updateSlideTitleControler");
+SlideControler.prototype.updateTitle = function() {
 	updateWithLocksControler.apply(this, "title", updateSlideTitleModel);
 };
 
 
-SlideControler.prototype.doubleClickSlide = function(event){
-	logger.info("doubleClickSlide");
+SlideControler.prototype.doubleClick = function(event) {
+
 	event.stopPropagation();
 }
 
 
-SlideControler.prototype.addSlide = function(event) {
-    logger.info("addSlide", event.offsetY, event.offsetX)
-    createSlide({
-        pos: {
-            y: event.offsetY * ratioSlideshowMode,
-            x: event.offsetX * ratioSlideshowMode
-        }
-    });
-
+SlideControler.prototype.create = function(event) {
+	var sl = new SlideDAO();
+	sl.pos = {
+		y: event.offsetY * ratioSlideshowMode,
+		x: event.offsetX * ratioSlideshowMode
+	}
+	sl.create();
 }
 
-GoogDragger.prototype.startDragSlide = function(e) {
-    logger.info("GoogDragger.prototype.startDragSlide");
-    e.stopPropagation();
-    $("#" + this._id).toggleClass('dragged');
+SlideControler.prototype.delete = function(slide) {
+	var sl = new SlideDAO(slide._id);
+	sl.delete();
 }
 
-GoogDragger.prototype.endDragSlide = function(e) {
-    logger.info("GoogDragger.prototype.endDragSlide");
-    $("#" + this._id).toggleClass('dragged');
-    updateSlidePos.call(this);
+SlideControler.prototype.drag = function(self) {
+	var sl = this._getDomPosSize(self);
+	sl.updatePos();
 }
 
-GoogDragger.prototype.dragSlide = function(e) {
-    logger.info("GoogDragger.prototype.dragSlide");
-    updateSlidePos.call(this);
+SlideControler.prototype.startDrag = function(self) {
+	$("#" + this._id).toggleClass('dragged');
+}
+
+SlideControler.prototype.endDrag = function(self) {
+	$("#" + this._id).toggleClass('dragged');
+	this.drag(self);
+}
+
+SlideControler.prototype._getDomPosSize = function(self) {
+	var sl = new SlideDAO(self._id);
+
+	var $slide = $("#" + self._id);
+	var top = parseFloat($slide.css('top'));
+	var left = parseFloat($slide.css('left'));
+
+
+	sl.CSS = {
+		top: top,
+		left: left
+	};
+	sl.size = {
+		width: parseFloat(self.displayOptions.editor.size.width),
+		height: parseFloat(self.displayOptions.editor.size.height)
+	}
+
+	return sl;
+
 }

@@ -60,7 +60,7 @@ Template.elementCurrentEditing.rendered = function() {
         function() {
             //set draggable on wrapper
             self.data.id = self.data.id + '-wrapper';
-            var dragged = goog.dom.getElement(self.data._id + '-currentEditing-wrapper');
+            var dragged = goog.dom.getElement(self.data.id);//_id + '-currentEditing-wrapper');
             var dr = goog.dom.getElement(self.data._id + '-dragMe');
             googDragger.init(dragged, dr, self.data, elementControler.instanceName);
         }

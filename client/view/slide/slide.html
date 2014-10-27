@@ -18,11 +18,12 @@
 
 <template name='editorSlide'>
     <div id='{{_id}}' class='slide {{isLocked}} {{isActive}}' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px; top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px ;transform:scale({{getEditorData 'scaleX'}},{{getEditorData 'scaleY'}})'> 
-         {{> deleteSlide }}
-         {{> editSlideContent}}
-         <p class='title'> {{order}} - {{informations.title}} </p>
-    
-      {{> elementsArea}}
+       {{> deleteSlide }}
+       {{> editSlideContent}}
+       <p class='title'> {{order}} - {{informations.title}} </p>
+       <div id='{{_id}}-dragMe' class='drag-me'> {{! has to wrapp text in order to get event bubbling because of texte is z-index upper than dragme}}
+          {{> elementsArea}}     
+        </div>      
     </div>      
 </template> 
 

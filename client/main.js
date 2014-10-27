@@ -39,6 +39,9 @@ Meteor.startup(function() {
 	elementControler = new ElementControler();
     elementControler.instanceName = "elementControler"; 
     timelineControler = new TimelineControler("timeline");
+    slideControler = new SlideControler();
+    slideControler.instanceName = "slideControler";
+
 
 	//INJECT SERVICES
 	googEditor = new GoogEditor();
@@ -68,7 +71,8 @@ Meteor.startup(function() {
     //add texte with dbl blick
     goog.events.listen(goog.dom.getElement('modalCurrentEditing'), goog.events.EventType.DBLCLICK, 
         elementControler.addTexte)
-    goog.events.listen(goog.dom.getElement('editor-container'), goog.events.EventType.DBLCLICK, addSlide)
+    goog.events.listen(goog.dom.getElement('editor-container'), goog.events.EventType.DBLCLICK,
+     slideControler.create)
     //edit slideshowTitle
     goog.events.listen(goog.dom.getElement('slideshowTitle'), goog.events.EventType.DBLCLICK, updateSlideshowControler);
 
@@ -103,7 +107,7 @@ _initButtons = function() {
     goog.events.listen(goog.dom.getElement('backToEditor'),
         goog.events.EventType.CLICK, launchEditorControler, false, buttons);
     goog.events.listen(goog.dom.getElement('createSlide'),
-        goog.events.EventType.CLICK, createSlideControler, false, buttons);
+        goog.events.EventType.CLICK, slideControler.create, false, buttons);
     goog.events.listen(goog.dom.getElement('showTimeline'),
         goog.events.EventType.CLICK, showTimelineControler, false, buttons);
 

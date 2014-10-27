@@ -37,7 +37,7 @@
 
 
 
-.elementDragMe {
+.drag-me {
     /*border:  dashed 1px;*/
     width: 90%;
     height: 90%;
@@ -46,6 +46,8 @@
     left: 5%;
 
 }
+
+
 
 .elementsAreaCurrentEditing {
     background-color: cadetblue;

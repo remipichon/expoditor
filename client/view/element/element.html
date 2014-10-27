@@ -29,7 +29,7 @@
    <div id='{{_id}}-currentEditing-wrapper' class='{{isLocked}} wrapper-element-currentEditing element' style='width:{{getEditorData 'w'}}px; height:{{getEditorData 'h'}}px;top:{{getEditorData 'y'}}px; left:{{getEditorData 'x'}}px; '>
       {{>editTexteContent}}
       {{>deleteElement}}
-      <div id='{{_id}}-dragMe' class='elementDragMe'> {{! has to wrapp text in order to get event bubbling because of texte is z-index upper than dragme}}
+      <div id='{{_id}}-dragMe' class='drag-me'> {{! has to wrapp text in order to get event bubbling because of texte is z-index upper than dragme}}
         <div id='{{_id}}-currentEditing' class='editor {{type}}'>
             {{{content}}}
         </div>       
