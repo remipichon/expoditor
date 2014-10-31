@@ -147,10 +147,10 @@ SlideshowHelper.prototype.getSlideshow = function(options, userId) {
 
     //is the slideshow already publish ? if not, publish slideshow, linked slides an related elements
     if (typeof slideshowPublished[slideshowId] === "undefined") {
-        if (PROCESS_ENV !== "dev") {
+        //if (PROCESS_ENV !== "dev") {
             logger.info("getSlideshow : load slideshow");
             SlideshowState.prototype.loadToEdit(slideshowId);
-        }
+        //}
 
         logger.info("SlideshowHelper.prototype.getSlideshow : publish slideshow ", options.title, slideshowId);
 
