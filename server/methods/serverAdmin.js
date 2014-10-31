@@ -33,6 +33,17 @@ Meteor.methods({
         var slides = Slides.find({}).fetch();
         var elements = Elements.find({}).fetch();
         var locks = Locks.find({}).fetch();
+         logger.info("************get infos***************")
+        
+        logger.info("**** slideshow :", slideshows);
+        logger.info("**************************");
+        logger.info("**** slides :", slides);
+        logger.info("**************************");
+        logger.info("**** elements :", elements);
+        logger.info("**************************");
+        logger.info("**** locks :", locks);
+        logger.info("**************************");
+        logger.info("slideshowPublished :", slideshowPublished);
         return {
             slideshows: slideshows.length,
             slides: slides.length,

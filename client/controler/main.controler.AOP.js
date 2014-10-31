@@ -6,14 +6,15 @@
 var logginAop = {
 	"ElementControler": ElementControler,
 	"TimelineControler": TimelineControler,
-	"SlideControler": SlideControler
+	"SlideControler": SlideControler,
+	"SlideshowControler": SlideshowControler
 };
 
 
 for (namespace in logginAop) {
 	(function(namespace) {
 		var obj = logginAop[namespace];
-		console.log("add AOP on", namespace);
+		console.info("add AOP on", namespace);
 
 		Aop.around("", function(f) {
 			logger.info("   Controler   " + namespace + "." + f.fnName);

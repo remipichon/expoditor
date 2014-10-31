@@ -40,6 +40,8 @@ TurnManager.prototype.deleteTurnPage = function(_id) {
 
 
 Template.turnContainer.slides = function() {
+    console.debug("turnContainer.slides desactivated");
+    return [];
     if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'turn') {
         turnIsInit = false;
         if ($("#turn-container").length !== 0) {

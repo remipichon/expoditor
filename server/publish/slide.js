@@ -164,6 +164,11 @@ Slides.allow({
 
 
 /****************************
+pour alléger le server, ce traitement lourd pourrait n'être proposé qu'au client
+dans ce cas il faut pouvoir gérer des cas ou le client n'avait pas empeché une superpostion ou une forbiden zone
+et savoir recuperer de ce genre d'"érreur"
+
+
  * do not delete
  //positionet fordidden zone
  //            if (_.contains(fields, 'top') || _.contains(fields, 'left')) {
@@ -227,4 +232,31 @@ Slides.allow({
  //                logger.log("girafe");
  //            }
  //            });
+ //TODO transformer ca en objet. prototype de Slide
+isCloseTo = function(self, slide) {
+    var H = 70; //height
+    var W = 90; //width
+    return  self._id !== slide._id && 
+            (Math.pow(W, 2) + Math.pow(H, 2) > 
+            Math.pow(parseInt(slide.left) - parseInt(self.left), 2) + Math.pow(parseInt(slide.top) - parseInt(self.top), 2));
+};
+//client slide only
+getCloserSlide = function(slideId, pos) {
+    //connecter cela au ratio et au css
+    var H = 700; //height
+    var W = 900; //width
+    var pos = Slides.findOne({
+        _id: slideId
+    }).displayOptions.editor.positions;
+
+    //pour retourner uniquement les slides proche de la slide dont la pos est passée en parametre
+    return Slides.find({
+        $where: function() {
+            var selfPos = this.displayOptions.editor.positions;
+            return this._id !== slideID && 
+            Math.abs(pos.x - selfPos.x) < W &&
+            Math.abs(pos.y - selfPos.y) < H;
+        }
+    }).fetch();
+};
  *****************************/
