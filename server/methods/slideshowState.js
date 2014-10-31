@@ -12,11 +12,12 @@ SlideshowState.prototype.unloadToStore = function(slideshowId) {
 
     var slide, slideElements, nb;
     _.each(slides, function(slideId) {
-        logger.info("SlideshowState.prototype.unloadToStore : slide ", slideId);
         if (typeof slideId === 'object') {
             logger.info("SlideshowState.prototype.unloadToStore : error : the slide is already an object");
             return;
         }
+        logger.info("SlideshowState.prototype.unloadToStore : slide ", slideId);
+        
 
 
         //get all elements and the slide

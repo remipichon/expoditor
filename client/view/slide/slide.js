@@ -5,7 +5,6 @@
  * @return {cursor} all slides related to the slideshow loaded, sorted by order
  */
 Template.editorContainer.slides = function() {
-    //logger.debug("Template.editorContainer.slides","inject editor data");
     if (typeof Slides.findOne() === 'undefined' || Session.get("clientMode") !== 'editor') {
         return [];
     }

@@ -1,7 +1,16 @@
+/**
+ * Controler & Model pour slideshow
+ *
+ * Ce controler risque fort de disparaitre ou d'être migré sur la partie Expo
+ *
+ * (d'où son incohérence avec le reste de Editor, pour le moment)
+ */
+
+
+
 SlideshowControler = function(){};
 
-SlideshowControler.prototype.createSlideshowControler = function(callbackReturn) {
-    logger.info("createSlideshowControler");
+SlideshowControler.prototype.create = function(callbackReturn) {
     if (typeof callbackReturn === "number") { //is it the callback ?
         if (callbackReturn !== 1) { //there was an error
             alert("an error occured when creating slideshow : " + callbackReturn.reason);
@@ -13,23 +22,22 @@ SlideshowControler.prototype.createSlideshowControler = function(callbackReturn)
 
     var title = prompt("Type a title for the new slideshow");
     if (title !== null) {
-        createSlideshowModel({
+        slideshowControler.createSlideshowModel({
             title: title
-        }, createSlideshowControler);
+        }, slideshowControler.create);
     }
 
 
 };
 
 SlideshowControler.prototype.createSlideshowModel = function(options, callback) {
-    logger.info("createSlideshowModel ", options);
     Meteor.call('createSlideshow', options, function(error, result) {
         if (typeof error !== "undefined") {
             logger.error("createSlideshow : create error ", error);
             callback(error);
         } else {
             logger.info("createSlideshow ", result);
-            getSlideshowModel({
+            slideshowControler.getSlideshowModel({
                 title: options.title,
             });
             callback(1);
@@ -38,8 +46,7 @@ SlideshowControler.prototype.createSlideshowModel = function(options, callback) 
 };
 
 
-SlideshowControler.prototype.updateSlideshowControler = function() {
-    logger.info("updateSlideshowControler");
+SlideshowControler.prototype.update = function() {
     var title = Slideshow.findOne({}).informations.title;
     title = prompt("Enter a new title for slideshow \n(you also can dblClick on title to edit)", title);
     if (!title) return;
@@ -50,7 +57,6 @@ SlideshowControler.prototype.updateSlideshowControler = function() {
 
 
 SlideshowControler.prototype.updateSlideshowModel = function(options) {
-    logger.info("updateSlideshowModel");
     if (typeof options.title === "undefined") {
         logger.warnig("updateSlideshow : title undefined");
         return;
@@ -65,18 +71,16 @@ SlideshowControler.prototype.updateSlideshowModel = function(options) {
     });
 };
 
-SlideshowControler.prototype.deleteSlideshowControler = function() {
-    logger.info("deleteSlideshowControler");
+SlideshowControler.prototype.delete = function() {
     var title = Slideshow.findOne().informations.title;
     var answ = confirm("Do you really want to delete all slideshow " + title + " ? It will affect all users, you should'nt do that...");
     if (answ) {
-        deleteSlideshowModel();
+        slideshowControler.deleteSlideshowModel();
     }
 };
 
 
 SlideshowControler.prototype.deleteSlideshowModel = function() {
-    logger.info("deleteSlideshowModel");
     Meteor.call('removeSlideshow', Slideshow.findOne({})._id, Meteor.userId(), function(error, result) {
         if (typeof error !== "undefined") {
             logger.log("removeSlideshow : remove error ", error);
@@ -92,10 +96,9 @@ SlideshowControler.prototype.deleteSlideshowModel = function() {
 
 
 
-SlideshowControler.prototype.getSlideshowList = function(callback) {
-    logger.info("getSlideshowList");
+SlideshowControler.prototype.getList = function(callback) {
     if (typeof callback !== "function")
-        callback = printResult;
+        callback = logger.info;
 
     Meteor.call('getSlideshowList', {}, Meteor.userId(), function(error, result) {
         if (typeof error !== "undefined") {
@@ -109,10 +112,9 @@ SlideshowControler.prototype.getSlideshowList = function(callback) {
 };
 
 
-SlideshowControler.prototype.getSlideshowControler = function(callbackReturn) {
-    logger.info("getSlideshowControler");
-    if (typeof callbackReturn === "undefined") {
-        getSlideshowList(getSlideshowControler);
+SlideshowControler.prototype.get = function(callbackReturn) {
+    if (typeof callbackReturn === "undefined" || callbackReturn instanceof goog.events.BrowserEvent) {
+        this.getList(this.get);
         return;
     }
     if (typeof callbackReturn === "object" && typeof callbackReturn.errorType === "undefined") { //is it the callback && is there an error 
@@ -121,7 +123,7 @@ SlideshowControler.prototype.getSlideshowControler = function(callbackReturn) {
             return;
         }
         var title = prompt("which slideshow to load ? " + callbackReturn.titlesArray);
-        getSlideshowModel({
+        slideshowControler.getSlideshowModel({
             title: title
         });
     } else {
@@ -132,7 +134,6 @@ SlideshowControler.prototype.getSlideshowControler = function(callbackReturn) {
 
 
 SlideshowControler.prototype.getSlideshowModel = function(options, callback) {
-    logger.info("getSlideshowModel", options);
     if (Meteor.userId() === null) {
         alert("you have to be connected as a user \nlogin : user1@yopmail.com \npswd : user1user1");
         return;

@@ -13,7 +13,7 @@ var logginAop = {
 for (strKey in logginAop) {
 	(function(strKey) {
 		var obj = logginAop[strKey];
-		console.log("add AOP on", strKey);
+		console.info("add AOP on", strKey);
 
 		Aop.around("", function(f) {
 			logger.info("   Service   " + strKey + "." + f.fnName + " called with ", f.arguments);

@@ -24,12 +24,6 @@ Meteor.startup(function() {
     console.log("startup : mode ", PROCESS_ENV);
 
 
-    if (PROCESS_ENV === "prod") {
-        SlideshowState.prototype.recoverData();
-    }
-
-    console.log("Meteor startup sucessfully");
-
     logger = log.noConflict();
     logger.setLevel(LOG_MODE);
     logger.log = function() {
@@ -38,7 +32,11 @@ Meteor.startup(function() {
     }
     delete log;
 
-    logger.info("logger set in",LOG_MODE);
+    logger.info("logger set in", LOG_MODE);
+
+    if (PROCESS_ENV === "prod") {
+        SlideshowState.prototype.recoverData();
+    }
+
+    console.log("Meteor startup sucessfully");
 });
-
-
