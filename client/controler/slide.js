@@ -66,8 +66,8 @@ SlideControler.prototype.doubleClick = function(event) {
 SlideControler.prototype.create = function(event) {
 	var sl = new SlideDAO();
 	sl.pos = {
-		y: event.offsetY * ratioSlideshowMode,
-		x: event.offsetX * ratioSlideshowMode
+		y: event.offsetY * positionService.ratioSlideshowMode,
+		x: event.offsetX * positionService.ratioSlideshowMode
 	}
 	sl.create();
 }

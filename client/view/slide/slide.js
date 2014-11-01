@@ -69,7 +69,7 @@ Template.editorSlide.isLocked = function() {
 
 
 /**
- * calculate position and size of a slide in slideshow editor mode according to ratioSlideshowMode
+ * calculate position and size of a slide in slideshow editor mode according to positionService.ratioSlideshowMode
  * @param  {string} axis which CSS style is needed
  * @return {int}      value of the CSS style
  */
@@ -87,18 +87,18 @@ Template.editorSlide.getEditorData = function(axis) {
         height: parseFloat(this.displayOptions.editor.size.height)
     }
     this.ratio = {
-        top: ratioSlideshowMode,
-        left: ratioSlideshowMode
+        top: positionService.ratioSlideshowMode,
+        left: positionService.ratioSlideshowMode
     }
     delete this.CSS;
-    posToCSS.call(this);
+    positionService.posToCSS(this);
 
     switch (axis) {
         case "x":
-            var coord = this.CSS.left; //posX / ratioSlideshowMode;
+            var coord = this.CSS.left; //posX / positionService.ratioSlideshowMode;
             break;
         case "y":
-            var coord = this.CSS.top; //tposY / ratioSlideshowMode;
+            var coord = this.CSS.top; //tposY / positionService.ratioSlideshowMode;
             break;
         case "z":
             var coord = 0;
@@ -110,10 +110,10 @@ Template.editorSlide.getEditorData = function(axis) {
             var coord = 1; /// 5;
             break;
         case "h":
-            var coord = this.displayOptions.editor.size.height / ratioSlideshowMode; //
+            var coord = this.displayOptions.editor.size.height / positionService.ratioSlideshowMode; //
             break;
         case "w":
-            var coord = this.displayOptions.editor.size.width / ratioSlideshowMode; //
+            var coord = this.displayOptions.editor.size.width / positionService.ratioSlideshowMode; //
             break;
         default:
             return "";

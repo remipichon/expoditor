@@ -20,8 +20,8 @@ ElementControler.prototype.addTexte = function(event) {
 
     var el = new ElementDAO();
     el.pos = {
-        y: event.offsetY * ratioContentMode,
-        x: event.offsetX * ratioContentMode
+        y: event.offsetY * positionService.ratioContentMode,
+        x: event.offsetX * positionService.ratioContentMode
     };
 
     el.create();
@@ -94,9 +94,9 @@ ElementControler.prototype.resize = function(self) {
     //TODO d'ou vient ce ratio ? 
     var ratio;
     if (goog.dom.classes.has(component, 'slide')) {
-        ratio = ratioSlideshowMode;
+        ratio = positionService.ratioSlideshowMode;
     } else if (goog.dom.classes.has(component, 'element')) {
-        ratio = ratioContentMode;
+        ratio = positionService.ratioContentMode;
     }
 
 

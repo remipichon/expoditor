@@ -147,10 +147,8 @@ SlideshowHelper.prototype.getSlideshow = function(options, userId) {
 
     //is the slideshow already publish ? if not, publish slideshow, linked slides an related elements
     if (typeof slideshowPublished[slideshowId] === "undefined") {
-        //if (PROCESS_ENV !== "dev") {
-            logger.info("getSlideshow : load slideshow");
-            SlideshowState.prototype.loadToEdit(slideshowId);
-        //}
+        logger.info("getSlideshow : load slideshow");
+        SlideshowState.prototype.loadToEdit(slideshowId);
 
         logger.info("SlideshowHelper.prototype.getSlideshow : publish slideshow ", options.title, slideshowId);
 
@@ -238,7 +236,7 @@ SlideshowHelper.prototype.getSlideshow = function(options, userId) {
     //add user to the list of current editors
     if (slideshowPublished[slideshowId].indexOf(userId) === -1)
         slideshowPublished[slideshowId].push(userId);
-    logger.info("SlideshowHelper.prototype.getSlideshow : done for user",userId,"on slideshow",slideshowId);
+    logger.info("SlideshowHelper.prototype.getSlideshow : done for user", userId, "on slideshow", slideshowId);
     return slideshowId;
 },
 
@@ -292,23 +290,23 @@ SlideshowHelper.prototype.removeSlideshow = function(slideshowId, userId) {
 Meteor.methods({
 
     createSlideshow: function(options, userId) {
-       return SlideshowHelper.prototype.createSlideshow(options, userId);
+        return SlideshowHelper.prototype.createSlideshow(options, userId);
     },
 
     getSlideshowList: function(options, userId) {
-       return SlideshowHelper.prototype.getSlideshowList(options, userId);
+        return SlideshowHelper.prototype.getSlideshowList(options, userId);
     },
 
     getSlideshow: function(options, userId) {
-     return SlideshowHelper.prototype.getSlideshow(options, userId);
+        return SlideshowHelper.prototype.getSlideshow(options, userId);
     },
 
     updateSlideshow: function(options, slideshowId, userId) {
-       return SlideshowHelper.prototype.updateSlideshow(options, slideshowId, userId);
+        return SlideshowHelper.prototype.updateSlideshow(options, slideshowId, userId);
     },
 
     removeSlideshow: function(slideshowId, userId) {
-       return SlideshowHelper.prototype.removeSlideshow(slideshowId, userId);
+        return SlideshowHelper.prototype.removeSlideshow(slideshowId, userId);
     }
 
 });

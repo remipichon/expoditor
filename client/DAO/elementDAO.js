@@ -83,17 +83,17 @@ ElementDAO.prototype.create = function() {
 
 /**
  * update a element pos by this._id. Read CSS left/top in DOM and convert into real pos accordind to
- * slide size and ratioContentMode *
+ * slide size and positionService.ratioContentMode *
  * @param  {boolean} getUpdateData wether or not return the update objet or really update data
  */
 //updateElementPos
 ElementDAO.prototype.updatePos = function(getUpdateData) {
     this.ratio = {
-        top: ratioContentMode,
-        left: ratioContentMode
+        top: positionService.ratioContentMode,
+        left: positionService.ratioContentMode
     }
     delete this.center; // pour liberer la place
-    CSSToPos.call(this);
+    positionService.CSSToPos(this);
 
     var pos = {
         x: this.center.x,

@@ -92,8 +92,6 @@ Template.timelineSlide.rendered = function() {
 
 
 	if (setToTimeline) {
-		logger.info("render timelineslide for editor", this.data._id);
-
 		//ajout à la timeline
 		//c'est pas top parce que la premiere fois on setSortable pour chaque slide 
 		this._id = this.data._id;

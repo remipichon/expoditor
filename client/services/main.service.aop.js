@@ -6,7 +6,7 @@
 var logginAop = {
 	"GoogEditor": GoogEditor,
 	"GoogDragger": GoogDragger,
-	"ResizeService": ResizeService
+	"ResizeService": ResizeService,
 };
 
 
@@ -22,5 +22,30 @@ for (strKey in logginAop) {
 		}, [obj.prototype]);
 
 	})(strKey);
+
+}
+
+
+
+var logginAop2= {
+	//"PositionService": PositionService //too much call on CSStoPos and posToCSS
+};
+
+
+for (namespaceName in logginAop2) {
+	(function(namespaceName) {
+
+		var namespace = logginAop2[namespaceName];
+
+		console.info("add AOP on", namespaceName);
+
+		Aop.around("", function(fn) {
+			logger.info("  ??  ");
+			var retour = Aop.next(fn, fn.self); //mandatory
+			logger.info("  ?? ");
+			return retour; //mandatory
+		}, [namespace.prototype]);
+
+	})(namespaceName);
 
 }

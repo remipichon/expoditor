@@ -48,6 +48,7 @@ Meteor.startup(function() {
 	googEditor = new GoogEditor();
 	googDragger = new GoogDragger();
 	resizeService = new ResizeService();
+    positionService = new PositionService();
 
     //HELPER
     serverBackendDAO = new ServerBackendDAO();

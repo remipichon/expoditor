@@ -16,9 +16,9 @@ for (strKey in logginAop) {
 		console.info("add AOP on", strKey);
 
 		Aop.around("", function(f) {
-			logger.info("   AOPbefore " + strKey + "." + f.fnName, "called with", ((arguments[0].arguments.length == 0) ? "no args" : arguments[0].arguments));
+			logger.info("   DAObefore " + strKey + "." + f.fnName, "called with", ((arguments[0].arguments.length == 0) ? "no args" : arguments[0].arguments));
 			var retour = Aop.next(f, obj.prototype); //mandatory
-			logger.info("   AOPafter  " + strKey + "." + f.fnName, "which returned", retour);
+			logger.info("   DAOPafter  " + strKey + "." + f.fnName, "which returned", retour);
 			return retour; //mandatory
 		}, [obj.prototype]);
 	})(strKey);
@@ -38,7 +38,7 @@ for (strKey in logginAop) {
  */
 
 var logginAopDA0 = {
-	//"ElementDAO": ElementDAO,
+	"ElementDAO": ElementDAO,
 	"SlideDAO": SlideDAO,
 };
 
@@ -51,18 +51,18 @@ for (namespaceName in logginAopDA0) {
 		console.info("add AOP on", namespaceName);
 
 		Aop.around("create", function(fn) {
-			logger.info("   AOPbefore " + namespaceName + "." + fn.fnName);
+			logger.info("   DAObefore " + namespaceName + "." + fn.fnName);
 			var retour = Aop.next(fn, fn.self); //mandatory
-			logger.info("   AOPafter  " + namespaceName + "." + fn.fnName, " component created with _id", retour);
+			logger.info("   DAOPafter  " + namespaceName + "." + fn.fnName, " component created with _id", retour);
 			return retour; //mandatory
 		}, [namespace.prototype]);
 
 
 
 		Aop.around("update|delete", function(fn) {
-			logger.info("   AOPbefore " + namespaceName + "." + fn.fnName, "on component._id", fn.self._id, "which is", fn.self.id, "on the DOM");
+			logger.info("   DAObefore " + namespaceName + "." + fn.fnName, "on component._id", fn.self._id);
 			var retour = Aop.next(fn, fn.self); //mandatory
-			logger.info("   AOPafter  " + namespaceName + "." + fn.fnName, "altered", retour, "documents");
+			logger.info("   DAOPafter  " + namespaceName + "." + fn.fnName, "altered", retour, "documents");
 			return retour; //mandatory
 		}, [namespace.prototype]);
 

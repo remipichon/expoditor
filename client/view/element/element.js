@@ -76,7 +76,7 @@ Template.elementCurrentEditing.rendered = function() {
 /********************** HELPERS *********************/
 
 /**
- * calculate position and size of an element in slideshow editor mode according to ratioSlideshowMode
+ * calculate position and size of an element in slideshow editor mode according to positionService.ratioSlideshowMode
  * @param  {string} axis which CSS style is needed
  * @return {int}      value of the CSS style
  */
@@ -90,11 +90,11 @@ Template.element.getEditorData = function(axis) {
         height: parseFloat(this.displayOptions.editor.size.height)
     }
     this.ratio = {
-        top: ratioSlideshowMode,
-        left: ratioSlideshowMode
+        top: positionService.ratioSlideshowMode,
+        left: positionService.ratioSlideshowMode
     }
     delete this.CSS;
-    posToCSS.call(this);
+    positionService.posToCSS(this);
 
     switch (axis) {
         case "x":
@@ -113,10 +113,10 @@ Template.element.getEditorData = function(axis) {
             var coord = 1;
             break;
         case "h":
-            var coord = this.displayOptions.editor.size.height / ratioSlideshowMode;
+            var coord = this.displayOptions.editor.size.height / positionService.ratioSlideshowMode;
             break;
         case "w":
-            var coord = this.displayOptions.editor.size.width / ratioSlideshowMode;;
+            var coord = this.displayOptions.editor.size.width / positionService.ratioSlideshowMode;;
             break;
         default:
             return "";
@@ -127,7 +127,7 @@ Template.element.getEditorData = function(axis) {
 };
 
 /**
- * calculate position and size of an element in slide content editor mode according to ratioSlideshowMode
+ * calculate position and size of an element in slide content editor mode according to positionService.ratioSlideshowMode
  * @param  {string} axis which CSS style is needed
  * @return {int}      value of the CSS style
  */
@@ -144,11 +144,11 @@ Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore uti
             height: parseFloat(this.displayOptions.editor.size.height)
         }
         this.ratio = {
-            top: ratioContentMode,
-            left: ratioContentMode
+            top: positionService.ratioContentMode,
+            left: positionService.ratioContentMode
         }
         delete this.CSS;
-        posToCSS.call(this);
+        positionService.posToCSS(this);
     }
 
     switch (axis) {
@@ -168,10 +168,10 @@ Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore uti
             var coord = 1;
             break;
         case "h":
-            var coord = this.displayOptions.editor.size.height / ratioContentMode;
+            var coord = this.displayOptions.editor.size.height / positionService.ratioContentMode;
             break;
         case "w":
-            var coord = this.displayOptions.editor.size.width / ratioContentMode;;
+            var coord = this.displayOptions.editor.size.width / positionService.ratioContentMode;;
             break;
         default:
             return "";
@@ -181,7 +181,7 @@ Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore uti
 
 
 Template.element.getFontSize = function() {
-    return 16 / ratioSlideshowMode; //16 est un peu au pif via le debugger
+    return 16 / positionService.ratioSlideshowMode; //16 est un peu au pif via le debugger
 }
 
 
@@ -260,11 +260,11 @@ CurrentEditing.find({}).observeChanges({
                         height: parseFloat(fields.displayOptions.editor.size.height)
                     }
                     this.ratio = {
-                        top: ratioContentMode,
-                        left: ratioContentMode
+                        top: positionService.ratioContentMode,
+                        left: positionService.ratioContentMode
                     }
                     delete this.CSS;
-                    posToCSS.call(this);
+                    positionService.posToCSS(this);
 
 
                     goog.style.setPosition(gwrapper, this.CSS.left, this.CSS.top);

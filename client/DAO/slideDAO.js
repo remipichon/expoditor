@@ -104,17 +104,17 @@ SlideDAO.prototype.updateTitle = function() {
 
 /**
  * update a slide by this._id. Read CSS left/top in DOM and convert into real pos accordind to
- * slide size and ratioSlideshowMode
+ * slide size and positionService.ratioSlideshowMode
  * @param  {boolean} getUpdateData wether or not return the update objet or really update data
  */
 SlideDAO.prototype.updatePos = function(getUpdateData) {
     
     this.ratio = {
-        top: ratioSlideshowMode,
-        left: ratioSlideshowMode
+        top: positionService.ratioSlideshowMode,
+        left: positionService.ratioSlideshowMode
     }
     delete this.center; // pour liberer la place
-    CSSToPos.call(this);
+    positionService.CSSToPos(this);
 
     var pos = {
         x: this.center.x,
@@ -129,7 +129,7 @@ SlideDAO.prototype.updatePos = function(getUpdateData) {
     //petite verif que la slide a effectivement bougée
     if (slide.displayOptions.editor.positions.x == pos.x && slide.displayOptions.editor.positions.y == pos.y) {
         logger.info("updateSlidePosMove : slide didn't really move");
-        return;
+        return -1;
     }
 
     var update = {
