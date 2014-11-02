@@ -6,7 +6,6 @@
  */
 var logginAop = {
 	"CommonDao": CommonDao,
-	"LockDAO": LockDAO
 };
 
 

@@ -10,11 +10,11 @@ Template.editSlideContent.events({
 	}
 });
 
-Template.editorSlide.events({
-	'dblclick': function() {
-		slideControler.updateTitle(this);
-	}
-});
+// Template.editorSlide.events({
+// 	'dblclick': function() {
+// 		slideControler.updateTitle(this);
+// 	}
+// });
 
 Template.deleteSlide.events({
 	"click": function() {
@@ -24,6 +24,7 @@ Template.deleteSlide.events({
 
 
 SlideControler = function() {};
+SlideControler.security = {};
 
 SlideControler.prototype.create = function() {
 	var d = new Date;
@@ -52,8 +53,20 @@ SlideControler.prototype.editContent = function(slide) {
 	displayBlockAccordingToEditorMode('contentMode');
 }
 
-SlideControler.prototype.updateTitle = function() {
-	updateWithLocksControler.apply(this, "title", updateSlideTitleModel);
+
+SlideControler.security.updateTitle = {
+    field: ["title"]
+}
+SlideControler.prototype.updateTitle = function(slide) {
+	var sl = new SlideDAO(slide._id);
+	var newTitle = prompt("Type a new title", slide.informations.title);
+	if (typeof newTitle !== "undefined" && newTitle !== "" && newTitle !== slide.informations.title) {
+		sl.informations = {
+			title: newTitle
+		};
+		sl.updateTitle();
+	}
+	logger.info("SlideControler.updateTitle ", "noUpdate");
 };
 
 

@@ -14,7 +14,8 @@ Aop = {
     for (var i in namespaces) {
       var ns = namespaces[i];
       for (var property in ns) {
-        if (typeof ns[property] == 'function' && property.match(pointcut)) {
+        if (typeof ns[property] == 'function' && new RegExp(pointcut,"g").test(property) ){
+          //property.match(pointcut)) {
           (function(fn, fnName, ns) {
             // replace the property fn slot with a wrapper which calls
             // the 'advice' Function

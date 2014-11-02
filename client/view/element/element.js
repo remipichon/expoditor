@@ -185,10 +185,11 @@ Template.element.getFontSize = function() {
 }
 
 
+//lock by content
 Template.elementCurrentEditing.isLocked = function() {
     var component = Locks.findOne({
         componentId: this._id,
-        user: {
+        "fields.content": {
             $not: null
         }
     });

@@ -7,6 +7,7 @@ var logginAop = {
 	"GoogEditor": GoogEditor,
 	"GoogDragger": GoogDragger,
 	"ResizeService": ResizeService,
+	"LockService": LockService
 };
 
 

@@ -43,11 +43,16 @@ Template.editorSlide.rendered = function() {
     var dr = goog.dom.getElement(this.data._id+"drag-me");
     googDragger.init(dragged, dr, this.data, slideControler.instanceName);
 
-    //prevent doublclick    
+    
     goog.events.listen(goog.dom.getElement(this.data.id), goog.events.EventType.DBLCLICK,
-        slideControler.doubleClick, 'false');
+        _updateTitleCaller, 'false',this.data);
 
 };
+
+_updateTitleCaller = function(e){
+    e.stopPropagation();
+    slideControler.updateTitle(this);
+}
 
 
 /********************** HELPERS *********************/

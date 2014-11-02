@@ -2,6 +2,9 @@ Locks = new Meteor.Collection("lock");
 
 Locks.allow({
     insert: function(userId, lock, fields, modifier) {
+        return true;
+
+
         //check slideshow
         if (typeof lock.slideshowId === "undefined")
             throw new Meteor.Error("24", "lock.insert : lock does not contain a slideshowId");
@@ -32,6 +35,9 @@ Locks.allow({
         return true;
     },
     update: function(userId, newLock, fields, modifier) {
+        return true;
+
+
 
         //verifie si le lock existe bel et bien
         var lock = Locks.findOne({
@@ -67,6 +73,10 @@ Locks.allow({
         return false;
     },
     remove: function() {
+        return true;
+
+
+        
         return false;
     }
 });

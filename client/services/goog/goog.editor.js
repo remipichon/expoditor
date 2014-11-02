@@ -2,9 +2,9 @@ GoogEditor = function() {};
 
 
 GoogEditor.prototype.makeEditable = function(field) {
-    if (updateWithLocksControler.apply(Elements.findOne({
+    if (lockService.setLock(Elements.findOne({
         _id: field._id
-    }))) {
+    })._id, ["content"])) {
 
         //cancel all other editor (if exists)
         if ($("#quitEditTexteButton").length === 0) logger.warn("need a quit edit all texte button");
@@ -42,9 +42,9 @@ GoogEditor.prototype.makeUneditable = function(field) {
     var button = goog.dom.getElement('quitEditTexteButton');
     goog.style.setOpacity(button, '0');
 
-    removeLocksControler.call(Elements.findOne({
+   lockService.unsetLock(Elements.findOne({
         _id: field._id
-    }));
+    })._id, ["content"]);
 }
 
 
@@ -96,9 +96,7 @@ GoogEditor.prototype.init = function(idElement, callbackTarget, callback) {
     // click on button to disable editor
     var button = goog.dom.getElement('quitEditTexteButton');
     goog.events.listen(goog.dom.getElement(button), goog.events.EventType.CLICK,
-        // this._
-        _callerMakeUneditable, 'false', myField); //TOUPDATE
-
+        _callerMakeUneditable, 'false', myField);
 
     if (typeof callback === "function") {
         callback();

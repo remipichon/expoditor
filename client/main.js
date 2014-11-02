@@ -49,6 +49,7 @@ Meteor.startup(function() {
 	googDragger = new GoogDragger();
 	resizeService = new ResizeService();
     positionService = new PositionService();
+    lockService = new LockService();
 
     //HELPER
     serverBackendDAO = new ServerBackendDAO();
@@ -72,6 +73,13 @@ Meteor.startup(function() {
      slideControler.create)
     //edit slideshowTitle
     goog.events.listen(goog.dom.getElement('slideshowTitle'), goog.events.EventType.DBLCLICK, slideshowControler.update);
+
+
+
+    logger.debug("init pres pour test");
+    slideshowControler.getSlideshowModel({
+        title: 'test'
+    });
 
 });
 
