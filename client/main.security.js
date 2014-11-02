@@ -1,3 +1,4 @@
+/*
 Test = function(_id) {
     this._id = _id
 };
@@ -11,14 +12,21 @@ Test.prototype.print = function() {
 Test.security.print2 = {
     field: ["content2"]
 }
+
 Test.prototype.print2 = function() {
     console.log("Test.print2 ", this._id);
 }
-
+Test.security.print3 = {
+    field: ["all"]
+}
+Test.prototype.print3 = function() {
+    console.log("Test.print3 ", this._id);
+}
+*/
 
 //add security
 var securityAOP = {
-    "Test": Test,
+    //"Test": Test,
     "SlideControler": SlideControler
 };
 
@@ -50,7 +58,7 @@ for (namespaceName in securityAOP) {
 
                 var retour = Aop.next(fn, fn.self); //mandatory
 
-                lockService.unsetLock(componentId, namespace.security[fn.fnName].field)
+               lockService.unsetLock(componentId, namespace.security[fn.fnName].field)
 
                 return retour; //mandatory
             }
