@@ -83,9 +83,9 @@ SlideshowControler.prototype.delete = function() {
 SlideshowControler.prototype.deleteSlideshowModel = function() {
     Meteor.call('removeSlideshow', Slideshow.findOne({})._id, Meteor.userId(), function(error, result) {
         if (typeof error !== "undefined") {
-            logger.log("removeSlideshow : remove error ", error);
+            logger.error("removeSlideshow : remove error ", error);
         } else {
-            logger.log("removeSlideshow : stop all corresponding subscriptions");
+            logger.info("removeSlideshow : stop all corresponding subscriptions");
             //arret de la precedente si existante
             if (subscriptionSlideshow !== null)
                 subscriptionSlideshow.stop();

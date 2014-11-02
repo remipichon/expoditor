@@ -1,4 +1,4 @@
-Test = function(_id) {
+/*Test = function(_id) {
     this._id = _id
 };
 Test.security = {};
@@ -22,11 +22,11 @@ Test.security.print3 = {
 Test.prototype.print3 = function() {
     console.log("Test.print3 ", this._id);
 }
-
+*/
 
 //add security
 var securityAOP = {
-    "Test": Test,
+   // "Test": Test,
     "SlideControler": SlideControler
 };
 
@@ -43,7 +43,7 @@ for (namespaceName in securityAOP) {
         console.info("add security on", namespaceName, poincut);
         Aop.around(poincut, function(fn) {
             var componentId = fn.self._id;
-            console.info("   secu " + namespaceName + "." + fn.fnName, "component", componentId,
+            logger.info("   secu " + namespaceName + "." + fn.fnName, "component", componentId,
                 "field", namespace.security[fn.fnName].field);
 
             if (typeof componentId !== "string") {
@@ -73,7 +73,3 @@ for (namespaceName in securityAOP) {
         }, [namespace.prototype]);
     })(namespaceName);
 }
-
-
-
-test = new Test("1234");

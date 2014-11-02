@@ -26,10 +26,6 @@ Meteor.startup(function() {
 	//SETUP LOGGER
     logger = log.noConflict();
     logger.setLevel("trace");
-    logger.log = function() {
-        var args = Array.prototype.slice.call(arguments);
-        //console.log.apply(console, args);
-    }
 
     logger.debug("logger init");
 

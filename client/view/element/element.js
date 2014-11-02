@@ -217,7 +217,6 @@ Template.elementCurrentEditing.isLocked = function() {
 /*
 CurrentEditing.find({}).observeChanges({
     added: function(_id, fields) {
-        logger.log("slide added to current editing", _id, Elements.find({
             slideReference: {
                 $in: [_id]
             }
@@ -229,16 +228,13 @@ CurrentEditing.find({}).observeChanges({
             }
         }).observeChanges({
             added: function(_id) {
-                logger.log("debug : an element has been added");
             },
             changed: function(_id, fields) {
                 var gwrapper = goog.dom.getElement(_id + '-currentEditing-wrapper');
 
                 if (goog.dom.classes.has(gwrapper, 'currentlyEditingByMe')) {
-                    logger.log("debug update skipped")
                     return;
                 }
-                logger.log("elements changed", _id, fields);
 
                 //display options
                 if (typeof fields.displayOptions !== 'undefined') {
@@ -283,7 +279,6 @@ CurrentEditing.find({}).observeChanges({
         //nothing to do
     },
     removed: function(_id, fields) {
-        logger.log("slide removed to current editing");
         handleElementCurrentEditing.stop();
     }
 });

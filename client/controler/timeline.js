@@ -84,7 +84,7 @@ TimelineControler.prototype.setSortable = function() {
         var clone = item.data("clone");
         clone.stop(true, false);
         var position = item.position();
-        logger.log("sortable.change", position.left, position.top);
+        logger.info("TimelineControler.sortable.change", position.left, position.top);
         clone.animate({
           left: position.left,
           top: position.top

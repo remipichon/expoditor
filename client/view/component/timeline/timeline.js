@@ -53,7 +53,6 @@ Slides.find({}).observeChanges({
 	removed: function(_id) {
 		$("#" + _id + '-timeline').remove();
 		$("#" + _id + '-timeline-cloned').remove();
-		logger.log("removeclone and timelineslide", _id);
 		setSortable();
 	}
 })
@@ -64,7 +63,6 @@ Slides.find({}).observeChanges({
  */
 /*Template.timelineSlide.destroyed = function(){
 	$("#"+this.data._id+'-timeline-cloned').remove();
-	logger.log("removeclone",this.data._id+'-timeline-cloned');
 	setSortable();
 }*/
 
