@@ -1,10 +1,9 @@
-/********************** INJECT DATA **********************/
+/* INJECT DATA */
 
-/**
- * slideshow editor mode
- */
+/* * slideshow editor mode */
 Template.elementsArea.elements = function() {
-    //logger.debug("Template.elementsArea.elements";this._id);
+    // logger.debug("Template.elementsArea.elements"; this._id);
+    // logger.debug("Template.elementsArea.elements"; this._id);
     return Elements.find({
         slideReference: {
             $in: [this._id]
@@ -51,20 +50,17 @@ Template.elementsAreaCurrentEditing.elements = function() {
 Template.elementCurrentEditing.rendered = function() {
     //set text editor
     this.data.id = this.data._id + '-currentEditing';
-    var self = this;
-    googEditor.init(this.data.id, elementControler.instanceName,
-        //sinon conflict d'event. Il faut que les events de goodEditor (le dblclick)
-        //soit en premier dans le pool d'event, or googEditor.init est bien plus long que
-        // googDragger.init. Ce doit on a besoin ici c'est du synchrone (sadly...)
-        // TODO FIND A BETTER WAY
-        function() {
-            //set draggable on wrapper
-            self.data.id = self.data.id + '-wrapper';
-            var dragged = goog.dom.getElement(self.data.id);//_id + '-currentEditing-wrapper');
-            var dr = goog.dom.getElement(self.data._id + '-dragMe');
-            googDragger.init(dragged, dr, self.data, elementControler.instanceName);
-        }
-    );
+    //googEditor.init(this.data.id, elementControler.instanceName);
+    var field = goog.dom.getElement(this.data.id); //_id + '-currentEditing-wrapper');
+    googEditor.init(field, this.data, elementControler.instanceName);
+
+    //return;
+
+    //set draggable on wrapper
+    this.data.id = this.data.id + '-wrapper';
+    var dragged = goog.dom.getElement(this.data.id); //_id + '-currentEditing-wrapper');
+    var dr = goog.dom.getElement(this.data._id + '-dragMe');
+    googDragger.init(dragged, dr, this.data, elementControler.instanceName);
 
     //set resize on wrapper    
     var widgetbox = goog.dom.getElement(this.data.id);

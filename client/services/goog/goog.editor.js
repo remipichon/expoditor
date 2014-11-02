@@ -47,21 +47,29 @@ GoogEditor.prototype.makeUneditable = function(field) {
     })._id, ["content"]);
 }
 
+/**
+ * il faut :
+ * l'element texte (myfield) (dblclick)
+ * un button (opt)  (button) (click)
+ * mongo _id      (pour les callbacks)
+ * 
+ */
 
-
-GoogEditor.prototype.init = function(idElement, callbackTarget, callback) {
-    if (typeof idElement === "undefined") return;
+// GoogEditor.prototype.init = function(idElement, callbackTarget, callback) {
+GoogEditor.prototype.init = function(field,component, callbackTarget) {
     if (typeof window[callbackTarget] !== "object") {
         logger.error(callbackTarget, "doesn't exist in the window scope");
         return;
     }
 
-    var myField = new goog.editor.Field(idElement);
-    myField.id = idElement;
-    var mongoId = idElement.split('-')[0]
-    myField._id = mongoId; //pour coller à miniMongo
+    var myField = new goog.editor.Field(component.id);
+    myField.id = component.id;
+    myField._id = component._id;
+   
 
     myField.callbackTarget = callbackTarget;
+
+
 
     // Create and register all of the editing plugins you want to use.
     myField.registerPlugin(new goog.editor.plugins.BasicTextFormatter());
@@ -87,20 +95,16 @@ GoogEditor.prototype.init = function(idElement, callbackTarget, callback) {
 
     /***  manage event  **/
     //double click pour activer l'édition de texte
-    goog.events.listen(goog.dom.getElement(myField.id), goog.events.EventType.DBLCLICK,
+    goog.events.listen(goog.dom.getElement(component.id), goog.events.EventType.DBLCLICK,
         _callerMakeEditable, 'false', myField);
     //click on button to enable editor
-    var wrp = goog.dom.getElement(idElement + '-wrapper');
+    var wrp = goog.dom.getElement(component.id+ '-wrapper');  
     goog.events.listen(goog.dom.getElementByClass('editTextContent', wrp), goog.events.EventType.CLICK,
         _callerMakeEditable, 'false', myField);
     // click on button to disable editor
     var button = goog.dom.getElement('quitEditTexteButton');
     goog.events.listen(goog.dom.getElement(button), goog.events.EventType.CLICK,
         _callerMakeUneditable, 'false', myField);
-
-    if (typeof callback === "function") {
-        callback();
-    }
 
     return myField;
 }

@@ -12,7 +12,6 @@ LockService = function() {};
  */
 
 
-//updateWithLocksControler
 LockService.prototype.setLock = function(componentId, fieldsList) {
     if (typeof componentId !== "string") {
         logger.error("LockService.setLock : param componentId is required as a string");
@@ -73,7 +72,7 @@ LockService.prototype.setLock = function(componentId, fieldsList) {
     }
 
 };
-//removeLocksControler
+
 LockService.prototype.unsetLock = function(componentId, fieldsList) {
     if (typeof componentId !== "string") {
         logger.error("LockService.setLock : param componentId is required as a string");

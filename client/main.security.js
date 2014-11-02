@@ -20,8 +20,8 @@ Test.prototype.print2 = function() {
 var securityAOP = {
     "Test": Test,
     "SlideControler": SlideControler
-
 };
+
 for (namespaceName in securityAOP) {
     (function(namespaceName) {
         var namespace = securityAOP[namespaceName];
