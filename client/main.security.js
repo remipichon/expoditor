@@ -1,4 +1,3 @@
-/*
 Test = function(_id) {
     this._id = _id
 };
@@ -15,6 +14,7 @@ Test.security.print2 = {
 
 Test.prototype.print2 = function() {
     console.log("Test.print2 ", this._id);
+    throw new Meteor.Error("500", "pouet");
 }
 Test.security.print3 = {
     field: ["all"]
@@ -22,11 +22,11 @@ Test.security.print3 = {
 Test.prototype.print3 = function() {
     console.log("Test.print3 ", this._id);
 }
-*/
+
 
 //add security
 var securityAOP = {
-    //"Test": Test,
+    "Test": Test,
     "SlideControler": SlideControler
 };
 
@@ -56,9 +56,16 @@ for (namespaceName in securityAOP) {
 
             if (lockService.setLock(componentId, namespace.security[fn.fnName].field)) {
 
-                var retour = Aop.next(fn, fn.self); //mandatory
+                try {
+                    var retour = Aop.next(fn, fn.self); //mandatory
+                    logger.debug("remove lock")
+                    lockService.unsetLock(componentId, namespace.security[fn.fnName].field);
+                } catch (err) {
+                    logger.debug("remove lock")
+                    lockService.unsetLock(componentId, namespace.security[fn.fnName].field);
+                    throw err;
+                }
 
-               lockService.unsetLock(componentId, namespace.security[fn.fnName].field)
 
                 return retour; //mandatory
             }
