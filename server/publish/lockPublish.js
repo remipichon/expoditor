@@ -2,9 +2,7 @@ Locks = new Meteor.Collection("lock");
 
 Locks.allow({
     insert: function(userId, lock, fields, modifier) {
-        return true;
-
-
+    
         //check slideshow
         if (typeof lock.slideshowId === "undefined")
             throw new Meteor.Error("24", "lock.insert : lock does not contain a slideshowId");
@@ -13,24 +11,20 @@ Locks.allow({
 
 
         //check component
-        if (typeof lock.componentId === "undefined")
-            throw new Meteor.Error("24", "lock.insert : lock does not contain a componentId");
+        // if (typeof lock.componentId === "undefined")
+        //     throw new Meteor.Error("24", "lock.insert : lock does not contain a componentId");
         if (Locks.findOne({
             componentId: lock.componentId
         }))
             throw new Meteor.Error("24", "lock.insert : a lock already exists for the component ", lock.componentId);
 
-        //check userId
-        if (typeof lock.user.userId === "undefined")
-            throw new Meteor.Error("24", "lock.insert : lock does not contain a userId");
-        if (userId !== lock.user.userId)
-            throw new Meteor.Error("24", "lock.insert : lock's userId ", lock.userId, " does not correspond to client's userId ", userId);
-
         //check properties
-        if (typeof lock.properties === "undefined" || !Array.isArray(lock.properties))
-            throw new Meteor.Error("24", "lock.insert : lock does not contain a properties array");
-
-
+        if (typeof lock.fields === "undefined")
+            throw new Meteor.Error("24", "lock.insert : lock does not contain a fieldsList ('lock.fields')");
+        //check userId
+        if (Object.keys(lock.fields)[0] !== lock.user.userId)
+            throw new Meteor.Error("24", "lock.insert : lock's userId ", lock.fields[0].userId, " does not correspond to client's userId ", userId);
+        
         logger.info("Locks.allow.insert : allow user",userId,"on component",lock.componentId,"with properties",lock.properties);
         return true;
     },

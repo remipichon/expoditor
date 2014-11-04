@@ -1,4 +1,4 @@
-/*Test = function(_id) {
+Test = function(_id) {
     this._id = _id
 };
 Test.security = {};
@@ -22,11 +22,11 @@ Test.security.print3 = {
 Test.prototype.print3 = function() {
     console.log("Test.print3 ", this._id);
 }
-*/
+
 
 //add security
 var securityAOP = {
-   // "Test": Test,
+    "Test": Test,
     "SlideControler": SlideControler
 };
 
