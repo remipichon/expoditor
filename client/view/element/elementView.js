@@ -1,27 +1,30 @@
 /* INJECT DATA */
 
 /* * slideshow editor mode */
-Template.elementsArea.elements = function() {
-    // logger.debug("Template.elementsArea.elements"; this._id);
-    // logger.debug("Template.elementsArea.elements"; this._id);
-    return Elements.find({
-        slideReference: {
-            $in: [this._id]
-        }
-    });
-};
+Template.elementsArea.helpers({
+    elements : function() {
+        // logger.debug("Template.elementsArea.elements"; this._id);
+        // logger.debug("Template.elementsArea.elements"; this._id);
+        return Elements.find({
+            slideReference: {    $in: [this._id]
+            }
+        });
+    }
+});
 
 /**
  * content slide editor mode
  */
-Template.elementsAreaCurrentEditing.elements = function() {
-    //logger.debug("Template.elementsAreaCurrentEditing.elements",this._id);
-    return Elements.find({
-        slideReference: {
-            $in: [this._id]
-        }
-    });
-};
+ Template.elementsAreaCurrentEditing.helpers({
+    elements : function() {
+        //logger.debug("Template.elementsAreaCurrentEditing.elements",this._id);
+        return Elements.find({
+            slideReference: {
+                $in: [this._id]
+            }
+        });
+    }
+});
 
 /**
  * update text content dynamically
@@ -47,12 +50,12 @@ Template.elementsAreaCurrentEditing.elements = function() {
 /**
  * add editor and dragger and resize on an element in slide content editor mode
  */
-Template.elementCurrentEditing.rendered = function() {
+ Template.elementCurrentEditing.rendered = function() {
     //set text editor
     this.data.id = this.data._id + '-currentEditing';
     //googEditor.init(this.data.id, elementControler.instanceName);
     var field = goog.dom.getElement(this.data.id); //_id + '-currentEditing-wrapper');
-    googEditor.init(field, this.data, elementControler.instanceName);
+googEditor.init(field, this.data, elementControler.instanceName);
 
     //return;
 
@@ -60,7 +63,7 @@ Template.elementCurrentEditing.rendered = function() {
     this.data.id = this.data.id + '-wrapper';
     var dragged = goog.dom.getElement(this.data.id); //_id + '-currentEditing-wrapper');
     var dr = goog.dom.getElement(this.data.id);// + '-dragMe');
-    googDragger.init(dragged, dr, this.data, elementControler.instanceName);
+googDragger.init(dragged, dr, this.data, elementControler.instanceName);
 
     //set resize on wrapper    
     var widgetbox = goog.dom.getElement(this.data.id);
@@ -70,67 +73,14 @@ Template.elementCurrentEditing.rendered = function() {
 
 
 /********************** HELPERS *********************/
-
+//TODO factoriser les getEditor data non ?
 /**
  * calculate position and size of an element in slideshow editor mode according to positionService.ratioSlideshowMode
  * @param  {string} axis which CSS style is needed
  * @return {int}      value of the CSS style
  */
-Template.element.getEditorData = function(axis) {
-    this.center = {
-        x: parseFloat(this.displayOptions.editor.positions.x),
-        y: parseFloat(this.displayOptions.editor.positions.y)
-    };
-    this.size = {
-        width: parseFloat(this.displayOptions.editor.size.width),
-        height: parseFloat(this.displayOptions.editor.size.height)
-    }
-    this.ratio = {
-        top: positionService.ratioSlideshowMode,
-        left: positionService.ratioSlideshowMode
-    }
-    delete this.CSS;
-    positionService.posToCSS(this);
-
-    switch (axis) {
-        case "x":
-            var coord = this.CSS.left;
-            break;
-        case "y":
-            var coord = this.CSS.top;
-            break;
-        case "z":
-            var coord = 0;
-            break;
-        case "scaleX":
-            var coord = 1;
-            break;
-        case "scaleY":
-            var coord = 1;
-            break;
-        case "h":
-            var coord = this.displayOptions.editor.size.height / positionService.ratioSlideshowMode;
-            break;
-        case "w":
-            var coord = this.displayOptions.editor.size.width / positionService.ratioSlideshowMode;;
-            break;
-        default:
-            return "";
-
-    }
-
-    return coord;
-};
-
-/**
- * calculate position and size of an element in slide content editor mode according to positionService.ratioSlideshowMode
- * @param  {string} axis which CSS style is needed
- * @return {int}      value of the CSS style
- */
-Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
-    if (typeof this.CSS === 'undefined') { //works here because elementCurrendEditing are #constant
-
-        //a a factoriser avec l'observeChanges
+ Template.element.helpers({
+    getEditorData : function(axis) {
         this.center = {
             x: parseFloat(this.displayOptions.editor.positions.x),
             y: parseFloat(this.displayOptions.editor.positions.y)
@@ -140,67 +90,171 @@ Template.elementCurrentEditing.getEditorData = function(axis) { //pas encore uti
             height: parseFloat(this.displayOptions.editor.size.height)
         }
         this.ratio = {
-            top: positionService.ratioContentMode,
-            left: positionService.ratioContentMode
+            top: positionService.ratioSlideshowMode,
+            left: positionService.ratioSlideshowMode
         }
         delete this.CSS;
         positionService.posToCSS(this);
-    }
 
-    switch (axis) {
-        case "x":
+        switch (axis) {
+            case "x":
             var coord = this.CSS.left;
             break;
-        case "y":
+            case "y":
             var coord = this.CSS.top;
             break;
-        case "z":
+            case "z":
             var coord = 0;
             break;
-        case "scaleX":
+            case "scaleX":
             var coord = 1;
             break;
-        case "scaleY":
+            case "scaleY":
             var coord = 1;
             break;
-        case "h":
+            case "h":
+            var coord = this.displayOptions.editor.size.height / positionService.ratioSlideshowMode;
+            break;
+            case "w":
+            var coord = this.displayOptions.editor.size.width / positionService.ratioSlideshowMode;;
+            break;
+            default:
+            return "";
+
+        }
+
+        return coord;
+    },
+    getFontSize : function() {
+        return 16 / positionService.ratioSlideshowMode; //16 est un peu au pif via le debugger
+    }
+});
+
+/**
+ * calculate position and size of an element in slide content editor mode according to positionService.ratioSlideshowMode
+ * @param  {string} axis which CSS style is needed
+ * @return {int}      value of the CSS style
+ */
+ Template.elementCurrentEditing.helpers({
+    getEditorData : function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
+        if (typeof this.CSS === 'undefined') { //works here because elementCurrendEditing are #constant
+
+            //a a factoriser avec l'observeChanges
+            this.center = {
+                x: parseFloat(this.displayOptions.editor.positions.x),
+                y: parseFloat(this.displayOptions.editor.positions.y)
+            };
+            this.size = {
+                width: parseFloat(this.displayOptions.editor.size.width),
+                height: parseFloat(this.displayOptions.editor.size.height)
+            }
+            this.ratio = {
+                top: positionService.ratioContentMode,
+                left: positionService.ratioContentMode
+            }
+            delete this.CSS;
+            positionService.posToCSS(this);
+        }
+
+        switch (axis) {
+            case "x":
+            var coord = this.CSS.left;
+            break;
+            case "y":
+            var coord = this.CSS.top;
+            break;
+            case "z":
+            var coord = 0;
+            break;
+            case "scaleX":
+            var coord = 1;
+            break;
+            case "scaleY":
+            var coord = 1;
+            break;
+            case "h":
             var coord = this.displayOptions.editor.size.height / positionService.ratioContentMode;
             break;
-        case "w":
+            case "w":
             var coord = this.displayOptions.editor.size.width / positionService.ratioContentMode;;
             break;
-        default:
+            default:
             return "";
-    }
-    return coord;
-};
-
-
-Template.element.getFontSize = function() {
-    return 16 / positionService.ratioSlideshowMode; //16 est un peu au pif via le debugger
-}
-
-
-//lock by content
-Template.elementCurrentEditing.isLocked = function() {
-    var component = Locks.findOne({
-        componentId: this._id,
-        "fields.content": {
-            $not: null
         }
-    });
-    if (typeof component !== "undefined") {
-        return "locked";
+        return coord;
+    },
+    //lock by content
+    isLocked : function() {
+        var component = Locks.findOne({
+            componentId: this._id,
+            "fields.content": {
+                $not: null
+            }
+        });
+        if (typeof component !== "undefined") {
+            return "locked";
+        }
+        return "";
     }
-    return "";
-}
+});
+
+ Template.elementTimeline.helpers({
+    getEditorData : function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
+        if (typeof this.CSS === 'undefined') { //works here because elementCurrendEditing are #constant
+
+            //a a factoriser avec l'observeChanges
+            this.center = {
+                x: parseFloat(this.displayOptions.editor.positions.x),
+                y: parseFloat(this.displayOptions.editor.positions.y)
+            };
+            this.size = {
+                width: parseFloat(this.displayOptions.editor.size.width),
+                height: parseFloat(this.displayOptions.editor.size.height)
+            }
+            this.ratio = {
+                top: positionService.ratioTimeline,
+                left: positionService.ratioTimeline
+            }
+            delete this.CSS;
+            positionService.posToCSS(this);
+        }
+
+        switch (axis) {
+            case "x":
+            var coord = this.CSS.left;
+            break;
+            case "y":
+            var coord = this.CSS.top;
+            break;
+            case "z":
+            var coord = 0;
+            break;
+            case "scaleX":
+            var coord = 1;
+            break;
+            case "scaleY":
+            var coord = 1;
+            break;
+            case "h":
+            var coord = this.displayOptions.editor.size.height / positionService.ratioTimeline;
+            break;
+            case "w":
+            var coord = this.displayOptions.editor.size.width / positionService.ratioTimeline;
+            break;
+            default:
+            return "";
+        }
+        return coord;
+    }
+
+});
 
 
 
 /*********************
     Le code ci dessous n'est plus utile depuis la migration de Spark vers Blaze.
     En revanche, je le garde parce qu'il montre bien l'usage des observeChange
-*********************/
+    *********************/
 
 
 /**

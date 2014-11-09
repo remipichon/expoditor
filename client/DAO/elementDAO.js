@@ -11,10 +11,12 @@ ElementDAO = function(args) {
     if (typeof args === "string") {
         this._id = args;
     } else if (typeof args === "object") {
-        //TODO merge this et args
+        _.extend(this,args);
     } else {
         this._id = null;
     }
+
+
 }
 
 //methods
@@ -23,7 +25,6 @@ ElementDAO.prototype.delete = function() {
     if (!userHasAccessToComponent.call(this)) {
         throw new Meteor.Error('500', 'deleteSlideElement : cannot remove an element locked');
     }
-    //TODO ne pas supprimer l'element et seuelement sa reference
     return Elements.remove(this._id);
 };
 

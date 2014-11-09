@@ -90,8 +90,7 @@ ElementControler.prototype._getDomPosSize = function(self) {
 ElementControler.prototype.resize = function(self) {
     var component = goog.dom.getElement(self.id);
     var size = goog.style.getSize(component);
-
-    //TODO d'ou vient ce ratio ? 
+ 
     var ratio;
     if (goog.dom.classes.has(component, 'slide')) {
         ratio = positionService.ratioSlideshowMode;

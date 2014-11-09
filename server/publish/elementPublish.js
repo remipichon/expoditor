@@ -71,18 +71,6 @@ Elements.allow({
 
         //content
         if (_.contains(fields, 'content')) {
-            var lock = Locks.findOne({
-                $and: [{
-                    componentId: element._id
-                }, {
-                    'user.userId': userId
-                }]
-            });
-
-            if (typeof lock == 'undefined') {
-                logger.info("Elements.allow.update : client trying to update without lock element : ", element._id, "client :", userId);
-                return false;
-            }
             logger.info("Elements.allow.update : allow content update on",element._id);
 
             toReturn = true;
