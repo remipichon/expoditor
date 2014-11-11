@@ -51,19 +51,17 @@ Template.elementsArea.helpers({
  * add editor and dragger and resize on an element in slide content editor mode
  */
  Template.elementCurrentEditing.rendered = function() {
+    var baseId = this.data._id + '-currentEditing';
     //set text editor
-    this.data.id = this.data._id + '-currentEditing';
-    //googEditor.init(this.data.id, elementControler.instanceName);
+    this.data.id = baseId;
     var field = goog.dom.getElement(this.data.id); //_id + '-currentEditing-wrapper');
-googEditor.init(field, this.data, elementControler.instanceName);
-
-    //return;
-
+    googEditor.init(field, this.data, elementControler.instanceName);
+    
+    this.data.id = baseId+ '-wrapper';
     //set draggable on wrapper
-    this.data.id = this.data.id + '-wrapper';
     var dragged = goog.dom.getElement(this.data.id); //_id + '-currentEditing-wrapper');
-    var dr = goog.dom.getElement(this.data.id);// + '-dragMe');
-googDragger.init(dragged, dr, this.data, elementControler.instanceName);
+    var dr = goog.dom.getElement(this.data._id + '-dragMe');// + '-dragMe');
+    googDragger.init(dragged, dr, this.data, elementControler.instanceName);
 
     //set resize on wrapper    
     var widgetbox = goog.dom.getElement(this.data.id);

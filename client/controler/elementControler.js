@@ -64,8 +64,8 @@ ElementControler.prototype.endDrag = function(self) {
 ElementControler.prototype._getDomPosSize = function(self) {
     var el = new ElementDAO(self._id);
 
-    var $element = $("#" + self.id);
-    var component = goog.dom.getElement(self.id);
+    var $element = $("#" + self.id);//+'-wrapper');
+    var component = goog.dom.getElement(self.id);//+'-wrapper');
 
     var top = parseFloat($element.css('top'));
     var left = parseFloat($element.css('left'));
@@ -91,12 +91,9 @@ ElementControler.prototype.resize = function(self) {
     var component = goog.dom.getElement(self.id);
     var size = goog.style.getSize(component);
  
-    var ratio;
-    if (goog.dom.classes.has(component, 'slide')) {
-        ratio = positionService.ratioSlideshowMode;
-    } else if (goog.dom.classes.has(component, 'element')) {
+    var 
         ratio = positionService.ratioContentMode;
-    }
+    
 
 
     var el = this._getDomPosSize(self);
@@ -105,30 +102,18 @@ ElementControler.prototype.resize = function(self) {
         height: el.size.height * ratio,
         width: el.size.width * ratio
     };
-    var id = {
-        _id: self._id
-    };
+ 
     var update = {
         $set: {
             'displayOptions.editor.size': el.size,
             'displayOptions.jmpress.size': el.size,
         }
-    }
+    };
 
     var updatePos = el.updatePos(true);
+
     jQuery.extend(update.$set, updatePos.$set);
-
-
-
-    /**
-     * Il faut absolument que
-     */
-    if (goog.dom.classes.has(component, 'slide')) {
-        return Slides.update(id, update);
-    } else if (goog.dom.classes.has(component, 'element')) {
-        return Elements.update(id, update);
-    }
-
+    return Elements.update(el._id, update);
 }
 
 ElementControler.prototype.startResize = function(component) {
