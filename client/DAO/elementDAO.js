@@ -1,5 +1,4 @@
 ElementDAO = function(args) {
-
     //constructor
     this.defaultPos = {
         x: 200,

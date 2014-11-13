@@ -22,6 +22,11 @@ CurrentEditing = new Meteor.Collection('currentEditing', {
 
 
 Meteor.startup(function() {
+    //add goog.ui.resizable 
+    s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.src = 'http://127.0.0.1:2438/goog.ui.resizable.js';
+    $('head').append(s);
 
 	//SETUP LOGGER
     logger = log.noConflict();
