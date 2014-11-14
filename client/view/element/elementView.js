@@ -52,6 +52,7 @@ Template.elementsArea.helpers({
  */
  Template.elementCurrentEditing.rendered = function() {
     var baseId = this.data._id + '-currentEditing';
+    
     //set text editor
     this.data.id = baseId;
     var field = goog.dom.getElement(this.data.id); //_id + '-currentEditing-wrapper');
@@ -134,7 +135,7 @@ Template.elementsArea.helpers({
  * @return {int}      value of the CSS style
  */
  Template.elementCurrentEditing.helpers({
-    getEditorData : function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
+    getEditorData : function(axis) { //pas encore utilisÃ© Ã  cause du draggable de jqueryreu
         if (typeof this.CSS === 'undefined') { //works here because elementCurrendEditing are #constant
 
             //a a factoriser avec l'observeChanges
@@ -197,7 +198,7 @@ Template.elementsArea.helpers({
 });
 
  Template.elementTimeline.helpers({
-    getEditorData : function(axis) { //pas encore utilisé à cause du draggable de jqueryreu
+    getEditorData : function(axis) { //pas encore utilisÃ© Ã  cause du draggable de jqueryreu
         if (typeof this.CSS === 'undefined') { //works here because elementCurrendEditing are #constant
 
             //a a factoriser avec l'observeChanges
@@ -256,9 +257,9 @@ Template.elementsArea.helpers({
 
 
 /**
- * maj des elements en cours d'édition à la main
+ * maj des elements en cours d'Ã©dition Ã  la main
  */
-//tous les elements de la slide en cours d'édition
+//tous les elements de la slide en cours d'Ã©dition
 /**
  * When a slide is added to CurrentEditing, create an handler to watch for news elements created
  * and updated by others client. Element in slide content editor are {#constant} in order to prevent

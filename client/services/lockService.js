@@ -65,7 +65,7 @@ LockService.prototype.setLock = function(componentId, fieldsList) {
                 var field = fieldsList[i];
                 annoyingUser += "on field '"+field+"'' by '"+ lock.fields[field].username + "'\n";
             }
-            alert("Some locks are set \n" + annoyingUser); //TODO prendre en compte le multi field
+            alert("Some locks are set \n" + annoyingUser); 
         } else
             alert("you cannot edit this component");
         return false;
@@ -112,4 +112,3 @@ LockService.prototype.unsetLock = function(componentId, fieldsList) {
         "user", Meteor.user()._id, "has lost access on component", componentId, "when unlocking fields", fieldsList);
     throw new Meteor.Error(404, "user " + Meteor.user()._id + " has lost access on component " + componentId + " when unlocking fields " + fieldsList);
 };
-

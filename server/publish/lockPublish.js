@@ -1,8 +1,16 @@
 Locks = new Meteor.Collection("lock");
 
+
+
+
+
+
 Locks.allow({
-    insert: function(userId, lock, fields, modifier) {
-    
+    insert: function(userId, lock, fields, modifier) {    
+
+
+
+        return true;
         //check slideshow
         if (typeof lock.slideshowId === "undefined")
             throw new Meteor.Error("24", "lock.insert : lock does not contain a slideshowId");
